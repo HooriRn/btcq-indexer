@@ -83,10 +83,10 @@ func GetBalances(ctx context.Context, address string, height string, timestamp s
 			c.asset AS asset,
 			b.amount_e8 AS amount_e8
 		FROM
-			midgard_agg.current_balances AS c,
+			btcq_indexer_agg.current_balances AS c,
 			LATERAL (
 				SELECT amount_e8
-				FROM midgard_agg.balances
+				FROM btcq_indexer_agg.balances
 				WHERE addr = $1
 					AND asset = c.asset
 					AND block_timestamp <= $2
@@ -130,7 +130,7 @@ func GetTopHolders(ctx context.Context, asset string, limit int64) (oapigen.Hold
 			c.asset AS asset,
 			c.amount_e8 AS amount_e8
 		FROM
-			midgard_agg.current_balances AS c
+			btcq_indexer_agg.current_balances AS c
 		WHERE c.asset = $1 AND c.amount_e8 > 0
 		ORDER BY amount_e8 desc
 		limit $2`,

@@ -1,7 +1,7 @@
-INSERT INTO midgard_agg.watermarks (materialized_table, watermark)
+INSERT INTO btcq_indexer_agg.watermarks (materialized_table, watermark)
     VALUES ('borrowers', 0);
 
-CREATE TABLE midgard_agg.borrowers_log (
+CREATE TABLE btcq_indexer_agg.borrowers_log (
     borrower_id text NOT NULL,
     change_type text NOT NULL,
     --
@@ -17,7 +17,7 @@ CREATE TABLE midgard_agg.borrowers_log (
     block_timestamp bigint NOT NULL
 );
 
-CREATE VIEW midgard_agg.borrowers_log_partial AS (
+CREATE VIEW btcq_indexer_agg.borrowers_log_partial AS (
     SELECT * FROM (
         SELECT
             owner AS borrower_id,
@@ -50,7 +50,7 @@ CREATE VIEW midgard_agg.borrowers_log_partial AS (
     ORDER BY block_timestamp, change_type
 );
 
-CREATE TABLE midgard_agg.borrowers (
+CREATE TABLE btcq_indexer_agg.borrowers (
     borrower_id text NOT NULL,
     collateral_asset text,
     target_assets text[],
@@ -66,22 +66,22 @@ CREATE TABLE midgard_agg.borrowers (
 )
 WITH (fillfactor = 90);
 
-CREATE INDEX ON midgard_agg.borrowers (borrower_id);
-CREATE INDEX ON midgard_agg.borrowers (collateral_asset);
+CREATE INDEX ON btcq_indexer_agg.borrowers (borrower_id);
+CREATE INDEX ON btcq_indexer_agg.borrowers (collateral_asset);
 
-CREATE TABLE midgard_agg.borrowers_count (
+CREATE TABLE btcq_indexer_agg.borrowers_count (
     collateral_asset text NOT NULL,
     count bigint NOT NULL,
     block_timestamp bigint NOT NULL,
     PRIMARY KEY (collateral_asset, block_timestamp)
 );
 
-CREATE INDEX ON midgard_agg.borrowers_count (collateral_asset, block_timestamp DESC);
+CREATE INDEX ON btcq_indexer_agg.borrowers_count (collateral_asset, block_timestamp DESC);
 
-CREATE FUNCTION midgard_agg.add_borrowers_log() RETURNS trigger
+CREATE FUNCTION btcq_indexer_agg.add_borrowers_log() RETURNS trigger
 LANGUAGE plpgsql AS $BODY$
 DECLARE
-    borrower midgard_agg.borrowers%ROWTYPE;
+    borrower btcq_indexer_agg.borrowers%ROWTYPE;
 BEGIN
     -- Fix Ethereum addresses to be uniformly lowercase
     -- TODO(huginn): fix this on the event parsing/recording level
@@ -90,7 +90,7 @@ BEGIN
     END IF;
 
     -- Look up the current state of the borrower
-    SELECT * FROM midgard_agg.borrowers
+    SELECT * FROM btcq_indexer_agg.borrowers
         WHERE borrower_id = NEW.borrower_id AND collateral_asset = NEW.collateral_asset
         FOR UPDATE INTO borrower;
 
@@ -107,12 +107,12 @@ BEGIN
         borrower.last_repay_loan_timestamp = 0;
 
         -- Add to borrowers count table
-        INSERT INTO midgard_agg.borrowers_count VALUES
+        INSERT INTO btcq_indexer_agg.borrowers_count VALUES
         (
             borrower.collateral_asset,
             COALESCE(
                 (
-                    SELECT count + 1 FROM midgard_agg.borrowers_count
+                    SELECT count + 1 FROM btcq_indexer_agg.borrowers_count
                     WHERE
                         collateral_asset = borrower.collateral_asset 
                     ORDER BY block_timestamp DESC LIMIT 1
@@ -145,11 +145,11 @@ BEGIN
     -- Update the `borrowers` table:
     IF borrower.debt_issued - borrower.debt_repaid <= 0 THEN
         -- Remove borrower from borrowers count table
-        INSERT INTO midgard_agg.borrowers_count VALUES
+        INSERT INTO btcq_indexer_agg.borrowers_count VALUES
         (
             borrower.collateral_asset,
             (
-                SELECT count - 1 FROM midgard_agg.borrowers_count
+                SELECT count - 1 FROM btcq_indexer_agg.borrowers_count
                 WHERE collateral_asset = borrower.collateral_asset
                 ORDER BY block_timestamp DESC LIMIT 1
             ),
@@ -158,7 +158,7 @@ BEGIN
         ON CONFLICT (collateral_asset, block_timestamp) DO UPDATE SET count = EXCLUDED.count;
     END IF;
 
-    INSERT INTO midgard_agg.borrowers VALUES (borrower.*)
+    INSERT INTO btcq_indexer_agg.borrowers VALUES (borrower.*)
     ON CONFLICT (borrower_id, collateral_asset) DO UPDATE SET
         -- Note, `EXCLUDED` is exactly the `borrower` variable here
         target_assets = EXCLUDED.target_assets,
@@ -175,34 +175,34 @@ END;
 $BODY$;
 
 CREATE TRIGGER add_log_trigger
-    BEFORE INSERT ON midgard_agg.borrowers_log
+    BEFORE INSERT ON btcq_indexer_agg.borrowers_log
     FOR EACH ROW
-    EXECUTE FUNCTION midgard_agg.add_borrowers_log();
+    EXECUTE FUNCTION btcq_indexer_agg.add_borrowers_log();
 
 
-CREATE PROCEDURE midgard_agg.update_borrowers_interval(t1 bigint, t2 bigint)
+CREATE PROCEDURE btcq_indexer_agg.update_borrowers_interval(t1 bigint, t2 bigint)
 LANGUAGE plpgsql AS $BODY$
 BEGIN
-    INSERT INTO midgard_agg.borrowers_log (
-        SELECT * FROM midgard_agg.borrowers_log_partial
+    INSERT INTO btcq_indexer_agg.borrowers_log (
+        SELECT * FROM btcq_indexer_agg.borrowers_log_partial
         WHERE t1 <= block_timestamp AND block_timestamp < t2
         ORDER BY event_id
     );
 END
 $BODY$;
 
-CREATE PROCEDURE midgard_agg.update_borrowers(w_new bigint)
+CREATE PROCEDURE btcq_indexer_agg.update_borrowers(w_new bigint)
 LANGUAGE plpgsql AS $BODY$
 DECLARE
     w_old bigint;
 BEGIN
-    SELECT watermark FROM midgard_agg.watermarks WHERE materialized_table = 'borrowers'
+    SELECT watermark FROM btcq_indexer_agg.watermarks WHERE materialized_table = 'borrowers'
         FOR UPDATE INTO w_old;
     IF w_new <= w_old THEN
         RAISE WARNING 'Updating borrowers into past: % -> %', w_old, w_new;
         RETURN;
     END IF;
-    CALL midgard_agg.update_borrowers_interval(w_old, w_new);
-    UPDATE midgard_agg.watermarks SET watermark = w_new WHERE materialized_table = 'borrowers';
+    CALL btcq_indexer_agg.update_borrowers_interval(w_old, w_new);
+    UPDATE btcq_indexer_agg.watermarks SET watermark = w_new WHERE materialized_table = 'borrowers';
 END
 $BODY$;

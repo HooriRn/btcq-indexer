@@ -21,7 +21,7 @@ type THORName struct {
 func GetTHORName(ctx context.Context, name string) (tName THORName, err error) {
 	q := `
 		SELECT chain, address, expire, owner
-		FROM midgard_agg.thorname_current_state
+		FROM btcq_indexer_agg.thorname_current_state
 		WHERE name = $1 AND last_height() < expire
 	`
 
@@ -49,7 +49,7 @@ func GetTHORName(ctx context.Context, name string) (tName THORName, err error) {
 func GetTHORNamesByAddress(ctx context.Context, addr string) (names []string, err error) {
 	q := `
 		SELECT name
-		FROM midgard_agg.thorname_current_state
+		FROM btcq_indexer_agg.thorname_current_state
 		WHERE address = $1 AND last_height() < expire
 	`
 
@@ -74,7 +74,7 @@ func GetTHORNamesByAddress(ctx context.Context, addr string) (names []string, er
 func GetTHORNamesByOwnerAddress(ctx context.Context, addr string) (names []string, err error) {
 	q := `
 		SELECT name
-		FROM midgard_agg.thorname_owner_expiration
+		FROM btcq_indexer_agg.thorname_owner_expiration
 		WHERE owner = $1 AND last_height() < expire
 	`
 

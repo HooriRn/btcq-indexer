@@ -18,7 +18,7 @@ func borrowersCount(ctx context.Context, pools []string, until *db.Nano) (map[st
 	q := `
 		SELECT
 			DISTINCT on (pool) pool, count 
-		FROM midgard_agg.borrowers_count
+		FROM btcq_indexer_agg.borrowers_count
 		` + db.Where(timeFilter, "pool = ANY($1)") + `
 		ORDER BY pool, block_timestamp DESC
 	`
@@ -58,7 +58,7 @@ func GetBorrowersCountBucket(ctx context.Context, buckets db.Buckets, pool strin
 		SELECT DISTINCT ON (truncated)
 			` + db.SelectTruncatedTimestamp("block_timestamp", buckets) + ` AS truncated,
 			count
-		FROM midgard_agg.borrowers_count
+		FROM btcq_indexer_agg.borrowers_count
 		WHERE pool = $1 AND $2 <= block_timestamp AND block_timestamp < $3
 		ORDER BY truncated, block_timestamp DESC
 

@@ -1,7 +1,7 @@
-INSERT INTO midgard_agg.watermarks (materialized_table, watermark)
+INSERT INTO btcq_indexer_agg.watermarks (materialized_table, watermark)
     VALUES ('rune_pool', 0);
 
-CREATE TABLE midgard_agg.rune_pool_log (
+CREATE TABLE btcq_indexer_agg.rune_pool_log (
     member_id text NOT NULL,
     change_type text NOT NULL,
     basis_points bigint,
@@ -18,7 +18,7 @@ CREATE TABLE midgard_agg.rune_pool_log (
 
 -- Intended to be inserted into `rune_pool_log` with the totals and other missing info filled out
 -- by the trigger.
-CREATE VIEW midgard_agg.rune_pool_log_partial AS (
+CREATE VIEW btcq_indexer_agg.rune_pool_log_partial AS (
     SELECT * FROM (
         SELECT
             rune_addr AS member_id,
@@ -49,7 +49,7 @@ CREATE VIEW midgard_agg.rune_pool_log_partial AS (
     ORDER BY block_timestamp, change_type
 );
 
-CREATE TABLE midgard_agg.rune_pool_members (
+CREATE TABLE btcq_indexer_agg.rune_pool_members (
     member_id text NOT NULL,
     units_total bigint NOT NULL,
     -- rune fields
@@ -64,23 +64,23 @@ CREATE TABLE midgard_agg.rune_pool_members (
 )
 WITH (fillfactor = 90);
 
-CREATE INDEX ON midgard_agg.rune_pool_members (rune_addr);
+CREATE INDEX ON btcq_indexer_agg.rune_pool_members (rune_addr);
 
-CREATE TABLE midgard_agg.rune_pool_members_count (
+CREATE TABLE btcq_indexer_agg.rune_pool_members_count (
     count bigint NOT NULL,
     block_timestamp bigint NOT NULL,
     PRIMARY KEY (block_timestamp)
 );
 
-CREATE INDEX ON midgard_agg.rune_pool_members_count (block_timestamp DESC);
+CREATE INDEX ON btcq_indexer_agg.rune_pool_members_count (block_timestamp DESC);
 
-CREATE FUNCTION midgard_agg.add_rune_pool_members_log() RETURNS trigger
+CREATE FUNCTION btcq_indexer_agg.add_rune_pool_members_log() RETURNS trigger
 LANGUAGE plpgsql AS $BODY$
 DECLARE
-    member midgard_agg.rune_pool_members%ROWTYPE;
+    member btcq_indexer_agg.rune_pool_members%ROWTYPE;
 BEGIN
     -- Look up the current state of the rune pool member
-    SELECT * FROM midgard_agg.rune_pool_members
+    SELECT * FROM btcq_indexer_agg.rune_pool_members
         WHERE member_id = NEW.member_id
         FOR UPDATE INTO member;
 
@@ -94,11 +94,11 @@ BEGIN
         member.rune_e8_deposit = 0;
 
         -- Add to members count table
-        INSERT INTO midgard_agg.rune_pool_members_count VALUES
+        INSERT INTO btcq_indexer_agg.rune_pool_members_count VALUES
         (
             COALESCE(
                 (
-                    SELECT count + 1 FROM midgard_agg.rune_pool_members_count
+                    SELECT count + 1 FROM btcq_indexer_agg.rune_pool_members_count
                     ORDER BY block_timestamp DESC LIMIT 1
                 ),
                 1
@@ -129,21 +129,21 @@ BEGIN
 
     -- Update the `rune_pool_members` table:
     IF member.units_total = 0 THEN
-        DELETE FROM midgard_agg.rune_pool_members
+        DELETE FROM btcq_indexer_agg.rune_pool_members
         WHERE member_id = member.member_id;
 
         -- Remove member from rune_pool_members count table
-        INSERT INTO midgard_agg.rune_pool_members_count VALUES
+        INSERT INTO btcq_indexer_agg.rune_pool_members_count VALUES
         (
             (
-                SELECT count - 1 FROM midgard_agg.rune_pool_members_count
+                SELECT count - 1 FROM btcq_indexer_agg.rune_pool_members_count
                 ORDER BY block_timestamp DESC LIMIT 1
             ),
             NEW.block_timestamp
         )
         ON CONFLICT (block_timestamp) DO UPDATE SET count = EXCLUDED.count;
     ELSE
-        INSERT INTO midgard_agg.rune_pool_members VALUES (member.*)
+        INSERT INTO btcq_indexer_agg.rune_pool_members VALUES (member.*)
         ON CONFLICT (member_id) DO UPDATE SET
             -- Note, `EXCLUDED` is exactly the `rune_pool_member` variable here
             units_total = EXCLUDED.units_total,
@@ -161,34 +161,34 @@ END;
 $BODY$;
 
 CREATE TRIGGER add_log_trigger
-    BEFORE INSERT ON midgard_agg.rune_pool_log
+    BEFORE INSERT ON btcq_indexer_agg.rune_pool_log
     FOR EACH ROW
-    EXECUTE FUNCTION midgard_agg.add_rune_pool_members_log();
+    EXECUTE FUNCTION btcq_indexer_agg.add_rune_pool_members_log();
 
 
-CREATE PROCEDURE midgard_agg.update_rune_pool_members_interval(t1 bigint, t2 bigint)
+CREATE PROCEDURE btcq_indexer_agg.update_rune_pool_members_interval(t1 bigint, t2 bigint)
 LANGUAGE plpgsql AS $BODY$
 BEGIN
-    INSERT INTO midgard_agg.rune_pool_log (
-        SELECT * FROM midgard_agg.rune_pool_log_partial
+    INSERT INTO btcq_indexer_agg.rune_pool_log (
+        SELECT * FROM btcq_indexer_agg.rune_pool_log_partial
         WHERE t1 <= block_timestamp AND block_timestamp < t2
         ORDER BY event_id
     );
 END
 $BODY$;
 
-CREATE PROCEDURE midgard_agg.update_rune_pool_members(w_new bigint)
+CREATE PROCEDURE btcq_indexer_agg.update_rune_pool_members(w_new bigint)
 LANGUAGE plpgsql AS $BODY$
 DECLARE
     w_old bigint;
 BEGIN
-    SELECT watermark FROM midgard_agg.watermarks WHERE materialized_table = 'rune_pool'
+    SELECT watermark FROM btcq_indexer_agg.watermarks WHERE materialized_table = 'rune_pool'
         FOR UPDATE INTO w_old;
     IF w_new <= w_old THEN
         RAISE WARNING 'Updating rune pool members into past: % -> %', w_old, w_new;
         RETURN;
     END IF;
-    CALL midgard_agg.update_rune_pool_members_interval(w_old, w_new);
-    UPDATE midgard_agg.watermarks SET watermark = w_new WHERE materialized_table = 'rune_pool';
+    CALL btcq_indexer_agg.update_rune_pool_members_interval(w_old, w_new);
+    UPDATE btcq_indexer_agg.watermarks SET watermark = w_new WHERE materialized_table = 'rune_pool';
 END
 $BODY$;

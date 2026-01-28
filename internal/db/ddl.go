@@ -6,7 +6,7 @@ import _ "embed"
 var dataDDL string
 
 func CoreDDL() []string {
-	return []string{SchemaCleanUp("midgard_agg"), SchemaCleanUp("midgard"), dataDDL}
+	return []string{SchemaCleanUp("btcq_indexer_agg"), SchemaCleanUp("btcq_indexer"), dataDDL}
 }
 
 // We have so many tables that dropping them all in one transaction makes us run out of locks

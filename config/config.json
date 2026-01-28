@@ -14,9 +14,9 @@
   "timescale": {
     "host": "localhost",
     "port": 5432,
-    "user_name": "midgard",
+    "user_name": "btcq_indexer",
     "password": "password",
-    "database": "midgard",
+    "database": "btcq_indexer",
     "sslmode": "disable",
     "commit_batch_size": 100,
     "max_open_conns": 80

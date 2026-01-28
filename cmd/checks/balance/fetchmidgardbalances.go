@@ -16,7 +16,7 @@ func readMidgardBalancesAt(timestamp int64) map[string]Balance {
 				asset,
 				amount_e8
 			FROM
-				midgard_agg.balances
+				btcq_indexer_agg.balances
 			WHERE
 				block_timestamp <= $1
 			) AS x

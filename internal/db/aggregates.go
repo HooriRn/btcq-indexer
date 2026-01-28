@@ -255,7 +255,7 @@ func (agg *aggregateDescription) aggregateQuery(
 
 func (agg *aggregateDescription) createContinuousView(b io.Writer, period IntervalDescription) {
 	fmt.Fprint(b, `
-		CREATE MATERIALIZED VIEW midgard_agg.`+agg.name+`_`+period.name+`
+		CREATE MATERIALIZED VIEW btcq_indexer_agg.`+agg.name+`_`+period.name+`
 		WITH (timescaledb.continuous) AS
 		`)
 	bucketField := fmt.Sprintf("time_bucket('%d', %s.block_timestamp)", period.minDuration*1e9, agg.table)
@@ -267,9 +267,9 @@ func (agg *aggregateDescription) createContinuousView(b io.Writer, period Interv
 
 func (agg *aggregateDescription) createHigherView(b io.Writer, period string) {
 	fmt.Fprint(b, `
-		CREATE VIEW midgard_agg.`+agg.name+`_`+period+` AS
+		CREATE VIEW btcq_indexer_agg.`+agg.name+`_`+period+` AS
 		`)
-	fmt.Fprint(b, agg.aggregateQuery("midgard_agg."+agg.name+"_day", "d",
+	fmt.Fprint(b, agg.aggregateQuery("btcq_indexer_agg."+agg.name+"_day", "d",
 		"nano_trunc('"+period+"', d.aggregate_timestamp)"))
 	fmt.Fprint(b, ";\n")
 }
@@ -360,7 +360,7 @@ func (agg *aggregateDescription) UnionQuery(timeLow Nano, timeHigh Nano, whereCo
 	}
 	agg.aggregateQueryBuilder(
 		&b,
-		"midgard_agg."+agg.name+"_"+aggregatedTableType,
+		"btcq_indexer_agg."+agg.name+"_"+aggregatedTableType,
 		"h",
 		"MIN(h.aggregate_timestamp)",
 		conds,
@@ -394,7 +394,7 @@ func (agg *aggregateDescription) BucketedQuery(template string,
 		startTimestamp := fmt.Sprintf("$%d::BIGINT", len(params))
 		agg.aggregateQueryBuilder(&b, unionQ, "uni", startTimestamp, nil, agg.groupColumns(false))
 	} else {
-		fmt.Fprintf(&b, "SELECT * FROM midgard_agg.%s_%s ", agg.name, buckets.AggregateName())
+		fmt.Fprintf(&b, "SELECT * FROM btcq_indexer_agg.%s_%s ", agg.name, buckets.AggregateName())
 		params = append(params, buckets.Start().ToNano())
 		where := append(whereConditions, fmt.Sprintf("$%d <= aggregate_timestamp", len(params)))
 		params = append(params, buckets.End().ToNano())
@@ -442,14 +442,14 @@ func RegisterWatermarkedMaterializedView(name string, query string) {
 func WatermarkedMaterializedTables() []string {
 	ret := make([]string, 0, len(watermarkedMaterializedViews))
 	for name := range watermarkedMaterializedViews {
-		ret = append(ret, "midgard_agg."+name+"_materialized")
+		ret = append(ret, "btcq_indexer_agg."+name+"_materialized")
 	}
 	sort.Strings(ret)
 	return ret
 }
 
 func AggregatesDDL() []string {
-	parts := []string{SchemaCleanUp("midgard_agg"), aggDDLPrefix, aggBalances, aggMembers, aggRunePrice, aggBorrowers, aggRunePool}
+	parts := []string{SchemaCleanUp("btcq_indexer_agg"), aggDDLPrefix, aggBalances, aggMembers, aggRunePrice, aggBorrowers, aggRunePool}
 	var b strings.Builder
 
 	// Sort to iterate in deterministic order.
@@ -476,20 +476,20 @@ func AggregatesDDL() []string {
 	for _, name := range watermarkedNames {
 		query := watermarkedMaterializedViews[name]
 		fmt.Fprint(&b, `
-			CREATE VIEW midgard_agg.`+name+` AS
+			CREATE VIEW btcq_indexer_agg.`+name+` AS
 			`+query+`;
 			-- TODO(huginn): should this be a hypertable?
-			CREATE TABLE midgard_agg.`+name+`_materialized (LIKE midgard_agg.`+name+`);
-			CREATE INDEX ON midgard_agg.`+name+`_materialized (block_timestamp);
-			INSERT INTO midgard_agg.watermarks (materialized_table, watermark)
+			CREATE TABLE btcq_indexer_agg.`+name+`_materialized (LIKE btcq_indexer_agg.`+name+`);
+			CREATE INDEX ON btcq_indexer_agg.`+name+`_materialized (block_timestamp);
+			INSERT INTO btcq_indexer_agg.watermarks (materialized_table, watermark)
 			VALUES ('`+name+`', 0);
 
-			CREATE VIEW midgard_agg.`+name+`_combined AS
-				SELECT * from midgard_agg.`+name+`_materialized
-				WHERE block_timestamp < midgard_agg.watermark('`+name+`')
+			CREATE VIEW btcq_indexer_agg.`+name+`_combined AS
+				SELECT * from btcq_indexer_agg.`+name+`_materialized
+				WHERE block_timestamp < btcq_indexer_agg.watermark('`+name+`')
 			UNION ALL
-				SELECT * from midgard_agg.`+name+`
-				WHERE midgard_agg.watermark('`+name+`') <= block_timestamp;
+				SELECT * from btcq_indexer_agg.`+name+`
+				WHERE btcq_indexer_agg.watermark('`+name+`') <= block_timestamp;
 		`)
 	}
 
@@ -499,8 +499,8 @@ func AggregatesDDL() []string {
 
 func DropAggregates() (err error) {
 	_, err = TheDB.Exec(`
-		DROP SCHEMA IF EXISTS midgard_agg CASCADE;
-		DELETE FROM midgard.constants WHERE key = '` + aggregatesDdlHashKey + `';
+		DROP SCHEMA IF EXISTS btcq_indexer_agg CASCADE;
+		DELETE FROM btcq_indexer.constants WHERE key = '` + aggregatesDdlHashKey + `';
 	`)
 	return
 }
@@ -511,7 +511,7 @@ func updateAggregateSingle(ctx context.Context, refreshEnd Nano, sqlFuncName str
 	if ctx.Err() != nil {
 		log.Error().Err(ctx.Err()).Msg("Error in aggregate sql function: " + sqlFuncName)
 	}
-	q := fmt.Sprintf("CALL midgard_agg."+sqlFuncName+"('%d')", refreshEnd)
+	q := fmt.Sprintf("CALL btcq_indexer_agg."+sqlFuncName+"('%d')", refreshEnd)
 	_, err := TheDB.ExecContext(ctx, q)
 	if err != nil {
 		log.Error().Err(err).Msg("Error in aggregate sql function: " + sqlFuncName)
@@ -532,7 +532,7 @@ var nextAggregateRefreshLog time.Time
 // production (resulting in additional triggers on almost every insert to aggregated tables),
 // therefore this combined approach.
 //
-// Note: we could instead comletely reset the midgard_agg schema before every test. This would make
+// Note: we could instead comletely reset the btcq_indexer_agg schema before every test. This would make
 // testing slower though.
 func refreshAggregates(ctx context.Context, bulk bool, fullTimescaleRefreshForTests bool) {
 	if bulk {
@@ -594,11 +594,11 @@ func refreshAggregates(ctx context.Context, bulk bool, fullTimescaleRefreshForTe
 			if ctx.Err() != nil {
 				return
 			}
-			q := fmt.Sprintf("CALL refresh_continuous_aggregate('midgard_agg.%s_%s', NULL, '%d')",
+			q := fmt.Sprintf("CALL refresh_continuous_aggregate('btcq_indexer_agg.%s_%s', NULL, '%d')",
 				name, bucket.name, refreshEnd)
 			if fullTimescaleRefreshForTests {
 				q = fmt.Sprintf(
-					"CALL refresh_continuous_aggregate('midgard_agg.%s_%s', NULL, NULL)",
+					"CALL refresh_continuous_aggregate('btcq_indexer_agg.%s_%s', NULL, NULL)",
 					name, bucket.name)
 			}
 			_, err := TheDB.ExecContext(ctx, q)
@@ -614,7 +614,7 @@ func refreshAggregates(ctx context.Context, bulk bool, fullTimescaleRefreshForTe
 		if ctx.Err() != nil {
 			return
 		}
-		q := fmt.Sprintf("CALL midgard_agg.refresh_watermarked_view('%s', '%d')",
+		q := fmt.Sprintf("CALL btcq_indexer_agg.refresh_watermarked_view('%s', '%d')",
 			name, refreshEnd)
 		_, err := TheDB.ExecContext(ctx, q)
 		if err != nil {
@@ -666,7 +666,7 @@ func InitAggregatesRefresh(ctx context.Context) jobs.NamedFunction {
 	// Where did we stop last time
 	var lastAggregateBlockTimestamp Nano
 	err := TheDB.QueryRow(
-		"SELECT watermark FROM midgard_agg.watermarks WHERE materialized_table = 'actions'").
+		"SELECT watermark FROM btcq_indexer_agg.watermarks WHERE materialized_table = 'actions'").
 		Scan(&lastAggregateBlockTimestamp)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to query last watermark")

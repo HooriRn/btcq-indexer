@@ -1019,10 +1019,10 @@ func actionsPreparedStatements(moment time.Time,
 	}
 
 	// build and return final queries
-	countQuery := `SELECT count(1) FROM midgard_agg.actions ` + db.Where(append(timeFilters, actionFilters...)...)
+	countQuery := `SELECT count(1) FROM btcq_indexer_agg.actions ` + db.Where(append(timeFilters, actionFilters...)...)
 
 	if forceMainQuerySeparateEvaluation {
-		countQuery = `WITH relevant_actions AS (SELECT * FROM midgard_agg.actions 
+		countQuery = `WITH relevant_actions AS (SELECT * FROM btcq_indexer_agg.actions 
 		 ` + db.Where(actionFilters...) + `
 			OFFSET 0
 		)
@@ -1051,7 +1051,7 @@ func actionsPreparedStatements(moment time.Time,
 			fees,
 			meta,
 			streaming_meta
-		FROM midgard_agg.actions
+		FROM btcq_indexer_agg.actions
 	`
 
 	// The Postgres' query planner is kinda dumb when we have a `txid` specified.
@@ -1130,7 +1130,7 @@ func GetTopSwaps(ctx context.Context, period db.Buckets) (oapigen.ActionsRespons
 			a.fees,
 			a.meta,
 			a.streaming_meta
-		FROM midgard_agg.actions AS a
+		FROM btcq_indexer_agg.actions AS a
 		JOIN latest_rune_price AS r
 		ON TRUE -- Cross join with latest rune price
 		JOIN latest_pool_depths AS l
@@ -1192,7 +1192,7 @@ func GetAffiliateStats(ctx context.Context, buckets db.Buckets, thorname string)
 			) AS total_volume,
 			count(1) as count,
 			COALESCE(meta->>'affiliateAddress', '') as affiliate
-		FROM midgard_agg.actions AS a
+		FROM btcq_indexer_agg.actions AS a
 		LEFT JOIN LATERAL (
 			SELECT rune_price_e8
 			FROM rune_price
@@ -1308,7 +1308,7 @@ func GetAffiliateEarning(ctx context.Context, buckets db.Buckets, thorname strin
 			SUM((a.meta->>'liquidityFee')::BIGINT) AS liquidity_fee_rune,
 			count(1) as count,
 			COALESCE(a.meta->>'affiliateAddress', '') as affiliate
-		FROM midgard_agg.actions AS a
+		FROM btcq_indexer_agg.actions AS a
 		JOIN latest_rune_price AS r ON TRUE
 		` + db.Where(actionFilters...) + `
 		GROUP BY date, affiliate

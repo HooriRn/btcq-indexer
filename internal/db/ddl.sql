@@ -5,19 +5,19 @@ CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 ----------
 -- Clean up
 
-DROP SCHEMA IF EXISTS midgard_agg CASCADE;
-DROP SCHEMA IF EXISTS midgard CASCADE;
+DROP SCHEMA IF EXISTS btcq_indexer_agg CASCADE;
+DROP SCHEMA IF EXISTS btcq_indexer CASCADE;
 
 ----------
 -- Fresh start
 
-CREATE SCHEMA midgard;
+CREATE SCHEMA btcq_indexer;
 
 -- Check that the newly created schema is the one we are going to work with.
 -- If someone uses a non-standard set up, like using a different postgres user name, it's better
 -- to abort at this point and let them know that it's not going to work.
 DO $$ BEGIN
-    ASSERT (SELECT current_schema()) = 'midgard', 'current_schema() is not midgard';
+    ASSERT (SELECT current_schema()) = 'btcq_indexer', 'current_schema() is not btcq_indexer';
 END $$;
 
 
@@ -87,7 +87,7 @@ $$;
 
 CREATE FUNCTION height_nano(h bigint) RETURNS bigint
 LANGUAGE SQL STABLE AS $$
-    SELECT timestamp FROM midgard.block_log WHERE height = h;
+    SELECT timestamp FROM btcq_indexer.block_log WHERE height = h;
 $$;
 
 CREATE FUNCTION last_height() RETURNS bigint
@@ -99,7 +99,7 @@ $$;
 CREATE FUNCTION nano_event_id_up(t bigint) RETURNS bigint
 LANGUAGE SQL STABLE AS $$
     SELECT (height + 1) * 1e10 - 1
-    FROM midgard.block_log
+    FROM btcq_indexer.block_log
     WHERE timestamp <= t
     ORDER BY timestamp DESC
     LIMIT 1;
@@ -109,7 +109,7 @@ $$;
 CREATE FUNCTION nano_event_id_down(t bigint) RETURNS bigint
 LANGUAGE SQL STABLE AS $$
     SELECT height * 1e10
-    FROM midgard.block_log
+    FROM btcq_indexer.block_log
     WHERE t <= timestamp
     ORDER BY timestamp ASC
     LIMIT 1;

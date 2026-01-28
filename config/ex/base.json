@@ -9,9 +9,9 @@
     "read_timeout": "60s"
   },
   "timescale": {
-    "user_name": "midgard",
+    "user_name": "btcq_indexer",
     "password": "password",
-    "database": "midgard",
+    "database": "btcq_indexer",
     "sslmode": "disable",
     "commit_batch_size": 100,
     "max_open_conns": 100,

@@ -47,8 +47,8 @@ func main() {
 	}
 
 	midlog.Info("Deleting actions")
-	DeleteAfter("midgard_agg.actions", "block_timestamp", timestamp.ToI())
-	DeleteAfter("midgard_agg.rune_price", "block_timestamp", timestamp.ToI())
+	DeleteAfter("btcq_indexer_agg.actions", "block_timestamp", timestamp.ToI())
+	DeleteAfter("btcq_indexer_agg.rune_price", "block_timestamp", timestamp.ToI())
 	midlog.Info("Deleting watermark")
 	DeleteWatermark(timestamp.ToI())
 
@@ -70,7 +70,7 @@ func main() {
 }
 
 func DeleteWatermark(value int64) {
-	_, err := db.TheDB.Exec("UPDATE midgard_agg.watermarks SET watermark = $1", value)
+	_, err := db.TheDB.Exec("UPDATE btcq_indexer_agg.watermarks SET watermark = $1", value)
 	if err != nil {
 		midlog.FatalE(err, "delete failed")
 	}
@@ -92,7 +92,7 @@ func GetTableColumns(ctx context.Context) TableMap {
 		table_name,
 		column_name
 	FROM information_schema.columns
-	WHERE table_schema='midgard'
+	WHERE table_schema='btcq_indexer'
 	`
 	rows, err := db.Query(ctx, q)
 	if err != nil {

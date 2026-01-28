@@ -18,7 +18,7 @@ func membersCount(ctx context.Context, pools []string, until *db.Nano) (map[stri
 	q := `
 		SELECT
 			DISTINCT on (pool) pool, count 
-		FROM midgard_agg.members_count
+		FROM btcq_indexer_agg.members_count
 		` + db.Where(timeFilter, "pool = ANY($1)") + `
 		ORDER BY pool, block_timestamp DESC
 	`
@@ -63,7 +63,7 @@ func GetMembersCountBucket(ctx context.Context, buckets db.Buckets, pool string)
 		SELECT DISTINCT ON (truncated)
 			` + db.SelectTruncatedTimestamp("block_timestamp", buckets) + ` AS truncated,
 			count
-		FROM midgard_agg.members_count
+		FROM btcq_indexer_agg.members_count
 		WHERE pool = $1 AND $2 <= block_timestamp AND block_timestamp < $3
 		ORDER BY truncated, block_timestamp DESC
 

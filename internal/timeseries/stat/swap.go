@@ -396,7 +396,7 @@ func GlobalSwapStats(ctx context.Context, aggregate string, start db.Second) (Sw
 			_direction,
 			SUM(volume_e8),
 			SUM(swap_count)
-		FROM midgard_agg.swaps_` + aggregate + `
+		FROM btcq_indexer_agg.swaps_` + aggregate + `
 		WHERE aggregate_timestamp >= $1
 		GROUP BY _direction`
 

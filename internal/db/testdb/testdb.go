@@ -40,8 +40,8 @@ func init() {
 	config.Global.TimeScale = config.TimeScale{
 		Host:     getEnvVariable("DB_HOST", "localhost"),
 		Port:     testDbPort,
-		Database: "midgard",
-		UserName: "midgard",
+		Database: "btcq_indexer",
+		UserName: "btcq_indexer",
 		Password: "password",
 		Sslmode:  "disable",
 	}
@@ -95,19 +95,19 @@ func DeleteTables(t *testing.T) {
 }
 
 func clearAggregates(t *testing.T) {
-	MustExec(t, "UPDATE midgard_agg.watermarks SET watermark = 0")
+	MustExec(t, "UPDATE btcq_indexer_agg.watermarks SET watermark = 0")
 	for _, table := range db.WatermarkedMaterializedTables() {
 		MustExec(t, "DELETE FROM "+table)
 	}
-	MustExec(t, "DELETE FROM midgard_agg.actions")
-	MustExec(t, "DELETE FROM midgard_agg.current_balances")
-	MustExec(t, "DELETE FROM midgard_agg.balances")
-	MustExec(t, "DELETE FROM midgard_agg.members_log")
-	MustExec(t, "DELETE FROM midgard_agg.members")
-	MustExec(t, "DELETE FROM midgard_agg.members_count")
-	MustExec(t, "DELETE FROM midgard_agg.borrowers_log")
-	MustExec(t, "DELETE FROM midgard_agg.borrowers")
-	MustExec(t, "DELETE FROM midgard_agg.borrowers_count")
+	MustExec(t, "DELETE FROM btcq_indexer_agg.actions")
+	MustExec(t, "DELETE FROM btcq_indexer_agg.current_balances")
+	MustExec(t, "DELETE FROM btcq_indexer_agg.balances")
+	MustExec(t, "DELETE FROM btcq_indexer_agg.members_log")
+	MustExec(t, "DELETE FROM btcq_indexer_agg.members")
+	MustExec(t, "DELETE FROM btcq_indexer_agg.members_count")
+	MustExec(t, "DELETE FROM btcq_indexer_agg.borrowers_log")
+	MustExec(t, "DELETE FROM btcq_indexer_agg.borrowers")
+	MustExec(t, "DELETE FROM btcq_indexer_agg.borrowers_count")
 }
 
 func InitTest(t *testing.T) {

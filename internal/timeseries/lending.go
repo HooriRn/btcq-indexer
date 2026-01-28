@@ -55,7 +55,7 @@ func GetBorrower(ctx context.Context, address []string) (Borrowers, error) {
 			collateral_withdrawn,
 			COALESCE(last_open_loan_timestamp / 1000000000, 0),
 			COALESCE(last_repay_loan_timestamp / 1000000000, 0)
-		FROM midgard_agg.borrowers
+		FROM btcq_indexer_agg.borrowers
 		WHERE borrower_id = ANY($1)
 		ORDER BY collateral_asset
 	`
@@ -98,7 +98,7 @@ func GetLendingData(ctx context.Context) (map[string]LendingInfo, error) {
 			collateral_asset,
 			SUM(collateral_deposited) - SUM(collateral_withdrawn) AS total_collateral, 
 			SUM(debt_issued) - SUM(debt_repaid) as total_debt_tor
-		FROM midgard_agg.borrowers
+		FROM btcq_indexer_agg.borrowers
 		GROUP BY collateral_asset
 	`
 

@@ -168,7 +168,7 @@ func UpdateDDLIfNeeded(dbObj *sql.DB, tag string, ddl []string, hashKey string, 
 func readDbConstant(key string) []byte {
 	tableExists := true
 	err := TheDB.QueryRow(`SELECT EXISTS (
-		SELECT * FROM pg_tables WHERE tablename = 'constants' AND schemaname = 'midgard'
+		SELECT * FROM pg_tables WHERE tablename = 'constants' AND schemaname = 'btcq_indexer'
 	)`).Scan(&tableExists)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to look up 'constants' table")
@@ -178,7 +178,7 @@ func readDbConstant(key string) []byte {
 	}
 
 	value := []byte{}
-	err = TheDB.QueryRow(`SELECT value FROM midgard.constants WHERE key = $1`, key).Scan(&value)
+	err = TheDB.QueryRow(`SELECT value FROM btcq_indexer.constants WHERE key = $1`, key).Scan(&value)
 	if err != nil {
 		if err != sql.ErrNoRows {
 			log.Fatal().Err(err).Msg("Querying 'constants' table failed")

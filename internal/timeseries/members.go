@@ -24,7 +24,7 @@ func GetMemberIds(ctx context.Context, pool *string) (addrs []string, err error)
 		qargs = append(qargs, pool)
 	}
 
-	q := "SELECT DISTINCT member_id FROM midgard_agg.members " + db.Where(poolFilter)
+	q := "SELECT DISTINCT member_id FROM btcq_indexer_agg.members " + db.Where(poolFilter)
 
 	rows, err := db.Query(ctx, q, qargs...)
 	if err != nil {
@@ -52,7 +52,7 @@ func GetBorrowerIds(ctx context.Context, asset *string) (addrs []string, err err
 		qargs = append(qargs, asset)
 	}
 
-	q := "SELECT DISTINCT borrower_id FROM midgard_agg.borrowers " + db.Where(assetFilter)
+	q := "SELECT DISTINCT borrower_id FROM btcq_indexer_agg.borrowers " + db.Where(assetFilter)
 
 	rows, err := db.Query(ctx, q, qargs...)
 	if err != nil {
@@ -205,7 +205,7 @@ func GetMemberPools(ctx context.Context, address []string, poolType MemberPoolTy
 			pending_asset_e8_total,
 			COALESCE(first_added_timestamp / 1000000000, 0),
 			COALESCE(last_added_timestamp / 1000000000, 0)
-		FROM midgard_agg.members
+		FROM btcq_indexer_agg.members
 		WHERE member_id = ANY($1) OR asset_addr = ANY($1)
 		ORDER BY pool
 	`
@@ -255,7 +255,7 @@ func GetRUNEPoolProvider(ctx context.Context, address []string, poolType MemberP
 			withdrawn_rune_e8_total,
 			COALESCE(first_added_timestamp / 1000000000, 0),
 			COALESCE(last_added_timestamp / 1000000000, 0)
-		FROM midgard_agg.rune_pool_members
+		FROM btcq_indexer_agg.rune_pool_members
 		WHERE member_id = ANY($1)
 	`
 

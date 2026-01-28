@@ -2,7 +2,7 @@ package main
 
 // Automated check. To manually check values go here:
 // https://testnet.thornode.thorchain.info/thorchain/pools
-// https://testnet.midgard.thorchain.info/v2/pools
+// https://testnet.btcq_indexer.thorchain.info/v2/pools
 
 import (
 	"context"
@@ -514,7 +514,7 @@ func findTablesWithColumns(ctx context.Context, columnName string) map[string]bo
 	SELECT
 		table_name
 	FROM information_schema.columns
-	WHERE table_schema='midgard' and column_name=$1
+	WHERE table_schema='btcq_indexer' and column_name=$1
 	`
 	rows, err := db.Query(ctx, q, columnName)
 	if err != nil {

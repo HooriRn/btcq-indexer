@@ -134,7 +134,7 @@ func getDepthsHistory(ctx context.Context, buckets db.Buckets, pools []string,
 			low_price,
 			close_price,
 			aggregate_timestamp / 1000000000 AS truncated
-		FROM midgard_agg.pool_depths_` + buckets.AggregateName() + `
+		FROM btcq_indexer_agg.pool_depths_` + buckets.AggregateName() + `
 		` + db.Where("$1 <= aggregate_timestamp", "aggregate_timestamp < $2", poolFilter) + `
 		ORDER BY aggregate_timestamp ASC
 	`

@@ -1,7 +1,7 @@
-INSERT INTO midgard_agg.watermarks (materialized_table, watermark)
+INSERT INTO btcq_indexer_agg.watermarks (materialized_table, watermark)
     VALUES ('members', 0);
 
-CREATE TABLE midgard_agg.members_log (
+CREATE TABLE btcq_indexer_agg.members_log (
     member_id text NOT NULL,
     pool text NOT NULL,
     change_type text NOT NULL, -- add, withdraw, pending_add, pending_withdraw
@@ -27,7 +27,7 @@ CREATE TABLE midgard_agg.members_log (
 
 -- Intended to be inserted into `members_log` with the totals and other missing info filled out
 -- by the trigger.
-CREATE VIEW midgard_agg.members_log_partial AS (
+CREATE VIEW btcq_indexer_agg.members_log_partial AS (
     SELECT * FROM (
         SELECT
             COALESCE(rune_addr, asset_addr) AS member_id,
@@ -95,7 +95,7 @@ CREATE VIEW midgard_agg.members_log_partial AS (
     ORDER BY block_timestamp, change_type
 );
 
-CREATE TABLE midgard_agg.members (
+CREATE TABLE btcq_indexer_agg.members (
     member_id text NOT NULL,
     pool text NOT NULL,
     lp_units_total bigint NOT NULL,
@@ -118,21 +118,21 @@ CREATE TABLE midgard_agg.members (
 )
 WITH (fillfactor = 90);
 
-CREATE INDEX ON midgard_agg.members (asset_addr);
+CREATE INDEX ON btcq_indexer_agg.members (asset_addr);
 
-CREATE TABLE midgard_agg.members_count (
+CREATE TABLE btcq_indexer_agg.members_count (
     pool text NOT NULL,
     count bigint NOT NULL,
     block_timestamp bigint NOT NULL,
     PRIMARY KEY (pool, block_timestamp)
 );
 
-CREATE INDEX ON midgard_agg.members_count (pool, block_timestamp DESC);
+CREATE INDEX ON btcq_indexer_agg.members_count (pool, block_timestamp DESC);
 
-CREATE FUNCTION midgard_agg.add_members_log() RETURNS trigger
+CREATE FUNCTION btcq_indexer_agg.add_members_log() RETURNS trigger
 LANGUAGE plpgsql AS $BODY$
 DECLARE
-    member midgard_agg.members%ROWTYPE;
+    member btcq_indexer_agg.members%ROWTYPE;
 BEGIN
     -- Fix Ethereum addresses to be uniformly lowercase
     -- TODO(huginn): fix this on the event parsing/recording level
@@ -144,7 +144,7 @@ BEGIN
     END IF;
 
     -- Look up the current state of the member
-    SELECT * FROM midgard_agg.members
+    SELECT * FROM btcq_indexer_agg.members
         WHERE member_id = NEW.member_id AND pool = NEW.pool
         FOR UPDATE INTO member;
 
@@ -165,12 +165,12 @@ BEGIN
         member.rune_e8_deposit = 0;
 
         -- Add to members count table
-        INSERT INTO midgard_agg.members_count VALUES
+        INSERT INTO btcq_indexer_agg.members_count VALUES
         (
             member.pool,
             COALESCE(
                 (
-                    SELECT count + 1 FROM midgard_agg.members_count
+                    SELECT count + 1 FROM btcq_indexer_agg.members_count
                     WHERE pool = member.pool ORDER BY block_timestamp DESC LIMIT 1
                 ),
                 1
@@ -236,22 +236,22 @@ BEGIN
     -- Update the `members` table:
     IF member.lp_units_total = 0 AND member.pending_asset_e8_total = 0
             AND member.pending_rune_e8_total = 0 THEN
-        DELETE FROM midgard_agg.members
+        DELETE FROM btcq_indexer_agg.members
         WHERE member_id = member.member_id AND pool = member.pool;
 
         -- Remove member from members count table
-        INSERT INTO midgard_agg.members_count VALUES
+        INSERT INTO btcq_indexer_agg.members_count VALUES
         (
             member.pool,
             (
-                SELECT count - 1 FROM midgard_agg.members_count
+                SELECT count - 1 FROM btcq_indexer_agg.members_count
                 WHERE pool = member.pool ORDER BY block_timestamp DESC LIMIT 1
             ),
             NEW.block_timestamp
         )
         ON CONFLICT (pool, block_timestamp) DO UPDATE SET count = EXCLUDED.count;
     ELSE
-        INSERT INTO midgard_agg.members VALUES (member.*)
+        INSERT INTO btcq_indexer_agg.members VALUES (member.*)
         ON CONFLICT (member_id, pool) DO UPDATE SET
             -- Note, `EXCLUDED` is exactly the `member` variable here
             lp_units_total = EXCLUDED.lp_units_total,
@@ -275,34 +275,34 @@ END;
 $BODY$;
 
 CREATE TRIGGER add_log_trigger
-    BEFORE INSERT ON midgard_agg.members_log
+    BEFORE INSERT ON btcq_indexer_agg.members_log
     FOR EACH ROW
-    EXECUTE FUNCTION midgard_agg.add_members_log();
+    EXECUTE FUNCTION btcq_indexer_agg.add_members_log();
 
 
-CREATE PROCEDURE midgard_agg.update_members_interval(t1 bigint, t2 bigint)
+CREATE PROCEDURE btcq_indexer_agg.update_members_interval(t1 bigint, t2 bigint)
 LANGUAGE plpgsql AS $BODY$
 BEGIN
-    INSERT INTO midgard_agg.members_log (
-        SELECT * FROM midgard_agg.members_log_partial
+    INSERT INTO btcq_indexer_agg.members_log (
+        SELECT * FROM btcq_indexer_agg.members_log_partial
         WHERE t1 <= block_timestamp AND block_timestamp < t2
         ORDER BY event_id
     );
 END
 $BODY$;
 
-CREATE PROCEDURE midgard_agg.update_members(w_new bigint)
+CREATE PROCEDURE btcq_indexer_agg.update_members(w_new bigint)
 LANGUAGE plpgsql AS $BODY$
 DECLARE
     w_old bigint;
 BEGIN
-    SELECT watermark FROM midgard_agg.watermarks WHERE materialized_table = 'members'
+    SELECT watermark FROM btcq_indexer_agg.watermarks WHERE materialized_table = 'members'
         FOR UPDATE INTO w_old;
     IF w_new <= w_old THEN
         RAISE WARNING 'Updating members into past: % -> %', w_old, w_new;
         RETURN;
     END IF;
-    CALL midgard_agg.update_members_interval(w_old, w_new);
-    UPDATE midgard_agg.watermarks SET watermark = w_new WHERE materialized_table = 'members';
+    CALL btcq_indexer_agg.update_members_interval(w_old, w_new);
+    UPDATE btcq_indexer_agg.watermarks SET watermark = w_new WHERE materialized_table = 'members';
 END
 $BODY$;

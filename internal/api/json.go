@@ -127,7 +127,7 @@ func getRUNEPoolHistories(buckets db.Buckets, ctx context.Context) (
 	if err != nil {
 		return
 	}
-	beforeMemberCount, memberCounts, err = stat.GetAggMembersCountBucket(ctx, buckets, "midgard_agg.rune_pool_members_count")
+	beforeMemberCount, memberCounts, err = stat.GetAggMembersCountBucket(ctx, buckets, "btcq_indexer_agg.rune_pool_members_count")
 	if err != nil {
 		return
 	}
