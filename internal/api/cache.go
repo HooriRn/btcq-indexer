@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/julienschmidt/httprouter"
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/util/jobs"
-	"gitlab.com/thorchain/midgard/internal/util/miderr"
-	"gitlab.com/thorchain/midgard/internal/util/midlog"
-	"gitlab.com/thorchain/midgard/internal/util/timer"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/util/jobs"
+	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/timer"
 )
 
 // BackgroundCalculationTotalTimeout is the time a Refresh operation of single http result may take.

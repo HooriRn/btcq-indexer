@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/thorchain/midgard/internal/db"
+	"github.com/btcq/btcq-indexer/internal/db"
 )
 
 func getThorNodeBonds(thorNodeUrl string, height int64) map[string]int64 {

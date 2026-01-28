@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"gitlab.com/thorchain/midgard/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/miderr"
 )
 
 type chunk struct {

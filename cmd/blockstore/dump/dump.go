@@ -14,12 +14,12 @@ package main
 import (
 	"time"
 
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/fetch/sync/blockstore"
-	"gitlab.com/thorchain/midgard/internal/fetch/sync/chain"
-	"gitlab.com/thorchain/midgard/internal/util/jobs"
-	"gitlab.com/thorchain/midgard/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/fetch/sync/blockstore"
+	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
+	"github.com/btcq/btcq-indexer/internal/util/jobs"
+	"github.com/btcq/btcq-indexer/internal/util/midlog"
 )
 
 func main() {

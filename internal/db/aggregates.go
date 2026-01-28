@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/thorchain/midgard/internal/util/jobs"
-	"gitlab.com/thorchain/midgard/internal/util/timer"
+	"github.com/btcq/btcq-indexer/internal/util/jobs"
+	"github.com/btcq/btcq-indexer/internal/util/timer"
 )
 
 //go:embed aggregates.sql

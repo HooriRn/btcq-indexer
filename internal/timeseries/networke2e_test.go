@@ -5,9 +5,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/thorchain/midgard/internal/db/testdb"
-	"gitlab.com/thorchain/midgard/internal/fetch/notinchain"
-	"gitlab.com/thorchain/midgard/openapi/generated/oapigen"
+	"github.com/btcq/btcq-indexer/internal/db/testdb"
+	"github.com/btcq/btcq-indexer/internal/fetch/notinchain"
+	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
 func TestNetworkAPY(t *testing.T) {

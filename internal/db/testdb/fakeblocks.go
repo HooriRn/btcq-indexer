@@ -8,11 +8,11 @@ import (
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 
 	"github.com/stretchr/testify/require"
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/fetch/record"
-	"gitlab.com/thorchain/midgard/internal/fetch/sync/chain"
-	"gitlab.com/thorchain/midgard/internal/timeseries"
-	"gitlab.com/thorchain/midgard/internal/util"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/fetch/record"
+	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
+	"github.com/btcq/btcq-indexer/internal/timeseries"
+	"github.com/btcq/btcq-indexer/internal/util"
 )
 
 type blockCreator struct {

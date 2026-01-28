@@ -12,10 +12,10 @@ import (
 
 	abci "github.com/cometbft/cometbft/abci/types"
 
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/fetch/sync/chain"
-	"gitlab.com/thorchain/midgard/internal/util/miderr"
-	"gitlab.com/thorchain/midgard/internal/util/timer"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
+	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/timer"
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	btypes "github.com/cosmos/cosmos-sdk/x/bank/types"

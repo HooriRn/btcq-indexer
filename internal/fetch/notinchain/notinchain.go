@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/thorchain/midgard/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/midlog"
 )
 
 // BaseURL defines the REST root.

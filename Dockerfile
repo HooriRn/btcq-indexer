@@ -14,7 +14,7 @@ ENV GOBIN=/go/bin
 ENV GOPATH=/go
 ENV GOOS=linux
 
-WORKDIR /tmp/midgard
+WORKDIR /tmp/btcq-indexer
 
 # Cache Go dependencies like this:
 COPY go.mod go.sum ./
@@ -29,7 +29,7 @@ COPY openapi openapi
 ENV CC=/usr/bin/gcc
 ENV CGO_ENABLED=1
 RUN go build -v -installsuffix cgo ./cmd/blockstore/dump
-RUN go build -v -installsuffix cgo ./cmd/midgard
+RUN go build -v -installsuffix cgo ./cmd/btcq-indexer
 RUN go build -v -installsuffix cgo ./cmd/trimdb
 RUN go build -v -installsuffix cgo ./cmd/statechecks
 
@@ -44,13 +44,13 @@ RUN apt-get update && \
 
 RUN mkdir -p openapi/generated
 COPY --from=build /etc/ssl/certs /etc/ssl/certs
-COPY --from=build /tmp/midgard/openapi/generated/doc.html ./openapi/generated/doc.html
-COPY --from=build /tmp/midgard/dump .
-COPY --from=build /tmp/midgard/midgard .
-COPY --from=build /tmp/midgard/statechecks .
-COPY --from=build /tmp/midgard/trimdb .
+COPY --from=build /tmp/btcq-indexer/openapi/generated/doc.html ./openapi/generated/doc.html
+COPY --from=build /tmp/btcq-indexer/dump .
+COPY --from=build /tmp/btcq-indexer/btcq-indexer .
+COPY --from=build /tmp/btcq-indexer/statechecks .
+COPY --from=build /tmp/btcq-indexer/trimdb .
 COPY --from=build /go/pkg/mod/github.com/!cosm!wasm/wasmvm/v2@v2.1.2/internal/api/libwasmvm.*.so /usr/lib
 COPY config/config.json .
 COPY resources /resources
 
-CMD [ "./midgard", "config.json" ]
+CMD [ "./btcq-indexer", "config.json" ]

@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 
 	"github.com/DataDog/zstd"
-	"gitlab.com/thorchain/midgard/internal/fetch/sync/chain"
-	"gitlab.com/thorchain/midgard/internal/util/miderr"
-	"gitlab.com/thorchain/midgard/internal/util/timer"
+	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
+	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/timer"
 )
 
 type Iterator struct {

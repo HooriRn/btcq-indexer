@@ -1,4 +1,4 @@
-module gitlab.com/thorchain/midgard
+module github.com/btcq/btcq-indexer
 
 go 1.24.6
 

@@ -25,9 +25,9 @@ import (
 
 	abci "github.com/cometbft/cometbft/abci/types"
 
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/internal/util"
-	"gitlab.com/thorchain/midgard/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/internal/util"
+	"github.com/btcq/btcq-indexer/internal/util/miderr"
 )
 
 // Asset Labels

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"gitlab.com/thorchain/midgard/internal/db"
+	"github.com/btcq/btcq-indexer/internal/db"
 )
 
 // To run with fuzzing, run:

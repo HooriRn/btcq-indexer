@@ -14,8 +14,8 @@ import (
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/openapi/generated/oapigen"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
 type BlockId struct {

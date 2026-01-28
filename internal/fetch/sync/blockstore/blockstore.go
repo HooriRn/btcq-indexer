@@ -10,11 +10,11 @@ import (
 	"strings"
 
 	"github.com/DataDog/zstd"
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/fetch/sync/chain"
-	"gitlab.com/thorchain/midgard/internal/util/miderr"
-	"gitlab.com/thorchain/midgard/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
+	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/midlog"
 )
 
 //TODO(freki): replace midloglog.Fatal()-s to midlog.Warn()-s on write path

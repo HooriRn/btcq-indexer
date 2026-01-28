@@ -5,7 +5,7 @@ import (
 
 	"github.com/jarcoal/httpmock"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/thorchain/midgard/internal/fetch/notinchain"
+	"github.com/btcq/btcq-indexer/internal/fetch/notinchain"
 )
 
 const thorNodeUrl = "http://thornode.com"

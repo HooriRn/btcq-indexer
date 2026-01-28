@@ -16,14 +16,14 @@ import (
 	"strings"
 	"sync"
 
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/db/dbinit"
-	"gitlab.com/thorchain/midgard/internal/fetch/record"
-	"gitlab.com/thorchain/midgard/internal/timeseries"
-	"gitlab.com/thorchain/midgard/internal/timeseries/stat"
-	"gitlab.com/thorchain/midgard/internal/util"
-	"gitlab.com/thorchain/midgard/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/db/dbinit"
+	"github.com/btcq/btcq-indexer/internal/fetch/record"
+	"github.com/btcq/btcq-indexer/internal/timeseries"
+	"github.com/btcq/btcq-indexer/internal/timeseries/stat"
+	"github.com/btcq/btcq-indexer/internal/util"
+	"github.com/btcq/btcq-indexer/internal/util/midlog"
 )
 
 const usageStr = `Checks state at latest height.

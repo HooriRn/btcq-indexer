@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"math/rand"
 
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/internal/fetch/sync"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/internal/fetch/sync"
 )
 
 func main() {

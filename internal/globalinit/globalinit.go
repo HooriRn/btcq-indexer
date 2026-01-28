@@ -4,6 +4,6 @@
 package globalinit
 
 import (
-	_ "gitlab.com/thorchain/midgard/internal/timeseries"
-	_ "gitlab.com/thorchain/midgard/internal/timeseries/stat"
+	_ "github.com/btcq/btcq-indexer/internal/timeseries"
+	_ "github.com/btcq/btcq-indexer/internal/timeseries/stat"
 )

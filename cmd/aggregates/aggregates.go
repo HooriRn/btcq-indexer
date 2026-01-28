@@ -11,11 +11,11 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/db/dbinit"
-	_ "gitlab.com/thorchain/midgard/internal/timeseries/stat"
-	"gitlab.com/thorchain/midgard/internal/util"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/db/dbinit"
+	_ "github.com/btcq/btcq-indexer/internal/timeseries/stat"
+	"github.com/btcq/btcq-indexer/internal/util"
 )
 
 const usageString = `Print SQL definitions for a given aggregate

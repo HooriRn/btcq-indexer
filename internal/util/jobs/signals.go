@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/pascaldekloe/metrics/gostat"
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/internal/util/midlog"
 )
 
 var signals chan os.Signal

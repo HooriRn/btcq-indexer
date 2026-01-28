@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"gitlab.com/thorchain/midgard/internal/db"
+	"github.com/btcq/btcq-indexer/internal/db"
 )
 
 func borrowersCount(ctx context.Context, pools []string, until *db.Nano) (map[string]int64, error) {

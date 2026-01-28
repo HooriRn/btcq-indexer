@@ -7,10 +7,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/db/testdb"
-	"gitlab.com/thorchain/midgard/internal/util"
-	"gitlab.com/thorchain/midgard/openapi/generated/oapigen"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/db/testdb"
+	"github.com/btcq/btcq-indexer/internal/util"
+	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
 func TestActionsE2E(t *testing.T) {

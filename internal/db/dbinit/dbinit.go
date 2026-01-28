@@ -4,11 +4,11 @@ package dbinit
 // on all packages that affect the DB schema.
 
 import (
-	"gitlab.com/thorchain/midgard/internal/db"
+	"github.com/btcq/btcq-indexer/internal/db"
 
 	// Every package that calls `RegisterAggregate` should be included here
-	_ "gitlab.com/thorchain/midgard/internal/timeseries"
-	_ "gitlab.com/thorchain/midgard/internal/timeseries/stat"
+	_ "github.com/btcq/btcq-indexer/internal/timeseries"
+	_ "github.com/btcq/btcq-indexer/internal/timeseries/stat"
 )
 
 func Setup() {

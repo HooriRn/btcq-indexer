@@ -3,9 +3,9 @@ package stat
 import (
 	"context"
 
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/util"
-	"gitlab.com/thorchain/midgard/openapi/generated/oapigen"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/util"
+	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
 type AffiliateItem struct {

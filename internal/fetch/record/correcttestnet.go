@@ -2,7 +2,7 @@ package record
 
 import (
 	"github.com/rs/zerolog/log"
-	"gitlab.com/thorchain/midgard/internal/db"
+	"github.com/btcq/btcq-indexer/internal/db"
 )
 
 // Testnet started on 2021-11-06

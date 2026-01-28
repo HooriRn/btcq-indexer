@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/thorchain/midgard/internal/db/testdb"
-	"gitlab.com/thorchain/midgard/openapi/generated/oapigen"
+	"github.com/btcq/btcq-indexer/internal/db/testdb"
+	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
 func checkDepths(t *testing.T, pool string, assetE8, runeE8, synthE8 int64) {

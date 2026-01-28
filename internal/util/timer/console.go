@@ -3,8 +3,8 @@ package timer
 import (
 	"time"
 
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/internal/util/midlog"
 )
 
 type milliCounter time.Time

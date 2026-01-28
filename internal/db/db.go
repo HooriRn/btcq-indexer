@@ -10,9 +10,9 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/pascaldekloe/metrics"
 	"github.com/rs/zerolog/log"
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/internal/util"
-	"gitlab.com/thorchain/midgard/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/internal/util"
+	"github.com/btcq/btcq-indexer/internal/util/midlog"
 )
 
 // The Query part of the SQL client.

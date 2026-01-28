@@ -1,11 +1,11 @@
 package main
 
 import (
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/util/midlog"
 
-	_ "gitlab.com/thorchain/midgard/internal/globalinit"
+	_ "github.com/btcq/btcq-indexer/internal/globalinit"
 )
 
 func main() {

@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/fetch/record"
-	"gitlab.com/thorchain/midgard/internal/util"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/fetch/record"
+	"github.com/btcq/btcq-indexer/internal/util"
 )
 
 // MapDiff helps to get differences between snapshots of a map.

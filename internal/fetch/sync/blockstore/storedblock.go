@@ -14,7 +14,7 @@ import (
 	tendermintcoretypes "github.com/tendermint/tendermint/rpc/core/types"
 	tenderminttypes "github.com/tendermint/tendermint/types"
 
-	"gitlab.com/thorchain/midgard/internal/fetch/sync/chain"
+	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
 )
 
 type storedBlock struct {

@@ -12,9 +12,9 @@ import (
 	"github.com/DataDog/zstd"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/internal/fetch/sync/blockstore"
-	"gitlab.com/thorchain/midgard/internal/fetch/sync/chain"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/internal/fetch/sync/blockstore"
+	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
 )
 
 func main() {

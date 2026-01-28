@@ -3,8 +3,8 @@ package config_test
 import (
 	"testing"
 
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/internal/db/testdb"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/internal/db/testdb"
 )
 
 func TestMustLoadConfigFile(t *testing.T) {

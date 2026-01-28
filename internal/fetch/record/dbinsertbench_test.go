@@ -11,9 +11,9 @@ import (
 
 	"github.com/jackc/pgx/v4"
 	pgxstd "github.com/jackc/pgx/v4/stdlib"
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/db/testdb"
-	"gitlab.com/thorchain/midgard/internal/fetch/record"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/db/testdb"
+	"github.com/btcq/btcq-indexer/internal/fetch/record"
 )
 
 func intToBytes(n int64) []byte {
@@ -288,7 +288,7 @@ func BenchmarkInsertOne(b *testing.B) {
 // $ go test -run=NONE -bench Insert -v -p 1 ./internal/fetch/record...
 // goos: linux
 // goarch: amd64
-// pkg: gitlab.com/thorchain/midgard/internal/timeseries
+// pkg: github.com/btcq/btcq-indexer/internal/timeseries
 // BenchmarkInsertOne
 // BenchmarkInsertOne-8                 682           1634591 ns/op
 // BenchmarkInsertBatch
@@ -298,7 +298,7 @@ func BenchmarkInsertOne(b *testing.B) {
 // Updated with CopyFrom and BatchInserter, the results look as follows:
 // goos: linux
 // goarch: amd64
-// pkg: gitlab.com/thorchain/midgard/internal/fetch/record
+// pkg: github.com/btcq/btcq-indexer/internal/fetch/record
 // cpu: Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz
 // BenchmarkInsertOne
 // BenchmarkInsertOne-8                         607           2076099 ns/op

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"gitlab.com/thorchain/midgard/internal/fetch/record"
+	"github.com/btcq/btcq-indexer/internal/fetch/record"
 )
 
 type BalanceCorrection struct {

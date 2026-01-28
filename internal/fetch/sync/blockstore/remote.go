@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/util/miderr"
 )
 
 func (b *BlockStore) updateFromRemote(ctx context.Context) {

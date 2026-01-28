@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/util/miderr"
 )
 
 func totalUnitChanges(ctx context.Context, pools []string, tableName string, until *db.Nano) (

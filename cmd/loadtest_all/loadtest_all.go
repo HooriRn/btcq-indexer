@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/thorchain/midgard/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/midlog"
 )
 
 var midgardURL = flag.String("midgard_url", "http://localhost:8080", "Base URL of Midgard to test")

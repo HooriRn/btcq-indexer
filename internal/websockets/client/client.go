@@ -13,7 +13,7 @@ import (
 
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
-	"gitlab.com/thorchain/midgard/internal/websockets"
+	"github.com/btcq/btcq-indexer/internal/websockets"
 )
 
 var (

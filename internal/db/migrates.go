@@ -7,8 +7,8 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"gitlab.com/thorchain/midgard/internal/util/miderr"
-	"gitlab.com/thorchain/midgard/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/midlog"
 )
 
 func ReadChainID(ctx context.Context) (string, error) {

@@ -12,13 +12,13 @@ import (
 	"time"
 
 	"github.com/lib/pq"
-	"gitlab.com/thorchain/midgard/config"
-	"gitlab.com/thorchain/midgard/internal/db"
-	"gitlab.com/thorchain/midgard/internal/fetch/record"
-	"gitlab.com/thorchain/midgard/internal/util"
-	"gitlab.com/thorchain/midgard/internal/util/miderr"
-	"gitlab.com/thorchain/midgard/internal/util/midlog"
-	"gitlab.com/thorchain/midgard/openapi/generated/oapigen"
+	"github.com/btcq/btcq-indexer/config"
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/fetch/record"
+	"github.com/btcq/btcq-indexer/internal/util"
+	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
 const DefaultLimit = 50
@@ -1059,7 +1059,7 @@ func actionsPreparedStatements(moment time.Time,
 	// it chooses to do a scan on `event_id` index and filter for rows that have the given
 	// txid, instead of using the `transactions` index and sorting afterwards. This is a very bad
 	// decision in this case.
-	// See https://gitlab.com/thorchain/midgard/-/issues/45 for details.
+	// See https://github.com/btcq/btcq-indexer/-/issues/45 for details.
 	//
 	// The `OFFSET 0` in a sub-query is a semi-officially blessed hack to stop Postgres from
 	// inlining a sub-query; thus forcing it to create an independent plan for it. In which case
