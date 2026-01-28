@@ -38,10 +38,10 @@ If you wish to connect to a specific ThorNode the proper urls can be found in
 Third option: Overwrite single config values with environment variables
 
 Fields in nested structs are accessed using underscores. Examples:
-* `MIDGARD_LISTEN_PORT` env variable will override `Config.ListenPort` value
-* `MIDGARD_TIMESCALE_PORT` will override `Config.TimeScale.Port` value
-* `MIDGARD_USD_POOLS="A,B,C"` will override the UsdPools
-* `MIDGARD_POOLS_DECIMAL="A.A:8,B.B:18"` will override the pools decimals
+* `BTCQ_INDEXER_LISTEN_PORT` env variable will override `Config.ListenPort` value
+* `BTCQ_INDEXER_TIMESCALE_PORT` will override `Config.TimeScale.Port` value
+* `BTCQ_INDEXER_USD_POOLS="A,B,C"` will override the UsdPools
+* `BTCQ_INDEXER_POOLS_DECIMAL="A.A:8,B.B:18"` will override the pools decimals
 
 ### Start native Midgard
 

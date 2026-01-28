@@ -38,7 +38,7 @@ type Config struct {
 
 	UsdPools []string `yaml:"usdpools" split_words:"true"`
 
-	// you can specify on the command line with: MIDGARD_POOLS_DECIMAL="A.A:8,B.B:18"
+	// you can specify on the command line with: BTCQ_INDEXER_POOLS_DECIMAL="A.A:8,B.B:18"
 	PoolsDecimal map[string]int64 `yaml:"pools_decimal" split_words:"true"`
 
 	// These are filtered addresses that will be ignored by the action endpoint
@@ -315,7 +315,7 @@ func readConfigFrom(filenames string) Config {
 	MustLoadConfigFiles(filenames, &ret)
 
 	// override config with env variables
-	err := envconfig.Process("midgard", &ret)
+	err := envconfig.Process("btcq_indexer", &ret)
 	if err != nil {
 		logger.FatalE(err, "Failed to process config environment variables")
 	}
