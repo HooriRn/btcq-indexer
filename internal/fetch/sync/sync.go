@@ -26,11 +26,11 @@ import (
 var logger = midlog.LoggerForModule("sync")
 
 // CursorHeight is the Tendermint chain position [sequence identifier].
-var CursorHeight = metrics.Must1LabelInteger("midgard_chain_cursor_height", "node")
+var CursorHeight = metrics.Must1LabelInteger("btcq_indexer_chain_cursor_height", "node")
 
 // NodeHeight is the latest Tendermint chain position [sequence identifier]
 // reported by the node.
-var NodeHeight = metrics.Must1LabelRealSample("midgard_chain_height", "node")
+var NodeHeight = metrics.Must1LabelRealSample("btcq_indexer_chain_height", "node")
 
 type Sync struct {
 	chainClient *chain.Client

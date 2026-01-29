@@ -25,18 +25,18 @@ import (
 // Package Metrics
 var (
 	blockProcTimer = timer.NewTimer("block_write_process")
-	EventProcTime  = metrics.Must1LabelHistogram("midgard_chain_event_process_seconds", "type", 0.001, 0.01, 0.1)
+	EventProcTime  = metrics.Must1LabelHistogram("btcq_indexer_chain_event_process_seconds", "type", 0.001, 0.01, 0.1)
 
-	EventTotal            = metrics.Must1LabelCounter("midgard_chain_events_total", "group")
+	EventTotal            = metrics.Must1LabelCounter("btcq_indexer_chain_events_total", "group")
 	DeliverTxEventsTotal  = EventTotal("deliver_tx")
 	BeginBlockEventsTotal = EventTotal("begin_block")
 	EndBlockEventsTotal   = EventTotal("end_block")
-	IgnoresTotal          = metrics.MustCounter("midgard_chain_event_ignores_total", "Number of known types not in use seen.")
-	UnknownsTotal         = metrics.MustCounter("midgard_chain_event_unknowns_total", "Number of unknown types discarded.")
+	IgnoresTotal          = metrics.MustCounter("btcq_indexer_chain_event_ignores_total", "Number of known types not in use seen.")
+	UnknownsTotal         = metrics.MustCounter("btcq_indexer_chain_event_unknowns_total", "Number of unknown types discarded.")
 
-	AttrPerEvent = metrics.MustHistogram("midgard_chain_event_attrs", "Number of attributes per event.", 0, 1, 7, 21, 144)
+	AttrPerEvent = metrics.MustHistogram("btcq_indexer_chain_event_attrs", "Number of attributes per event.", 0, 1, 7, 21, 144)
 
-	PoolRewardsTotal = metrics.MustCounter("midgard_pool_rewards_total", "Number of asset amounts on rewards events seen.")
+	PoolRewardsTotal = metrics.MustCounter("btcq_indexer_pool_rewards_total", "Number of asset amounts on rewards events seen.")
 )
 
 // Metadata has metadata for a block (from the chain).

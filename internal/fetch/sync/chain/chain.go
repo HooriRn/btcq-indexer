@@ -22,8 +22,8 @@ import (
 var logger = midlog.LoggerForModule("chain")
 
 func init() {
-	metrics.MustHelp("midgard_chain_cursor_height", "The Tendermint sequence identifier that is next in line.")
-	metrics.MustHelp("midgard_chain_height", "The latest Tendermint sequence identifier reported by the node.")
+	metrics.MustHelp("btcq_indexer_chain_cursor_height", "The Tendermint sequence identifier that is next in line.")
+	metrics.MustHelp("btcq_indexer_chain_height", "The latest Tendermint sequence identifier reported by the node.")
 }
 
 // Block is a chain record.
