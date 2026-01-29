@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 	"gopkg.in/yaml.v3"
 )
 
@@ -49,7 +49,7 @@ type Config struct {
 
 	CaseInsensitiveChains map[string]bool `yaml:"case_insensitive_chains" split_words:"true"`
 
-	Logs midlog.LogConfig `yaml:"logs" split_words:"true"`
+	Logs btcqlog.LogConfig `yaml:"logs" split_words:"true"`
 
 	// Temporary solution, will be field will be removed in the future.
 	TmpActionsCountTimeout Duration `yaml:"tmp_actions_count_timeout" split_words:"true"`
@@ -222,13 +222,13 @@ var defaultConfig = Config{
 	Debug: Debug{
 		EnableAggregationTimer: false,
 	},
-	Logs: midlog.LogConfig{
+	Logs: btcqlog.LogConfig{
 		ConsoleLogger: true,
 		NoColor:       false,
 	},
 }
 
-var logger = midlog.LoggerForModule("config")
+var logger = btcqlog.LoggerForModule("config")
 
 func (d Duration) Value() time.Duration {
 	return time.Duration(d)
@@ -327,7 +327,7 @@ func readConfigFrom(filenames string) Config {
 // Values in later files overwrite values from earlier files.
 func ReadGlobalFrom(filenames string) {
 	Global = readConfigFrom(filenames)
-	midlog.SetFromConfig(Global.Logs)
+	btcqlog.SetFromConfig(Global.Logs)
 	LogAndcheckUrls(&Global)
 }
 

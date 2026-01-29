@@ -1,4 +1,4 @@
-package miderr
+package btcqerr
 
 import (
 	"fmt"

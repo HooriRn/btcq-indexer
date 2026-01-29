@@ -15,15 +15,15 @@ import (
 	"github.com/btcq/btcq-indexer/internal/fetch/sync/blockstore"
 	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
 	"github.com/btcq/btcq-indexer/internal/util/jobs"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 	"github.com/btcq/btcq-indexer/internal/util/timer"
 
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	jsonrpctypes "github.com/cometbft/cometbft/rpc/jsonrpc/types"
 )
 
-var logger = midlog.LoggerForModule("sync")
+var logger = btcqlog.LoggerForModule("sync")
 
 // CursorHeight is the Tendermint chain position [sequence identifier].
 var CursorHeight = metrics.Must1LabelInteger("btcq_indexer_chain_cursor_height", "node")
@@ -58,7 +58,7 @@ func (s *Sync) FetchSingle(height int64) (*coretypes.ResultBlockResults, error) 
 				return nil, err
 			}
 			if !reflect.DeepEqual(ret, fromChain) {
-				return nil, miderr.InternalErr("Blockstore blocks blocks don't match chain blocks")
+				return nil, btcqerr.InternalErr("Blockstore blocks blocks don't match chain blocks")
 			}
 		}
 		return ret, nil
@@ -73,15 +73,15 @@ func reportProgress(nextHeightToFetch, thornodeHeight int64, fetchingFrom string
 	}
 	if thornodeHeight <= midgardHeight+1 {
 		logger.InfoT(
-			midlog.Int64("height", midgardHeight),
+			btcqlog.Int64("height", midgardHeight),
 			"Fully synced")
 	} else {
 		progress := 100 * float64(midgardHeight) / float64(thornodeHeight)
 		logger.InfoT(
-			midlog.Tags(
-				midlog.Str("progress", fmt.Sprintf("%.2f%%", progress)),
-				midlog.Int64("height", midgardHeight),
-				midlog.Str("from", fetchingFrom)),
+			btcqlog.Tags(
+				btcqlog.Str("progress", fmt.Sprintf("%.2f%%", progress)),
+				btcqlog.Int64("height", midgardHeight),
+				btcqlog.Str("from", fetchingFrom)),
 			"Syncing")
 	}
 }
@@ -108,7 +108,7 @@ func SetFirstBlock(height int64, timestamp db.Nano, hash string) {
 	// Check if height and hash is the same
 	g := db.GenesisInfo
 	if g.Height != height || g.Hash != hash {
-		midlog.Fatal("The genesis config for height and hash aren't the same as THORNode")
+		btcqlog.Fatal("The genesis config for height and hash aren't the same as THORNode")
 	}
 	db.FirstBlock.Set(height, timestamp)
 }
@@ -120,14 +120,14 @@ func (s *Sync) CheckGenesisStatus() {
 
 	genesisHeight := db.GenesisInfo.Get().Height
 	if db.LastCommittedBlock.Get().Height != 0 && db.LastCommittedBlock.Get().Height < genesisHeight {
-		midlog.Fatal("Midgard committed blocks before genesis file! Please nuke the database first.")
+		btcqlog.Fatal("Midgard committed blocks before genesis file! Please nuke the database first.")
 		return
 	}
 
 	if s.blockStore != nil && s.blockStore.HasHeight(genesisHeight) {
 		block, err := s.blockStore.SingleBlock(genesisHeight)
 		if err != nil {
-			midlog.Error(fmt.Sprintf("Can't get genesis height from Blockstore: %s", err))
+			btcqlog.Error(fmt.Sprintf("Can't get genesis height from Blockstore: %s", err))
 		}
 		SetFirstBlock(block.Height, db.TimeToNano(block.Time), db.PrintableHash(string(block.Hash)))
 		return
@@ -135,7 +135,7 @@ func (s *Sync) CheckGenesisStatus() {
 
 	block, err := s.chainClient.GetBlock(&genesisHeight)
 	if err != nil {
-		midlog.Error(
+		btcqlog.Error(
 			"Can't get the genesis height from Thornode, Maybe your genesis state is before hardfork")
 	}
 	SetFirstBlock(block.Block.Height,
@@ -250,7 +250,7 @@ func (s *Sync) CatchUp(out chan<- chain.Block, startHeight int64) (
 
 func (s *Sync) KeepInSync(ctx context.Context, out chan chain.Block) {
 	heightOnStart := db.LastCommittedBlock.Get().Height
-	midlog.InfoF("Starting chain read from previous height in DB %d", heightOnStart)
+	btcqlog.InfoF("Starting chain read from previous height in DB %d", heightOnStart)
 
 	s.failedThorNodeFetchHeight = -1
 
@@ -276,17 +276,17 @@ func (s *Sync) KeepInSync(ctx context.Context, out chan chain.Block) {
 			// For details, see: https://discord.com/channels/838986635756044328/973251236025466961
 			if !(errors.As(err, &rpcerror) &&
 				strings.HasPrefix(rpcerror.Data, "could not find results for height")) {
-				midlog.DebugF("Block fetch error at height %d, retrying: %v",
+				btcqlog.DebugF("Block fetch error at height %d, retrying: %v",
 					nextHeightToFetch, err)
 			} else {
-				midlog.WarnF("Block fetch error at height %d, retrying: %v",
+				btcqlog.WarnF("Block fetch error at height %d, retrying: %v",
 					nextHeightToFetch, err)
 			}
 			if nextHeightToFetch == previousHeight {
 				errorCountAtCurrentHeight++
 				const maxErrorCount = 20
 				if maxErrorCount < errorCountAtCurrentHeight {
-					midlog.ErrorF(
+					btcqlog.ErrorF(
 						"Already failed %d times fetching height %d, quitting",
 						maxErrorCount, nextHeightToFetch)
 					jobs.InitiateShutdown()

@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/btcq/btcq-indexer/config"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 type milliCounter time.Time
@@ -22,11 +22,11 @@ func (m milliCounter) SecondsElapsed() float32 {
 // defer timer.Console("name")()
 func Console(name string) func() {
 	start := MilliCounter()
-	midlog.WarnT(midlog.Str("name", name), "Timer start")
+	btcqlog.WarnT(btcqlog.Str("name", name), "Timer start")
 	return func() {
-		midlog.WarnT(midlog.Tags(
-			midlog.Str("name", name),
-			midlog.Float32("duration", start.SecondsElapsed()),
+		btcqlog.WarnT(btcqlog.Tags(
+			btcqlog.Str("name", name),
+			btcqlog.Float32("duration", start.SecondsElapsed()),
 		), "Timer end")
 	}
 }

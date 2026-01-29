@@ -6,7 +6,7 @@ import (
 
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
@@ -106,7 +106,7 @@ func GetLiquidityHistory(ctx context.Context, buckets db.Buckets, pool string) (
 	}
 
 	if len(usdPrices) != buckets.Count() {
-		err = miderr.InternalErr("Misalligned buckets")
+		err = btcqerr.InternalErr("Misalligned buckets")
 		return
 	}
 
@@ -120,7 +120,7 @@ func GetLiquidityHistory(ctx context.Context, buckets db.Buckets, pool string) (
 	for i := 0; i < buckets.Count(); i++ {
 		timestamp, endTime := buckets.Bucket(i)
 		if usdPrices[i].Window.From != timestamp {
-			err = miderr.InternalErr("Misalligned buckets")
+			err = btcqerr.InternalErr("Misalligned buckets")
 		}
 
 		withdrawals := withdraws.buckets[timestamp]

@@ -11,8 +11,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/util/jobs"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 	"github.com/btcq/btcq-indexer/internal/util/timer"
 )
 
@@ -54,7 +54,7 @@ func CreateAndRegisterCache(f RefreshFunc, name string) *cache {
 		f:        f,
 		name:     name,
 		timer:    timer.NewTimer("background_" + name),
-		response: cachedResponse{err: miderr.InternalErr("Cache not calculated yet")},
+		response: cachedResponse{err: btcqerr.InternalErr("Cache not calculated yet")},
 	}
 
 	GlobalCacheStore.Lock()
@@ -95,7 +95,7 @@ func (c *cache) getResponse() cachedResponse {
 	return c.response
 }
 
-var CacheLogger = midlog.LoggerForModule("cache")
+var CacheLogger = btcqlog.LoggerForModule("cache")
 
 func (cs *cacheStore) RefreshAll(ctx context.Context) {
 	cs.RLock()
@@ -104,13 +104,13 @@ func (cs *cacheStore) RefreshAll(ctx context.Context) {
 
 	for _, cache := range caches {
 		ctx2, cancel := context.WithTimeout(ctx, BackgroundCalculationTotalTimeout)
-		CacheLogger.InfoT(midlog.Str("cache", cache.name), "Refreshing cache")
+		CacheLogger.InfoT(btcqlog.Str("cache", cache.name), "Refreshing cache")
 		start := timer.MilliCounter()
 		cache.Refresh(ctx2)
 		CacheLogger.InfoT(
-			midlog.Tags(
-				midlog.Str("cache", cache.name),
-				midlog.Float32("duration", start.SecondsElapsed())),
+			btcqlog.Tags(
+				btcqlog.Str("cache", cache.name),
+				btcqlog.Float32("duration", start.SecondsElapsed())),
 			"Refreshed cache.")
 
 		cancel()

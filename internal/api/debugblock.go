@@ -11,7 +11,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/fetch/sync"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 )
 
 type DebugBlockResponse struct {
@@ -82,7 +82,7 @@ func TimestampAndHeight(ctx context.Context, id int64) (
 	defer rows.Close()
 
 	if !rows.Next() {
-		err = miderr.BadRequestF("No such height or timestamp: %d", id)
+		err = btcqerr.BadRequestF("No such height or timestamp: %d", id)
 		return
 	}
 	err = rows.Scan(&height, &timestamp)

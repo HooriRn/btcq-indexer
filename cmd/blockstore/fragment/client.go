@@ -11,11 +11,11 @@ import (
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/btcq/btcq-indexer/config"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
-var logger = midlog.LoggerForModule("chain")
+var logger = btcqlog.LoggerForModule("chain")
 
 // Block is a chain record.
 type Block struct {
@@ -125,7 +125,7 @@ func (i *Iterator) Next() (*Block, error) {
 
 func (i *Iterator) nextBatch() (hasMore bool, err error) {
 	if len(i.batch) != 0 {
-		return false, miderr.InternalErr("Batch still filled")
+		return false, btcqerr.InternalErr("Batch still filled")
 	}
 	if i.finalBlockHeight < i.nextBatchStart {
 		return false, nil

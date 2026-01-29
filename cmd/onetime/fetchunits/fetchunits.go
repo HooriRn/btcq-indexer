@@ -32,11 +32,11 @@ import (
 	"github.com/btcq/btcq-indexer/config"
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/db/dbinit"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 func main() {
-	midlog.LogCommandLine()
+	btcqlog.LogCommandLine()
 	config.ReadGlobal()
 
 	ctx := context.Background()
@@ -47,7 +47,7 @@ func main() {
 	db.EnsureDBMatchesChain()
 
 	summaries := withdrawsWithImpermanentLoss(ctx)
-	midlog.InfoF("Withdraws count with impermanent loss protection: %d ", len(summaries))
+	btcqlog.InfoF("Withdraws count with impermanent loss protection: %d ", len(summaries))
 
 	type WithdrawCorrection struct {
 		TX          string
@@ -73,10 +73,10 @@ func main() {
 			continue
 		}
 		if summary.Adds != 0 {
-			midlog.Info("Pool has add in the same block")
+			btcqlog.Info("Pool has add in the same block")
 		}
 		diff := float64(nodeWithdraw-summary.MidgardWithrawUnits) / float64(summary.MidgardWithrawUnits)
-		midlog.InfoF("Diff %f Pool: %s height %d -- [ %d vs %d ]",
+		btcqlog.InfoF("Diff %f Pool: %s height %d -- [ %d vs %d ]",
 			diff, summary.Pool, summary.Height, summary.MidgardWithrawUnits, (nodeWithdraw))
 		if -0.2 <= diff && diff <= 0 {
 			correctWithdraws[summary.Height] = WithdrawCorrection{
@@ -85,9 +85,9 @@ func main() {
 			}
 			sortedWithdrawKeys = append(sortedWithdrawKeys, summary.Height)
 		} else {
-			midlog.Warn("Big impermanent loss change, creating append")
+			btcqlog.Warn("Big impermanent loss change, creating append")
 			if -1 <= diff {
-				midlog.Fatal("Big impermanent loss but not addition yet")
+				btcqlog.Fatal("Big impermanent loss but not addition yet")
 			}
 			adds[summary.Height] = AddCorrection{
 				RuneAddr: summary.FromAddr,
@@ -97,8 +97,8 @@ func main() {
 			sortedAddKeys = append(sortedAddKeys, summary.Height)
 		}
 	}
-	midlog.InfoF("correct withdraws: %v", correctWithdraws)
-	midlog.InfoF("adds: %v", adds)
+	btcqlog.InfoF("correct withdraws: %v", correctWithdraws)
+	btcqlog.InfoF("adds: %v", adds)
 	withdrawString := "var withdrawUnitCorrections = map[int64]withdrawUnitCorrection{\n"
 
 	for _, k := range sortedWithdrawKeys {
@@ -107,7 +107,7 @@ func main() {
 			"\t%d: {\"%s\", %d},\n", k, v.TX, v.ActualUnits)
 	}
 	withdrawString += "}\n"
-	midlog.WarnF("Correct withdraws:\n%s", withdrawString)
+	btcqlog.WarnF("Correct withdraws:\n%s", withdrawString)
 
 	addString := "var addInsteadWithdrawMap = map[int64]addInsteadWithdraw{\n"
 	for _, k := range sortedAddKeys {
@@ -116,7 +116,7 @@ func main() {
 			"\t%d: {\"%s\", \"%s\", %d},\n", k, v.Pool, v.RuneAddr, v.Units)
 	}
 	addString += "}\n"
-	midlog.WarnF("Additional adds:\n%s", addString)
+	btcqlog.WarnF("Additional adds:\n%s", addString)
 }
 
 type UnitsSummary struct {
@@ -146,7 +146,7 @@ func withdrawsWithImpermanentLoss(ctx context.Context) []UnitsSummary {
 	`
 	rows, err := db.Query(ctx, q)
 	if err != nil {
-		midlog.FatalE(err, "Query error")
+		btcqlog.FatalE(err, "Query error")
 	}
 	defer rows.Close()
 
@@ -155,7 +155,7 @@ func withdrawsWithImpermanentLoss(ctx context.Context) []UnitsSummary {
 		err := rows.Scan(
 			&w.Pool, &w.TX, &w.MidgardWithrawUnits, &w.FromAddr, &w.Timestamp, &w.Height)
 		if err != nil {
-			midlog.FatalE(err, "Query error")
+			btcqlog.FatalE(err, "Query error")
 		}
 		ret = append(ret, w)
 	}
@@ -167,20 +167,20 @@ func checkWithdrawsIsAlone(ctx context.Context, summary UnitsSummary) {
 
 	rows, err := db.Query(ctx, q, summary.Timestamp)
 	if err != nil {
-		midlog.FatalE(err, "Query error")
+		btcqlog.FatalE(err, "Query error")
 	}
 	defer rows.Close()
 
 	if !rows.Next() {
-		midlog.Fatal("Expected one row from count")
+		btcqlog.Fatal("Expected one row from count")
 	}
 	var count int
 	err = rows.Scan(&count)
 	if err != nil {
-		midlog.FatalE(err, "Query error")
+		btcqlog.FatalE(err, "Query error")
 	}
 	if count != 1 {
-		midlog.FatalF(
+		btcqlog.FatalF(
 			"Multiple withdraws at timestamp %d, height %d",
 			summary.Timestamp, summary.Height)
 	}
@@ -195,11 +195,11 @@ func readAdds(ctx context.Context, summary *UnitsSummary) {
 	err := db.TheDB.QueryRow(q, summary.Pool, summary.Timestamp).Scan(&summary.Adds)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			midlog.Debug("Got no result. As the rows were empty")
+			btcqlog.Debug("Got no result. As the rows were empty")
 		}
-		midlog.FatalE(err, "Query error")
+		btcqlog.FatalE(err, "Query error")
 	}
-	midlog.DebugF("Add: %d", summary.Adds)
+	btcqlog.DebugF("Add: %d", summary.Adds)
 }
 
 type ThorNodeUnits struct {
@@ -208,10 +208,10 @@ type ThorNodeUnits struct {
 
 func NodeUnits(thorNodeUrl string, urlPath string, height int64) int64 {
 	url := thorNodeUrl + urlPath + "?height=" + strconv.FormatInt(height, 10)
-	midlog.DebugF("Querying thornode: %s", url)
+	btcqlog.DebugF("Querying thornode: %s", url)
 	resp, err := http.Get(url)
 	if err != nil {
-		midlog.FatalE(err, "Error fetching ThorNode")
+		btcqlog.FatalE(err, "Error fetching ThorNode")
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
@@ -219,7 +219,7 @@ func NodeUnits(thorNodeUrl string, urlPath string, height int64) int64 {
 	var result ThorNodeUnits
 	err = json.Unmarshal(body, &result)
 	if err != nil {
-		midlog.FatalE(err, "Error unmarshaling ThorNode response")
+		btcqlog.FatalE(err, "Error unmarshaling ThorNode response")
 	}
 	return result.TotalUnits
 }
@@ -229,5 +229,5 @@ func fetchNodeUnits(summary *UnitsSummary) {
 	unitsBefore := NodeUnits(thorNodeUrl, "/pool/"+summary.Pool, summary.Height-1)
 	unitsAfter := NodeUnits(thorNodeUrl, "/pool/"+summary.Pool, summary.Height)
 	summary.NodeDiff = unitsBefore - unitsAfter
-	midlog.DebugF("before %d  after %d  diff %d", unitsBefore, unitsAfter, summary.NodeDiff)
+	btcqlog.DebugF("before %d  after %d  diff %d", unitsBefore, unitsAfter, summary.NodeDiff)
 }

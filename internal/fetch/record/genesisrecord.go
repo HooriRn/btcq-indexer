@@ -8,7 +8,7 @@ import (
 	"github.com/btcq/btcq-indexer/config"
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 )
 
 // handle metadata after each insertion
@@ -25,7 +25,7 @@ func recordGenPools(m *Metadata) {
 		err := InsertWithMeta("pool_balance_change_events", m, cols,
 			e.Asset, e.BalanceRune, true, e.BalanceAsset, true, "genesisAdd")
 		if err != nil {
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"failed to insert add event from genesis, err: %s", err)
 		}
 
@@ -33,7 +33,7 @@ func recordGenPools(m *Metadata) {
 		cols = []string{"asset", "status"}
 		err = InsertWithMeta("pool_events", m, cols, e.Asset, e.Status)
 		if err != nil {
-			miderr.LogEventParseErrorF("failed to insert pool event from genesis, err: %s", err)
+			btcqerr.LogEventParseErrorF("failed to insert pool event from genesis, err: %s", err)
 		}
 
 		// recorder
@@ -74,7 +74,7 @@ func recordGenTransfers(m *Metadata) {
 	if config.Global.EventRecorder.OnTransferEnabled { // check with the config
 		for index, b := range db.GenesisData.AppState.Bank.Balances {
 			if b.Address == "" {
-				miderr.LogEventParseErrorF("failed to get the account address, index: %d", index)
+				btcqerr.LogEventParseErrorF("failed to get the account address, index: %d", index)
 			}
 
 			for _, c := range b.Coins {
@@ -82,13 +82,13 @@ func recordGenTransfers(m *Metadata) {
 
 				coin, err := parseCosmosDenom(c.Denom)
 				if err != nil {
-					miderr.LogEventParseErrorF("failed to parse denom from genesis, err: %s", err)
+					btcqerr.LogEventParseErrorF("failed to parse denom from genesis, err: %s", err)
 				}
 
 				err = InsertWithMeta("transfer_events", m, cols,
 					"genesis", b.Address, coin, c.Amount)
 				if err != nil {
-					miderr.LogEventParseErrorF(
+					btcqerr.LogEventParseErrorF(
 						"failed to insert transfer event from genesis, err: %s", err)
 				}
 
@@ -111,7 +111,7 @@ func recordGenLPs(m *Metadata) {
 				"genesisTx", util.WrapString(e.RuneAddr), e.RuneE8, "add")
 
 			if err != nil {
-				miderr.LogEventParseErrorF(
+				btcqerr.LogEventParseErrorF(
 					"failed to insert pending liquidity event, err: %s", err)
 			}
 		}
@@ -135,7 +135,7 @@ func recordGenLPs(m *Metadata) {
 				assetInRune)
 
 			if err != nil {
-				miderr.LogEventParseErrorF("failed to insert stake event, err: %s", err)
+				btcqerr.LogEventParseErrorF("failed to insert stake event, err: %s", err)
 			}
 		}
 
@@ -156,7 +156,7 @@ func recordGenTHORNames(m *Metadata) {
 			err := InsertWithMeta("thorname_change_events", m, cols,
 				e.Name, a.Chain, a.Address, 0, 0, e.ExpireBlockHeight, e.Owner)
 			if err != nil {
-				miderr.LogEventParseErrorF("failed to insert thorname change event, err: %s", err)
+				btcqerr.LogEventParseErrorF("failed to insert thorname change event, err: %s", err)
 			}
 
 			increaseMetadata(m)
@@ -171,7 +171,7 @@ func recordGenNodes(m *Metadata) {
 		err := InsertWithMeta("update_node_account_status_events", m, cols,
 			e.NodeAddress, []byte{}, e.Status)
 		if err != nil {
-			miderr.LogEventParseErrorF("failed to insert node account status event, err: %s", err)
+			btcqerr.LogEventParseErrorF("failed to insert node account status event, err: %s", err)
 		}
 
 		// bond events
@@ -180,7 +180,7 @@ func recordGenNodes(m *Metadata) {
 		err = InsertWithMeta("bond_events", m, cols,
 			"genesisTx", "THOR", e.BondAddr, "", "THOR.RUNE", 0, "", "bond_paid", e.BondE8)
 		if err != nil {
-			miderr.LogEventParseErrorF("failed to insert bond event, err: %s", err)
+			btcqerr.LogEventParseErrorF("failed to insert bond event, err: %s", err)
 		}
 
 		increaseMetadata(m)
@@ -202,7 +202,7 @@ func recordGenLoans(m *Metadata) {
 		err := InsertWithMeta("loan_open_events", m, cols,
 			e.Owner, e.CollateralDeposited, e.DebtIssued, 0, e.Asset, "")
 		if err != nil {
-			miderr.LogEventParseErrorF("failed to insert loan open event, err: %s", err)
+			btcqerr.LogEventParseErrorF("failed to insert loan open event, err: %s", err)
 		}
 
 		// loan repayment events
@@ -211,7 +211,7 @@ func recordGenLoans(m *Metadata) {
 			err = InsertWithMeta("loan_repayment_events", m, cols,
 				e.Owner, e.CollateralWithdrawn, e.DebtRepaid, e.Asset)
 			if err != nil {
-				miderr.LogEventParseErrorF("failed to insert loan repayment event, err: %s", err)
+				btcqerr.LogEventParseErrorF("failed to insert loan repayment event, err: %s", err)
 			}
 		}
 
@@ -226,7 +226,7 @@ func recordGenMimirs(m *Metadata) {
 		cols := []string{"key", "value"}
 		err := InsertWithMeta("set_mimir_events", m, cols, e.Key, strconv.FormatInt(e.Value, 10))
 		if err != nil {
-			miderr.LogEventParseErrorF("failed to insert mimir event, err: %s", err)
+			btcqerr.LogEventParseErrorF("failed to insert mimir event, err: %s", err)
 		}
 
 		Recorder.chainInfo.SetMimirStatus(e.Key, e.Value)

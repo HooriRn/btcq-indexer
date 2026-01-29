@@ -22,7 +22,7 @@ import (
 	"github.com/btcq/btcq-indexer/internal/db/dbinit"
 	"github.com/btcq/btcq-indexer/internal/fetch/record"
 	"github.com/btcq/btcq-indexer/internal/timeseries"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 const usageStr = `Check pool units share of each member
@@ -55,7 +55,7 @@ type MemberChange struct {
 }
 
 func main() {
-	midlog.LogCommandLine()
+	btcqlog.LogCommandLine()
 
 	flag.Parse()
 	if flag.NArg() < 1 {
@@ -83,11 +83,11 @@ func findHeight(param string) (height int64, timestamp db.Nano) {
 
 	heightOrTimestamp, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		midlog.FatalF("Couldn't parse height or timestamp: %s", idStr)
+		btcqlog.FatalF("Couldn't parse height or timestamp: %s", idStr)
 	}
 	height, timestamp, err = api.TimestampAndHeight(context.Background(), heightOrTimestamp)
 	if err != nil {
-		midlog.FatalE(err, "Couldn't find height or timestamp. ")
+		btcqlog.FatalE(err, "Couldn't find height or timestamp. ")
 	}
 	return
 }
@@ -105,13 +105,13 @@ func CheckOnePool() {
 
 	height, timestamp := findHeight(idStr)
 	thorNodeMembers := getThorNodeMembers(pool, height)
-	midlog.DebugF("Thornode rune addresses: %d assetOnly addresses: %d assetToRuneMap: %d",
+	btcqlog.DebugF("Thornode rune addresses: %d assetOnly addresses: %d assetToRuneMap: %d",
 		len(thorNodeMembers.RuneMemberUnits),
 		len(thorNodeMembers.AssetMemberUnits),
 		len(thorNodeMembers.AssetToRuneMap))
 
 	midgardMembers := getMidgardMembers(ctx, pool, timestamp)
-	midlog.DebugF("Midgard rune addresses: %d assetOnly addresses: %d assetToRuneMap: %d",
+	btcqlog.DebugF("Midgard rune addresses: %d assetOnly addresses: %d assetToRuneMap: %d",
 		len(midgardMembers.RuneMemberUnits),
 		len(midgardMembers.AssetMemberUnits),
 		len(midgardMembers.AssetToRuneMap))
@@ -133,7 +133,7 @@ func CheckAllPoolsStructured() {
 
 	poolsWithStatus, err := timeseries.GetPoolsStatuses(ctx, timestamp)
 	if err != nil {
-		midlog.FatalE(err, "Error getting Midgard pool status")
+		btcqlog.FatalE(err, "Error getting Midgard pool status")
 	}
 	sortedPools := []string{}
 	for k := range poolsWithStatus {
@@ -146,14 +146,14 @@ func CheckAllPoolsStructured() {
 			continue
 		}
 		thorNodeMembers := getThorNodeMembers(pool, height)
-		midlog.DebugF(
+		btcqlog.DebugF(
 			"Thornode rune addresses: %d assetOnly addresses: %d assetToRuneMap: %d",
 			len(thorNodeMembers.RuneMemberUnits),
 			len(thorNodeMembers.AssetMemberUnits),
 			len(thorNodeMembers.AssetToRuneMap))
 
 		midgardMembers := getMidgardMembers(ctx, pool, timestamp)
-		midlog.DebugF(
+		btcqlog.DebugF(
 			"Midgard rune addresses: %d assetOnly addresses: %d assetToRuneMap: %d",
 			len(midgardMembers.RuneMemberUnits), len(midgardMembers.AssetMemberUnits), len(midgardMembers.AssetToRuneMap))
 
@@ -218,7 +218,7 @@ func (x *MemberMap) AddMemberClustered(m MemberChange) {
 			previousRuneAddr, assetAddrAlreadyRegistered := x.AssetToRuneMap[aAddr]
 			if assetAddrAlreadyRegistered {
 				if previousRuneAddr != rAddr {
-					midlog.FatalF("AssetAddress registered with multiple rune addresses %s %s",
+					btcqlog.FatalF("AssetAddress registered with multiple rune addresses %s %s",
 						rAddr, previousRuneAddr)
 				}
 			} else {
@@ -262,13 +262,13 @@ func (x *MemberMap) TotalUnits() int64 {
 }
 
 func getThorNodeMembers(pool string, height int64) MemberMap {
-	midlog.InfoF("Checking pool units sum. Pool: %s Height: %d", pool, height)
+	btcqlog.InfoF("Checking pool units sum. Pool: %s Height: %d", pool, height)
 
 	thorNodeURL := config.Global.ThorChain.ThorNodeURL
 
 	var summary ThorNodeSummary
 	queryThorNode(thorNodeURL, "/pool/"+pool, height, &summary)
-	midlog.InfoF("ThorNode global units: %d", summary.TotalUnits)
+	btcqlog.InfoF("ThorNode global units: %d", summary.TotalUnits)
 
 	var thornodeBreakdown []MemberChange
 	queryThorNode(thorNodeURL, "/pool/"+pool+"/liquidity_providers", height, &thornodeBreakdown)
@@ -280,11 +280,11 @@ func getThorNodeMembers(pool string, height int64) MemberMap {
 		sum2 += member.Units
 		ret.AddMemberSimple(member)
 	}
-	midlog.InfoF("ThorNode units per member summed up: %d", sum2)
+	btcqlog.InfoF("ThorNode units per member summed up: %d", sum2)
 	if sum2 == summary.TotalUnits {
-		midlog.Info("thornode is consistent")
+		btcqlog.Info("thornode is consistent")
 	} else {
-		midlog.FatalF(
+		btcqlog.FatalF(
 			"thornode INCONSISTENT.\nPools Total units: %d\n Member units sum: %d\nDiff: %d",
 			summary.TotalUnits,
 			sum2,
@@ -301,17 +301,17 @@ func queryThorNode(thorNodeUrl string, urlPath string, height int64, dest interf
 	if 0 < height {
 		url += "?height=" + strconv.FormatInt(height, 10)
 	}
-	midlog.DebugF("Querying thornode: %s", url)
+	btcqlog.DebugF("Querying thornode: %s", url)
 	resp, err := http.Get(url)
 	if err != nil {
-		midlog.FatalE(err, "Querying ThorNode")
+		btcqlog.FatalE(err, "Querying ThorNode")
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 
 	err = json.Unmarshal(body, dest)
 	if err != nil {
-		midlog.FatalE(err, "Error unmarshaling ThorNode response")
+		btcqlog.FatalE(err, "Error unmarshaling ThorNode response")
 	}
 }
 
@@ -326,7 +326,7 @@ func getMidgardMembers(ctx context.Context, pool string, timestamp db.Nano) Memb
 	`
 	addRows, err := db.Query(ctx, addQ, pool, timestamp)
 	if err != nil {
-		midlog.FatalE(err, "Query error")
+		btcqlog.FatalE(err, "Query error")
 	}
 	defer addRows.Close()
 
@@ -338,7 +338,7 @@ func getMidgardMembers(ctx context.Context, pool string, timestamp db.Nano) Memb
 			&assetAddress,
 			&add.Units)
 		if err != nil {
-			midlog.FatalE(err, "Query error")
+			btcqlog.FatalE(err, "Query error")
 		}
 		if runeAddress.Valid {
 			add.RuneAddress = runeAddress.String
@@ -358,7 +358,7 @@ func getMidgardMembers(ctx context.Context, pool string, timestamp db.Nano) Memb
 
 	withdrawRows, err := db.Query(ctx, withdrawQ, pool, timestamp)
 	if err != nil {
-		midlog.FatalE(err, "Query error")
+		btcqlog.FatalE(err, "Query error")
 	}
 	defer withdrawRows.Close()
 
@@ -369,7 +369,7 @@ func getMidgardMembers(ctx context.Context, pool string, timestamp db.Nano) Memb
 			&fromAddr,
 			&units)
 		if err != nil {
-			midlog.FatalE(err, "Query error")
+			btcqlog.FatalE(err, "Query error")
 		}
 		withdraw := MemberChange{Units: -units}
 		if record.AddressIsRune(fromAddr) {
@@ -389,10 +389,10 @@ func mapDiff(thorNodeMap map[string]int64, midgardMap map[string]int64) {
 	for k, tValue := range thorNodeMap {
 		mValue, mOk := midgardMap[k]
 		if !mOk {
-			midlog.WarnF("Missing address in Midgard: %s ThorNode units: %d", k, tValue)
+			btcqlog.WarnF("Missing address in Midgard: %s ThorNode units: %d", k, tValue)
 			diffCount++
 		} else if mValue != tValue {
-			midlog.WarnF(
+			btcqlog.WarnF(
 				"Mismatch units for address: %s  ThorNode: %d  Midgard: %d  diff: %d",
 				k, tValue, mValue, tValue-mValue)
 			diffCount++
@@ -401,27 +401,27 @@ func mapDiff(thorNodeMap map[string]int64, midgardMap map[string]int64) {
 	for k, mValue := range midgardMap {
 		_, tOk := thorNodeMap[k]
 		if !tOk {
-			midlog.WarnF("Extra address in Midgard: %s  Midgard units: %d", k, mValue)
+			btcqlog.WarnF("Extra address in Midgard: %s  Midgard units: %d", k, mValue)
 			diffCount++
 		}
 	}
 	if diffCount == 0 {
-		midlog.Info("No difference")
+		btcqlog.Info("No difference")
 	}
 }
 
 func memberDiff(thorNodeMembers MemberMap, midgardMembers MemberMap) {
-	midlog.Info("Checking Rune adresses")
+	btcqlog.Info("Checking Rune adresses")
 	mapDiff(thorNodeMembers.RuneMemberUnits, midgardMembers.RuneMemberUnits)
-	midlog.Info("Checking Asset adresses")
+	btcqlog.Info("Checking Asset adresses")
 	mapDiff(thorNodeMembers.AssetMemberUnits, midgardMembers.AssetMemberUnits)
 
 	thorNodeUnits := thorNodeMembers.TotalUnits()
 	midgardUnits := midgardMembers.TotalUnits()
 	if thorNodeUnits != midgardUnits {
-		midlog.WarnF("Total units mismatch. ThorNode: %d  Midgard: %d", thorNodeUnits, midgardUnits)
+		btcqlog.WarnF("Total units mismatch. ThorNode: %d  Midgard: %d", thorNodeUnits, midgardUnits)
 	} else {
-		midlog.Info("Total units are equal")
+		btcqlog.Info("Total units are equal")
 	}
 }
 
@@ -461,5 +461,5 @@ func saveStructuredDiffs(pool string, thorNodeMembers MemberMap, midgardMembers 
 }
 
 func printStructuredDiffs() {
-	midlog.InfoF("Needed changes to Midgard:\n%v", structuredBuff.String())
+	btcqlog.InfoF("Needed changes to Midgard:\n%v", structuredBuff.String())
 }

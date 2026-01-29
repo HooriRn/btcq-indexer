@@ -7,7 +7,7 @@ import (
 
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 type Genesis struct {
@@ -32,13 +32,13 @@ type Coin struct {
 func readThorBalances(thorGenesisPath string) (balances map[string]Balance, height int64, timestamp int64) {
 	f, err := os.Open(thorGenesisPath)
 	if err != nil {
-		midlog.FatalE(err, "Error reading genesis json")
+		btcqlog.FatalE(err, "Error reading genesis json")
 	}
 	defer f.Close()
 	dec := json.NewDecoder(f)
 	var g Genesis
 	if err := dec.Decode(&g); err != nil {
-		midlog.FatalE(err, "Error parsing genesis json")
+		btcqlog.FatalE(err, "Error parsing genesis json")
 	}
 	balances = g.getBalances()
 	height = util.MustParseInt64(g.InitialHeight) - 1
@@ -52,7 +52,7 @@ func queryTimestampAtHeight(height int64) (timestamp int64) {
 		height).
 		Scan(&timestamp)
 	if err != nil {
-		midlog.FatalE(err, "Error reading block timestamp from db")
+		btcqlog.FatalE(err, "Error reading block timestamp from db")
 	}
 
 	return

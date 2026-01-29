@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/btcq/btcq-indexer/internal/db"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 func LoadGenesis() {
@@ -21,17 +21,17 @@ func LoadGenesis() {
 	lastCommitted := db.LastCommittedBlock.Get().Height
 
 	if db.GenesisExits() {
-		midlog.Info("The Genesis is already written.")
+		btcqlog.Info("The Genesis is already written.")
 		// This means block log was empty and first block of genesis hasn't been fetched.
 		if lastCommitted == 0 {
-			midlog.Info("The Genesis is written but there was no block fetch.")
+			btcqlog.Info("The Genesis is written but there was no block fetch.")
 			db.LastCommittedBlock.Set(recordBlockHeight, db.TimeToNano(db.GenesisData.GenesisTime.Add(-1)))
 		}
 		return
 	}
 
 	if genesisBlockHeight < lastCommitted {
-		midlog.Info("The Genesis was already written in a previous run.")
+		btcqlog.Info("The Genesis was already written in a previous run.")
 		return
 	}
 
@@ -50,7 +50,7 @@ func LoadGenesis() {
 
 	err := db.Inserter.StartBlock()
 	if err != nil {
-		midlog.FatalE(err, "Failed to StartBlock")
+		btcqlog.FatalE(err, "Failed to StartBlock")
 		return
 	}
 
@@ -69,14 +69,14 @@ func LoadGenesis() {
 
 	err = db.Inserter.EndBlock()
 	if err != nil {
-		midlog.FatalE(err, "Failed to EndBlock")
+		btcqlog.FatalE(err, "Failed to EndBlock")
 		deleteDBIfFail()
 		return
 	}
 
 	err = db.Inserter.Flush()
 	if err != nil {
-		midlog.FatalE(err, "Failed to Flush")
+		btcqlog.FatalE(err, "Failed to Flush")
 		deleteDBIfFail()
 		return
 	}
@@ -88,7 +88,7 @@ func setGenesisConstant(genesisBlockHeight int64) {
 	_, err := db.TheDB.Exec(`INSERT INTO constants (key, value) VALUES ('genesis', $1)
 			ON CONFLICT (key) DO UPDATE SET value = $1`, []byte(strconv.FormatInt(genesisBlockHeight, 10)))
 	if err != nil {
-		midlog.FatalE(err, "Failed to Insert into constants")
+		btcqlog.FatalE(err, "Failed to Insert into constants")
 		return
 	}
 }
@@ -96,7 +96,7 @@ func setGenesisConstant(genesisBlockHeight int64) {
 func deleteDBIfFail() {
 	_, err := db.TheDB.Exec(`DELETE FROM constants WHERE key = 'ddl_hash'`)
 	if err != nil {
-		midlog.FatalE(err, "Failed to delete ddl hash.")
+		btcqlog.FatalE(err, "Failed to delete ddl hash.")
 		return
 	}
 }

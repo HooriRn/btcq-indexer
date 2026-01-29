@@ -7,7 +7,7 @@ import (
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/timeseries"
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
@@ -293,7 +293,7 @@ func GetEarningsHistory(ctx context.Context, buckets db.Buckets) (oapigen.Earnin
 		return oapigen.EarningsHistoryResponse{}, err
 	}
 	if len(usdPrices) != buckets.Count() {
-		return oapigen.EarningsHistoryResponse{}, miderr.InternalErr("Misalligned buckets")
+		return oapigen.EarningsHistoryResponse{}, btcqerr.InternalErr("Misalligned buckets")
 	}
 
 	// TODO(huginn): remove console timer tail call
@@ -324,7 +324,7 @@ func GetEarningsHistory(ctx context.Context, buckets db.Buckets) (oapigen.Earnin
 	for i := 0; i < buckets.Count(); i++ {
 		timestamp, endTime := buckets.Bucket(i)
 		if usdPrices[i].Window.From != timestamp {
-			err = miderr.InternalErr("Misalligned buckets")
+			err = btcqerr.InternalErr("Misalligned buckets")
 		}
 
 		intervalPoolEarningsMap := intervalPoolEarningsMaps[timestamp]

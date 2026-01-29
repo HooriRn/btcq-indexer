@@ -16,7 +16,7 @@ import (
 	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
 	"github.com/btcq/btcq-indexer/internal/timeseries"
 	"github.com/btcq/btcq-indexer/internal/util/jobs"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 	"github.com/btcq/btcq-indexer/internal/util/timer"
 	"github.com/btcq/btcq-indexer/internal/websockets"
 )
@@ -24,7 +24,7 @@ import (
 var writeTimer = timer.NewTimer("block_write_total")
 
 func main() {
-	midlog.LogCommandLine()
+	btcqlog.LogCommandLine()
 	config.ReadGlobal()
 
 	// Read pools decimal overwrite from the config
@@ -73,20 +73,20 @@ func main() {
 
 func initWebsockets(ctx context.Context) jobs.NamedFunction {
 	if !config.Global.Websockets.Enable {
-		midlog.Info("Websockets are not enabled")
+		btcqlog.Info("Websockets are not enabled")
 		return jobs.EmptyJob()
 	}
 	db.CreateWebsocketChannel()
 	websocketsJob, err := websockets.Init(ctx, config.Global.Websockets.ConnectionLimit)
 	if err != nil {
-		midlog.FatalE(err, "Websockets failure")
+		btcqlog.FatalE(err, "Websockets failure")
 	}
 	return websocketsJob
 }
 
 func initHTTPServer(ctx context.Context) jobs.NamedFunction {
 	c := &config.Global
-	midlog.InfoF("HTTP server listen port: %d", c.ListenPort)
+	btcqlog.InfoF("HTTP server listen port: %d", c.ListenPort)
 	api.InitHandler(c.ThorChain.ThorNodeURL)
 	srv := &http.Server{
 		Handler:      api.Handler,
@@ -98,14 +98,14 @@ func initHTTPServer(ctx context.Context) jobs.NamedFunction {
 	// launch HTTP server
 	go func() {
 		err := srv.ListenAndServe()
-		midlog.ErrorE(err, "HTTP stopped")
+		btcqlog.ErrorE(err, "HTTP stopped")
 		jobs.InitiateShutdown()
 	}()
 
 	return jobs.Later("HTTPserver", func() {
 		<-ctx.Done()
 		if err := srv.Shutdown(context.Background()); err != nil {
-			midlog.ErrorE(err, "HTTP failed shutdown")
+			btcqlog.ErrorE(err, "HTTP failed shutdown")
 		}
 	})
 }
@@ -118,7 +118,7 @@ func initBlockWrite(ctx context.Context, blocks <-chan chain.Block) jobs.NamedFu
 
 	err := notinchain.LoadConstants()
 	if err != nil {
-		midlog.FatalE(err, "Failed to read constants")
+		btcqlog.FatalE(err, "Failed to read constants")
 	}
 
 	writer := blockWriter{
@@ -133,6 +133,6 @@ func setupDB() {
 	dbinit.Setup()
 	err := timeseries.Setup()
 	if err != nil {
-		midlog.FatalE(err, "Error during reading last block from DB")
+		btcqlog.FatalE(err, "Error during reading last block from DB")
 	}
 }

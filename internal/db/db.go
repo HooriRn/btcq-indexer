@@ -12,7 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/btcq/btcq-indexer/config"
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 // The Query part of the SQL client.
@@ -79,18 +79,18 @@ func SetupDoNotCallDirectly() {
 
 	dbConn, err := TheDB.Conn(context.Background())
 	if err != nil {
-		midlog.FatalE(err, "Opening a connection to PostgreSQL failed")
+		btcqlog.FatalE(err, "Opening a connection to PostgreSQL failed")
 	}
 
 	TheImmediateInserter = &ImmediateInserter{db: dbConn}
 	TheBatchInserter = &BatchInserter{db: dbConn}
 	Inserter = TheBatchInserter
 	if CheckBatchInserterMarked() {
-		midlog.Error("BatchInserter marked as failed, sync will be slow!")
+		btcqlog.Error("BatchInserter marked as failed, sync will be slow!")
 		inserterFailVar.Add(1)
 		Inserter = TheImmediateInserter
 	} else {
-		midlog.Info("DB inserts are going to be batched normally")
+		btcqlog.Info("DB inserts are going to be batched normally")
 	}
 }
 
@@ -250,7 +250,7 @@ func DebugPrintQuery(msg string, query string, args ...interface{}) {
 		case []string:
 			for _, x := range v {
 				if strings.Contains(x, "'") || strings.Contains(x, "}") {
-					midlog.FatalF(
+					btcqlog.FatalF(
 						"Query debug print failed for []string, a string has special characters: %v",
 						v)
 				}
@@ -258,11 +258,11 @@ func DebugPrintQuery(msg string, query string, args ...interface{}) {
 
 			s = "'{" + strings.Join(v, ",") + "}'"
 		default:
-			midlog.FatalF("Unknown type for args %T", v)
+			btcqlog.FatalF("Unknown type for args %T", v)
 		}
 		query = strings.ReplaceAll(query,
 			fmt.Sprintf("$%d", i+1),
 			s)
 	}
-	midlog.Warn(msg + "\n" + query)
+	btcqlog.Warn(msg + "\n" + query)
 }

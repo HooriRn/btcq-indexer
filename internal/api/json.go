@@ -18,7 +18,7 @@ import (
 	"github.com/btcq/btcq-indexer/internal/decimal"
 	"github.com/btcq/btcq-indexer/internal/fetch/record"
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 
 	"github.com/btcq/btcq-indexer/internal/timeseries"
 	"github.com/btcq/btcq-indexer/internal/timeseries/stat"
@@ -80,7 +80,7 @@ func jsonEarningsHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Pa
 	var res oapigen.EarningsHistoryResponse
 	res, err := stat.GetEarningsHistory(r.Context(), buckets)
 	if err != nil {
-		miderr.InternalErrE(err).ReportHTTP(w)
+		btcqerr.InternalErrE(err).ReportHTTP(w)
 		return
 	}
 	if buckets.OneInterval() {
@@ -111,7 +111,7 @@ func jsonLiquidityHistory(w http.ResponseWriter, r *http.Request, _ httprouter.P
 	var res oapigen.LiquidityHistoryResponse
 	res, err := stat.GetLiquidityHistory(r.Context(), buckets, pool)
 	if err != nil {
-		miderr.InternalErrE(err).ReportHTTP(w)
+		btcqerr.InternalErrE(err).ReportHTTP(w)
 		return
 	}
 	if buckets.OneInterval() {
@@ -164,7 +164,7 @@ func jsonDepths(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	pool := ps[0].Value
 
 	if !timeseries.PoolExists(pool) {
-		miderr.BadRequestF("Unknown pool: %s", pool).ReportHTTP(w)
+		btcqerr.BadRequestF("Unknown pool: %s", pool).ReportHTTP(w)
 		return
 	}
 
@@ -318,7 +318,7 @@ func jsonSaversDepths(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 	saverVaultName := util.ConvertNativePoolToSynth(pool)
 
 	if !timeseries.PoolExists(saverVaultName) {
-		miderr.BadRequestF("Unknown saver pool: %s", saverVaultName).ReportHTTP(w)
+		btcqerr.BadRequestF("Unknown saver pool: %s", saverVaultName).ReportHTTP(w)
 		return
 	}
 
@@ -428,7 +428,7 @@ func jsonSwapHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Params
 
 	mergedPoolSwaps, err := stat.GetPoolSwaps(r.Context(), pool, buckets)
 	if err != nil {
-		miderr.InternalErr(err.Error()).ReportHTTP(w)
+		btcqerr.InternalErr(err.Error()).ReportHTTP(w)
 		return
 	}
 	var result oapigen.SwapHistoryResponse = createVolumeIntervals(mergedPoolSwaps)
@@ -528,17 +528,17 @@ func jsonTVLHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Params)
 	// defer timer.Console("tvlDepthSingle")()
 	depths, err := stat.TVLDepthHistory(r.Context(), buckets)
 	if err != nil {
-		miderr.InternalErrE(err).ReportHTTP(w)
+		btcqerr.InternalErrE(err).ReportHTTP(w)
 		return
 	}
 
 	bonds, err := stat.BondsHistory(r.Context(), buckets)
 	if err != nil {
-		miderr.InternalErrE(err).ReportHTTP(w)
+		btcqerr.InternalErrE(err).ReportHTTP(w)
 		return
 	}
 	if len(depths) != len(bonds) || depths[0].Window != bonds[0].Window {
-		miderr.InternalErr("Buckets misalligned").ReportHTTP(w)
+		btcqerr.InternalErr("Buckets misalligned").ReportHTTP(w)
 		return
 	}
 
@@ -991,7 +991,7 @@ func jsonPools(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	apyBucket, err := parsePeriodParam(&urlParams, "14d")
 	if err != nil {
-		miderr.BadRequest(err.Error()).ReportHTTP(w)
+		btcqerr.BadRequest(err.Error()).ReportHTTP(w)
 		return
 	}
 
@@ -1034,7 +1034,7 @@ func jsonPool(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	apyBucket, err := parsePeriodParam(&urlParams, "14d")
 	if err != nil {
-		miderr.BadRequest(err.Error()).ReportHTTP(w)
+		btcqerr.BadRequest(err.Error()).ReportHTTP(w)
 		return
 	}
 
@@ -1047,19 +1047,19 @@ func jsonPool(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	pool := ps[0].Value
 
 	if !timeseries.PoolExistsNow(pool) {
-		miderr.BadRequestF("Unknown pool: %s", pool).ReportHTTP(w)
+		btcqerr.BadRequestF("Unknown pool: %s", pool).ReportHTTP(w)
 		return
 	}
 
 	status, err := timeseries.PoolStatus(r.Context(), pool)
 	if err != nil {
-		miderr.InternalErrE(err).ReportHTTP(w)
+		btcqerr.InternalErrE(err).ReportHTTP(w)
 		return
 	}
 
 	aggregates, err := getPoolAggregates(r.Context(), []string{pool}, apyBucket)
 	if err != nil {
-		miderr.InternalErrE(err).ReportHTTP(w)
+		btcqerr.InternalErrE(err).ReportHTTP(w)
 		return
 	}
 
@@ -1087,7 +1087,7 @@ func jsonMembers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	if poolParam != "" {
 		pool = &poolParam
 		if !timeseries.PoolExists(*pool) {
-			miderr.BadRequestF("Unknown pool: %s", *pool).ReportHTTP(w)
+			btcqerr.BadRequestF("Unknown pool: %s", *pool).ReportHTTP(w)
 			return
 		}
 	}
@@ -1146,7 +1146,7 @@ func jsonBorrowers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 	if assetParam != "" {
 		asset = &assetParam
 		if !timeseries.PoolExists(*asset) {
-			miderr.BadRequestF("Unknown asset: %s", *asset).ReportHTTP(w)
+			btcqerr.BadRequestF("Unknown asset: %s", *asset).ReportHTTP(w)
 			return
 		}
 	}
@@ -1366,7 +1366,7 @@ func jsonVotes(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	period, err := parsePeriodParam(&urlParams, "90d")
 	if err != nil {
-		miderr.BadRequest(err.Error()).ReportHTTP(w)
+		btcqerr.BadRequest(err.Error()).ReportHTTP(w)
 		return
 	}
 
@@ -1492,9 +1492,9 @@ func jsonActions(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 			errMsg := "The requested address is filtered, It might be one of module addresses."
 			if len(name) > 0 {
 				errMsg += "\n\nLabel: %s"
-				respError(w, miderr.BadRequestF(errMsg, name))
+				respError(w, btcqerr.BadRequestF(errMsg, name))
 			} else {
-				respError(w, miderr.BadRequestF(errMsg, name))
+				respError(w, btcqerr.BadRequestF(errMsg, name))
 			}
 			return
 		}
@@ -1548,7 +1548,7 @@ func jsonHolders(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		var err error
 		limit, err = strconv.ParseInt(limitStr, 10, 64)
 		if err != nil {
-			miderr.BadRequest("Invalid limit parameter").ReportHTTP(w)
+			btcqerr.BadRequest("Invalid limit parameter").ReportHTTP(w)
 			return
 		}
 	}
@@ -1665,7 +1665,7 @@ func jsonSwaps(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	period, err := parsePeriodParam(&urlParams, "24h")
 	if err != nil {
-		miderr.BadRequest(err.Error()).ReportHTTP(w)
+		btcqerr.BadRequest(err.Error()).ReportHTTP(w)
 		return
 	}
 
@@ -1696,7 +1696,7 @@ func jsonReserveHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Par
 
 	ret, err := stat.GetReserveHistory(r.Context(), buckets)
 	if err != nil {
-		miderr.InternalErrE(err).ReportHTTP(w)
+		btcqerr.InternalErrE(err).ReportHTTP(w)
 		return
 	}
 
@@ -1720,7 +1720,7 @@ func jsonRunePriceHistory(w http.ResponseWriter, r *http.Request, _ httprouter.P
 
 	ret, err := stat.GetRunePriceHistory(r.Context(), buckets)
 	if err != nil {
-		miderr.InternalErrE(err).ReportHTTP(w)
+		btcqerr.InternalErrE(err).ReportHTTP(w)
 		return
 	}
 
@@ -1750,7 +1750,7 @@ func jsonAffiliateHistory(w http.ResponseWriter, r *http.Request, _ httprouter.P
 
 	mergedAffiliates, err := stat.GetTHORNameAffiliate(r.Context(), thorname, buckets)
 	if err != nil {
-		miderr.InternalErr(err.Error()).ReportHTTP(w)
+		btcqerr.InternalErr(err.Error()).ReportHTTP(w)
 		return
 	}
 
@@ -1762,7 +1762,7 @@ func jsonRUJIMerge(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 
 	period, err := parsePeriodParam(&urlParams, "all")
 	if err != nil {
-		miderr.BadRequest(err.Error()).ReportHTTP(w)
+		btcqerr.BadRequest(err.Error()).ReportHTTP(w)
 		return
 	}
 
@@ -1780,7 +1780,7 @@ func jsonTCYDistribution(w http.ResponseWriter, r *http.Request, ps httprouter.P
 
 	period, err := parsePeriodParam(&urlParams, "30d")
 	if err != nil {
-		miderr.BadRequest(err.Error()).ReportHTTP(w)
+		btcqerr.BadRequest(err.Error()).ReportHTTP(w)
 		return
 	}
 
@@ -1792,7 +1792,7 @@ func jsonTCYDistribution(w http.ResponseWriter, r *http.Request, ps httprouter.P
 
 	ret, err := stat.GetTCYDistribution(r.Context(), address, period)
 	if err != nil {
-		miderr.InternalErrE(err).ReportHTTP(w)
+		btcqerr.InternalErrE(err).ReportHTTP(w)
 		return
 	}
 
@@ -1819,7 +1819,7 @@ func jsonAffiliateStats(w http.ResponseWriter, r *http.Request, _ httprouter.Par
 	result, err := timeseries.GetAffiliateStats(r.Context(), buckets, thorname)
 
 	if err != nil {
-		miderr.InternalErrE(err).ReportHTTP(w)
+		btcqerr.InternalErrE(err).ReportHTTP(w)
 		return
 	}
 
@@ -1845,7 +1845,7 @@ func jsonAffiliateEarning(w http.ResponseWriter, r *http.Request, _ httprouter.P
 
 	result, err := timeseries.GetAffiliateEarning(r.Context(), buckets, thorname)
 	if err != nil {
-		miderr.InternalErrE(err).ReportHTTP(w)
+		btcqerr.InternalErrE(err).ReportHTTP(w)
 		return
 	}
 

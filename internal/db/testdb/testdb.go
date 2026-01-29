@@ -26,7 +26,7 @@ import (
 	"github.com/btcq/btcq-indexer/internal/db/dbinit"
 	"github.com/btcq/btcq-indexer/internal/fetch/record"
 	"github.com/btcq/btcq-indexer/internal/timeseries"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 func init() {
@@ -122,9 +122,9 @@ func InitTest(t *testing.T) {
 
 // Show test logs only on failure
 func HideTestLogs(t *testing.T) {
-	midlog.SetExitFunctionForTest(t.FailNow)
+	btcqlog.SetExitFunctionForTest(t.FailNow)
 	b := bytes.Buffer{}
-	midlog.SetGlobalOutputTest(&b)
+	btcqlog.SetGlobalOutputTest(&b)
 
 	t.Cleanup(func() {
 		if t.Failed() {

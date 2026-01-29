@@ -19,25 +19,25 @@ import (
 	"github.com/btcq/btcq-indexer/internal/fetch/sync/blockstore"
 	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
 	"github.com/btcq/btcq-indexer/internal/util/jobs"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 func main() {
-	midlog.LogCommandLine()
+	btcqlog.LogCommandLine()
 	config.ReadGlobal()
 
 	mainContext := jobs.InitSignals()
 
-	midlog.InfoF("BlockStore: local directory: %s", config.Global.BlockStore.Local)
+	btcqlog.InfoF("BlockStore: local directory: %s", config.Global.BlockStore.Local)
 
 	chainClient, err := chain.NewClient(mainContext)
 	if err != nil {
-		midlog.FatalE(err, "Error during chain client initialization")
+		btcqlog.FatalE(err, "Error during chain client initialization")
 	}
 
 	status, err := chainClient.RefreshStatus()
 	if err != nil {
-		midlog.FatalE(err, "Error during fetching chain status")
+		btcqlog.FatalE(err, "Error during fetching chain status")
 	}
 
 	db.InitializeChainVarsFromThorNodeStatus(status)
@@ -55,7 +55,7 @@ func main() {
 
 	startHeight := blockStore.LastFetchedHeight() + 1
 	if startHeight < status.SyncInfo.EarliestBlockHeight {
-		midlog.FatalF(
+		btcqlog.FatalF(
 			"Cannot continue dump, startHeight[%d] < status.SyncInfo.EarliestBlockHeight[%d]",
 			startHeight, status.SyncInfo.EarliestBlockHeight)
 	}
@@ -67,14 +67,14 @@ func main() {
 			endHeight = endHeight - endHeight%config.Global.BlockStore.BlocksPerChunk
 		}
 		if endHeight < startHeight {
-			midlog.Info("No new full chunks, exiting")
+			btcqlog.Info("No new full chunks, exiting")
 			return
 		}
 	}
 
 	it := chainClient.Iterator(startHeight, endHeight)
 
-	midlog.InfoF("BlockStore: start fetching from %d to %d", startHeight, endHeight)
+	btcqlog.InfoF("BlockStore: start fetching from %d to %d", startHeight, endHeight)
 
 	finishedNormally := false
 
@@ -83,24 +83,24 @@ func main() {
 		defer blockStore.Close()
 		for {
 			if mainContext.Err() != nil {
-				midlog.InfoF("BlockStore: write shutdown")
+				btcqlog.InfoF("BlockStore: write shutdown")
 				return
 			}
 			block, err := it.Next()
 			if err != nil {
-				midlog.WarnF("BlockStore: error while fetching at height %d : %v", currentHeight, err)
+				btcqlog.WarnF("BlockStore: error while fetching at height %d : %v", currentHeight, err)
 				db.SleepWithContext(mainContext, 7*time.Second)
 				it = chainClient.Iterator(currentHeight, endHeight)
 				continue
 			}
 			if block == nil {
-				midlog.Info("BlockStore: Reached ThorNode last block")
+				btcqlog.Info("BlockStore: Reached ThorNode last block")
 				jobs.InitiateShutdown()
 				finishedNormally = true
 				return
 			}
 			if block.Height != currentHeight {
-				midlog.ErrorEF(
+				btcqlog.ErrorEF(
 					err,
 					"BlockStore: height not incremented by one. Expected: %d Actual: %d",
 					currentHeight, block.Height)
@@ -111,7 +111,7 @@ func main() {
 			blockStore.DumpBlock(block, forceFinalizeChunk)
 
 			if forceFinalizeChunk {
-				midlog.Info("BlockStore: Reached fork height")
+				btcqlog.Info("BlockStore: Reached fork height")
 				jobs.InitiateShutdown()
 				finishedNormally = true
 				return
@@ -120,7 +120,7 @@ func main() {
 			if currentHeight%1000 == 0 {
 				percentGlobal := 100 * float64(block.Height) / float64(endHeight)
 				percentCurrentRun := 100 * float64(block.Height-startHeight) / float64(endHeight-startHeight)
-				midlog.InfoF(
+				btcqlog.InfoF(
 					"BlockStore: fetched block with height %d [%.2f%% ; %.2f%%]",
 					block.Height, percentGlobal, percentCurrentRun)
 			}

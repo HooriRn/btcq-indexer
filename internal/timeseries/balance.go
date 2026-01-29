@@ -7,13 +7,13 @@ import (
 	"strconv"
 
 	"github.com/btcq/btcq-indexer/internal/db"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
-func blockIdFrom(strHeight string, strTimestamp string) (db.BlockId, miderr.Err) {
+func blockIdFrom(strHeight string, strTimestamp string) (db.BlockId, btcqerr.Err) {
 	if strHeight != "" && strTimestamp != "" {
-		return db.BlockId{}, miderr.BadRequest("only one of height or timestamp can be specified, not both")
+		return db.BlockId{}, btcqerr.BadRequest("only one of height or timestamp can be specified, not both")
 	}
 
 	var height *int64
@@ -23,13 +23,13 @@ func blockIdFrom(strHeight string, strTimestamp string) (db.BlockId, miderr.Err)
 	if strTimestamp != "" {
 		ts, err := strconv.ParseInt(strTimestamp, 10, 64)
 		if err != nil {
-			return db.BlockId{}, miderr.BadRequestF("error parsing timestamp %s", strTimestamp)
+			return db.BlockId{}, btcqerr.BadRequestF("error parsing timestamp %s", strTimestamp)
 		}
 		second := db.Second(ts)
 		firstSecond := db.Nano(firstBlock.Timestamp).ToSecond()
 		lastSecond := db.Nano(lastBlock.Timestamp).ToSecond()
 		if second < firstSecond || lastSecond < second {
-			return db.BlockId{}, miderr.BadRequestF("no data for timestamp %v, timestamp range is [%v,%v]",
+			return db.BlockId{}, btcqerr.BadRequestF("no data for timestamp %v, timestamp range is [%v,%v]",
 				second, firstSecond, lastSecond)
 		}
 		nano := second.ToNano() - 1 + 1e9
@@ -37,11 +37,11 @@ func blockIdFrom(strHeight string, strTimestamp string) (db.BlockId, miderr.Err)
 	} else if strHeight != "" {
 		h, err := strconv.ParseInt(strHeight, 10, 64)
 		if err != nil {
-			return db.BlockId{}, miderr.BadRequestF("error parsing height %s", strHeight)
+			return db.BlockId{}, btcqerr.BadRequestF("error parsing height %s", strHeight)
 		}
 		height = &h
 		if *height < firstBlock.Height || lastBlock.Height < *height {
-			return db.BlockId{}, miderr.BadRequestF("no data for height %s, height range is [%v,%v]",
+			return db.BlockId{}, btcqerr.BadRequestF("no data for height %s, height range is [%v,%v]",
 				strHeight, firstBlock.Height, lastBlock.Height)
 		}
 	} else {
@@ -54,7 +54,7 @@ func blockIdFrom(strHeight string, strTimestamp string) (db.BlockId, miderr.Err)
 	return findBlockId(height, timestamp)
 }
 
-func findBlockId(height *int64, timestamp *db.Nano) (db.BlockId, miderr.Err) {
+func findBlockId(height *int64, timestamp *db.Nano) (db.BlockId, btcqerr.Err) {
 	var row *sql.Row
 	query := "SELECT bl.height, bl.timestamp FROM block_log bl"
 	if timestamp != nil {
@@ -66,12 +66,12 @@ func findBlockId(height *int64, timestamp *db.Nano) (db.BlockId, miderr.Err) {
 	param := db.BlockId{}
 	err := row.Scan(&param.Height, &param.Timestamp)
 	if err != nil {
-		return param, miderr.InternalErrE(err)
+		return param, btcqerr.InternalErrE(err)
 	}
 	return param, nil
 }
 
-func GetBalances(ctx context.Context, address string, height string, timestamp string) (oapigen.BalanceResponse, miderr.Err) {
+func GetBalances(ctx context.Context, address string, height string, timestamp string) (oapigen.BalanceResponse, btcqerr.Err) {
 	blockId, merr := blockIdFrom(height, timestamp)
 
 	if merr != nil {
@@ -99,7 +99,7 @@ func GetBalances(ctx context.Context, address string, height string, timestamp s
 	)
 
 	if err != nil {
-		return oapigen.BalanceResponse{}, miderr.InternalErrE(err)
+		return oapigen.BalanceResponse{}, btcqerr.InternalErrE(err)
 	}
 
 	result := oapigen.BalanceResponse{
@@ -112,7 +112,7 @@ func GetBalances(ctx context.Context, address string, height string, timestamp s
 		var asset, amount string
 		err := rows.Scan(&asset, &amount)
 		if err != nil {
-			return oapigen.BalanceResponse{}, miderr.InternalErrE(err)
+			return oapigen.BalanceResponse{}, btcqerr.InternalErrE(err)
 		}
 		result.Coins = append(result.Coins, oapigen.Coin{
 			Amount: amount,
@@ -123,7 +123,7 @@ func GetBalances(ctx context.Context, address string, height string, timestamp s
 	return result, nil
 }
 
-func GetTopHolders(ctx context.Context, asset string, limit int64) (oapigen.HolderResponse, miderr.Err) {
+func GetTopHolders(ctx context.Context, asset string, limit int64) (oapigen.HolderResponse, btcqerr.Err) {
 	rows, err := db.Query(ctx,
 		`SELECT
 			c.addr AS address,
@@ -139,7 +139,7 @@ func GetTopHolders(ctx context.Context, asset string, limit int64) (oapigen.Hold
 	)
 
 	if err != nil {
-		return oapigen.HolderResponse{}, miderr.InternalErrE(err)
+		return oapigen.HolderResponse{}, btcqerr.InternalErrE(err)
 	}
 
 	result := oapigen.HolderResponse{}
@@ -148,7 +148,7 @@ func GetTopHolders(ctx context.Context, asset string, limit int64) (oapigen.Hold
 		var address, queryAsset, amount string
 		err := rows.Scan(&address, &queryAsset, &amount)
 		if err != nil {
-			return oapigen.HolderResponse{}, miderr.InternalErrE(err)
+			return oapigen.HolderResponse{}, btcqerr.InternalErrE(err)
 		}
 
 		// Create a holder with the address and amount

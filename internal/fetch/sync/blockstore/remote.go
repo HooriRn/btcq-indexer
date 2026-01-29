@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/btcq/btcq-indexer/internal/db"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 )
 
 func (b *BlockStore) updateFromRemote(ctx context.Context) {
@@ -78,7 +78,7 @@ func (b *BlockStore) fetchChunk(aChunk *chunk) error {
 		return err
 	}
 	if actualHash := hex.EncodeToString(sha256.Sum(nil)); aChunk.hash != actualHash {
-		return miderr.InternalErrF("BlockStore: Chunk hash mismatch, expected %v, received %v", aChunk, actualHash)
+		return btcqerr.InternalErrF("BlockStore: Chunk hash mismatch, expected %v, received %v", aChunk, actualHash)
 	}
 	if err := b.finalizeChunk(aChunk.name); err != nil {
 		return err

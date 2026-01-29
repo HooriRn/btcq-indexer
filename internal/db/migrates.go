@@ -7,15 +7,15 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 func ReadChainID(ctx context.Context) (string, error) {
 	var chainId string
 	err := TheDB.QueryRow("SELECT value FROM constants WHERE key = $1", chainIdKey).Scan(&chainId)
 	if err != nil && err != sql.ErrNoRows {
-		midlog.FatalE(err, "Failed to read 'chain_id' from constants")
+		btcqlog.FatalE(err, "Failed to read 'chain_id' from constants")
 	}
 
 	return chainId, err
@@ -32,13 +32,13 @@ func GetMigrateUpdates(currentDdlHash md5Hash, tag string) (data []byte, err err
 	}
 
 	if chainId != "thorchain" {
-		midlog.Info("Skipping migration for non-mainnet")
+		btcqlog.Info("Skipping migration for non-mainnet")
 		return nil, nil
 	}
 
 	latestHeight, err := GetLatestHeight(context.Background())
 	if err != nil {
-		midlog.FatalE(err, "Couldn't get latest height")
+		btcqlog.FatalE(err, "Couldn't get latest height")
 	}
 
 	// v2.32.1 migration from v2.32.2
@@ -46,7 +46,7 @@ func GetMigrateUpdates(currentDdlHash md5Hash, tag string) (data []byte, err err
 
 		// Trim migration for v2.32.2
 		if latestHeight > 20996000 {
-			midlog.Info("Trimming DB to height 20996001")
+			btcqlog.Info("Trimming DB to height 20996001")
 			TrimDB(context.Background(), 20996001)
 		}
 
@@ -59,7 +59,7 @@ func GetMigrateUpdates(currentDdlHash md5Hash, tag string) (data []byte, err err
 	if currentDdlHashString == "741ae065783c76df8218e3a75298d633" {
 		// Trim migration for v2.32.3
 		if latestHeight > 20996000 {
-			midlog.Info("Trimming DB to height 20996001")
+			btcqlog.Info("Trimming DB to height 20996001")
 			TrimDB(context.Background(), 20996001)
 		}
 
@@ -71,7 +71,7 @@ func GetMigrateUpdates(currentDdlHash md5Hash, tag string) (data []byte, err err
 	if currentDdlHashString == "38cc2cea31c31512f4d02ee13e36a91e" {
 		// Trim migration
 		if latestHeight > 21595000 {
-			midlog.Info("Trimming DB to height 21595001")
+			btcqlog.Info("Trimming DB to height 21595001")
 			TrimDB(context.Background(), 21595001)
 		}
 
@@ -85,7 +85,7 @@ func GetMigrateUpdates(currentDdlHash md5Hash, tag string) (data []byte, err err
 
 		// Trim for THOR.NAMI
 		if latestHeight > 22624800 {
-			midlog.Info("Trimming DB to height 22624001")
+			btcqlog.Info("Trimming DB to height 22624001")
 			TrimDB(context.Background(), 22624001)
 		}
 
@@ -123,29 +123,29 @@ func TrimDB(ctx context.Context, heightOrTimestamp int64) {
 
 	height, timestamp, err := QueryTimestampAndHeight(ctx, heightOrTimestamp)
 	if err != nil {
-		midlog.FatalF("Couldn't find height for %d", heightOrTimestamp)
+		btcqlog.FatalF("Couldn't find height for %d", heightOrTimestamp)
 	}
 
 	// Actions & Rune Price Aggregates
-	midlog.Info("Deleting actions")
+	btcqlog.Info("Deleting actions")
 	DeleteAfter("btcq_indexer_agg.actions", "block_timestamp", timestamp.ToI())
 	DeleteAfter("btcq_indexer_agg.rune_price", "block_timestamp", timestamp.ToI())
-	midlog.Info("Deleting watermark")
+	btcqlog.Info("Deleting watermark")
 	DeleteWatermark(timestamp.ToI())
 
-	midlog.InfoF("Deleting rows including and after height %d , timestamp %d", height, timestamp)
+	btcqlog.InfoF("Deleting rows including and after height %d , timestamp %d", height, timestamp)
 	tables := GetTableColumns(ctx)
 	for table, columns := range tables {
 		if columns["block_timestamp"] {
-			midlog.InfoF("%s  deleting by block_timestamp", table)
+			btcqlog.InfoF("%s  deleting by block_timestamp", table)
 			DeleteAfter(table, "block_timestamp", timestamp.ToI())
 		} else if columns["height"] {
-			midlog.InfoF("%s deleting by height", table)
+			btcqlog.InfoF("%s deleting by height", table)
 			DeleteAfter(table, "height", height)
 		} else if table == "constants" {
-			midlog.InfoF("Skipping table %s", table)
+			btcqlog.InfoF("Skipping table %s", table)
 		} else {
-			midlog.WarnF("talbe %s has no good column", table)
+			btcqlog.WarnF("talbe %s has no good column", table)
 		}
 	}
 }
@@ -164,7 +164,7 @@ func GetLatestHeight(ctx context.Context) (int64, error) {
 	defer rows.Close()
 
 	if !rows.Next() {
-		return 0, miderr.BadRequestF("No blocks in block_log")
+		return 0, btcqerr.BadRequestF("No blocks in block_log")
 	}
 
 	var height int64
@@ -188,7 +188,7 @@ func QueryTimestampAndHeight(ctx context.Context, id int64) (
 	defer rows.Close()
 
 	if !rows.Next() {
-		err = miderr.BadRequestF("No such height or timestamp: %d", id)
+		err = btcqerr.BadRequestF("No such height or timestamp: %d", id)
 		return
 	}
 	err = rows.Scan(&height, &timestamp)
@@ -204,7 +204,7 @@ func DeleteWatermark(value int64) {
 	`
 	_, err := TheDB.Exec(q, value)
 	if err != nil {
-		midlog.FatalE(err, "update failed")
+		btcqlog.FatalE(err, "update failed")
 	}
 }
 
@@ -212,7 +212,7 @@ func DeleteAfter(table string, columnName string, value int64) {
 	q := fmt.Sprintf("DELETE FROM %s WHERE $1 <= %s", table, columnName)
 	_, err := TheDB.Exec(q, value)
 	if err != nil {
-		midlog.FatalE(err, "delete failed")
+		btcqlog.FatalE(err, "delete failed")
 	}
 }
 
@@ -228,7 +228,7 @@ func GetTableColumns(ctx context.Context) TableMap {
 	`
 	rows, err := Query(ctx, q)
 	if err != nil {
-		midlog.FatalE(err, "Query error")
+		btcqlog.FatalE(err, "Query error")
 	}
 	defer rows.Close()
 
@@ -237,7 +237,7 @@ func GetTableColumns(ctx context.Context) TableMap {
 		var table, column string
 		err := rows.Scan(&table, &column)
 		if err != nil {
-			midlog.FatalE(err, "Query error")
+			btcqlog.FatalE(err, "Query error")
 		}
 		if _, ok := ret[table]; !ok {
 			ret[table] = map[string]bool{}

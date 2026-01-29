@@ -1,4 +1,4 @@
-package midlog
+package btcqlog
 
 import (
 	"errors"

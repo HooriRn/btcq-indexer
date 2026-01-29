@@ -8,7 +8,7 @@ import (
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/fetch/record"
 	"github.com/btcq/btcq-indexer/internal/timeseries"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 )
 
 type PoolDepthBucket struct {
@@ -221,7 +221,7 @@ func USDPriceHistory(ctx context.Context, buckets db.Buckets) (
 
 	usdPoolWhitelist := config.Global.UsdPools
 	if len(usdPoolWhitelist) == 0 {
-		return nil, miderr.InternalErr("No USD pools defined")
+		return nil, btcqerr.InternalErr("No USD pools defined")
 	}
 
 	ret = make([]USDPriceBucket, buckets.Count())

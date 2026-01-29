@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 var midgardURL = flag.String("midgard_url", "http://localhost:8080", "Base URL of Midgard to test")
@@ -98,10 +98,10 @@ func measureHTTP(url string) (result measurement) {
 	result.milli = int(time.Since(start).Milliseconds())
 	if err != nil {
 		result.ok = false
-		midlog.DebugT(midlog.Tags(
-			midlog.Err(err),
-			midlog.Str("url", url),
-			midlog.Int("time_ms", result.milli),
+		btcqlog.DebugT(btcqlog.Tags(
+			btcqlog.Err(err),
+			btcqlog.Str("url", url),
+			btcqlog.Int("time_ms", result.milli),
 		),
 			"Fetch failed")
 	}
@@ -119,30 +119,30 @@ func (ep *Endpoint) measureWithParams(params []string) {
 	for i := 0; i < tries; i++ {
 		m := measureHTTP(url)
 		if !m.ok {
-			midlog.InfoT(midlog.Tags(
-				midlog.Str("endpoint", ep.path),
-				midlog.Str("params", p),
-				midlog.Err(fmt.Errorf("unhealthy")),
+			btcqlog.InfoT(btcqlog.Tags(
+				btcqlog.Str("endpoint", ep.path),
+				btcqlog.Str("params", p),
+				btcqlog.Err(fmt.Errorf("unhealthy")),
 			), ".")
 			return
 		}
 		if 10000 < m.milli {
-			midlog.InfoT(midlog.Tags(
-				midlog.Str("endpoint", ep.path),
-				midlog.Str("params", p),
-				midlog.Float64("s", float64(m.milli)/1000),
-				midlog.Err(fmt.Errorf("too slow")),
+			btcqlog.InfoT(btcqlog.Tags(
+				btcqlog.Str("endpoint", ep.path),
+				btcqlog.Str("params", p),
+				btcqlog.Float64("s", float64(m.milli)/1000),
+				btcqlog.Err(fmt.Errorf("too slow")),
 			), ".")
 		}
 		measurements = append(measurements, float64(m.milli)/1000)
 	}
 	stats := computeStats(measurements)
-	midlog.InfoTF(midlog.Tags(
-		midlog.Str("endpoint", ep.path),
-		midlog.Str("params", p),
-		midlog.Float64("s_median", stats.median),
-		midlog.Float64("s_max", stats.max),
-		midlog.Float64("s_avg", stats.avg),
+	btcqlog.InfoTF(btcqlog.Tags(
+		btcqlog.Str("endpoint", ep.path),
+		btcqlog.Str("params", p),
+		btcqlog.Float64("s_median", stats.median),
+		btcqlog.Float64("s_max", stats.max),
+		btcqlog.Float64("s_avg", stats.avg),
 	), "%.2f", stats.avg)
 }
 
@@ -166,7 +166,7 @@ func (ep *Endpoint) measureAll() {
 func main() {
 	flag.Parse()
 
-	midlog.InfoT(midlog.Str("midgard_url", *midgardURL), "Starting")
+	btcqlog.InfoT(btcqlog.Str("midgard_url", *midgardURL), "Starting")
 
 	for _, ep := range endpoints {
 		ep.measureAll()

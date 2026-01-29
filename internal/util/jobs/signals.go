@@ -10,7 +10,7 @@ import (
 
 	"github.com/pascaldekloe/metrics/gostat"
 	"github.com/btcq/btcq-indexer/config"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 var signals chan os.Signal
@@ -23,7 +23,7 @@ func InitiateShutdown() {
 }
 
 func LogSignalAndStop() {
-	midlog.FatalF("Exit on signal %s", exitSignal)
+	btcqlog.FatalF("Exit on signal %s", exitSignal)
 }
 
 func StopIfCanceled() {
@@ -44,7 +44,7 @@ func InitSignals() context.Context {
 
 	job := Start("SignalWatch", func() {
 		exitSignal = <-signals
-		midlog.Warn("Shutting down initiated")
+		btcqlog.Warn("Shutting down initiated")
 		mainCancel()
 	})
 	signalWatcher = &job
@@ -62,7 +62,7 @@ func ShutdownWait(allJobs ...*RunningJob) {
 		log.Fatal("Maincontext is not cancelled, but wait for shutdown was initated")
 	}
 	timeout := config.Global.ShutdownTimeout.Value()
-	midlog.InfoF("Shutdown timeout %s", timeout)
+	btcqlog.InfoF("Shutdown timeout %s", timeout)
 	finishCTX, finishCancel := context.WithTimeout(context.Background(), timeout)
 	defer finishCancel()
 	WaitAll(finishCTX, allJobs...)

@@ -13,7 +13,7 @@ import (
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	btypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/btcq/btcq-indexer/internal/db"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 	prefix "gitlab.com/thorchain/thornode/v3/cmd"
 	"gitlab.com/thorchain/thornode/v3/common/cosmos"
 	"gitlab.com/thorchain/thornode/v3/x/thorchain/ebifrost"
@@ -74,7 +74,7 @@ func decodeTx(tx tendtypes.Tx) (ret DecodedTx) {
 	// non-positive integer: tx parse error [cosmos/cosmos-sdk@v0.50.9/x/auth/tx/decoder.go:49]
 	dtx, err := ebifrost.TxDecoder(protoCodec, authtx.DefaultTxDecoder(protoCodec))(tx)
 	if err != nil {
-		midlog.WarnF("fail to decode tx block endpoint tx: %v", err)
+		btcqlog.WarnF("fail to decode tx block endpoint tx: %v", err)
 		return
 	}
 

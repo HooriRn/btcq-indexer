@@ -18,7 +18,7 @@ import (
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/timeseries"
 	"github.com/btcq/btcq-indexer/internal/util/jobs"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 	"github.com/btcq/btcq-indexer/internal/util/timer"
 )
 
@@ -389,7 +389,7 @@ func nameConn(conn net.Conn) string {
 
 func WsHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	if connManager == nil {
-		miderr.InternalErr("Websockets are not active").ReportHTTP(w)
+		btcqerr.InternalErr("Websockets are not active").ReportHTTP(w)
 		return
 	}
 	if len(connManager.connections) >= connManager.connLimit {

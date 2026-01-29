@@ -16,7 +16,7 @@ import (
 	"github.com/btcq/btcq-indexer/config"
 	"github.com/btcq/btcq-indexer/internal/decimal"
 	"github.com/btcq/btcq-indexer/internal/timeseries/stat"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 	"github.com/btcq/btcq-indexer/internal/util/timer"
 	"github.com/btcq/btcq-indexer/internal/websockets"
 )
@@ -138,7 +138,7 @@ func corsHandler(h http.Handler) http.Handler {
 }
 
 func loggerHandler(h http.Handler) http.Handler {
-	logger := midlog.LoggerForModule("http")
+	logger := btcqlog.LoggerForModule("http")
 
 	// simillar to hlog.NewHandler
 	setLoggerInContext := func(next http.Handler) http.Handler {

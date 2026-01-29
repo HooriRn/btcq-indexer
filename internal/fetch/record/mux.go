@@ -14,7 +14,7 @@ import (
 
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 	"github.com/btcq/btcq-indexer/internal/util/timer"
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
@@ -87,7 +87,7 @@ func ProcessBlock(block *chain.Block) {
 		}
 		if isBeginBlock || !hasMode {
 			if err := processEvent(event, &m); err != nil {
-				miderr.LogEventParseErrorF("block height %d begin event %d type %q skipped: %s",
+				btcqerr.LogEventParseErrorF("block height %d begin event %d type %q skipped: %s",
 					block.Height, eventIndex, event.Type, err)
 			}
 			beginBlockEventsCount++
@@ -103,17 +103,17 @@ func ProcessBlock(block *chain.Block) {
 		m.EventId.EventIndex = 1
 		decodedTx := decodeTx(block.PureBlock.Block.Txs[txIndex])
 		if err := processTx(decodedTx, tx, &m); err != nil {
-			miderr.LogEventParseErrorF("block height %d tx %d skipped: %s",
+			btcqerr.LogEventParseErrorF("block height %d tx %d skipped: %s",
 				block.Height, txIndex, err)
 		}
 		for eventIndex, event := range tx.Events {
 			// Update the event according to its tx result
 			if err := processParentTx(decodedTx, &event); err != nil {
-				miderr.LogEventParseErrorF("block height %d tx %d event %d type %q skipped: %s (can't process parent)",
+				btcqerr.LogEventParseErrorF("block height %d tx %d event %d type %q skipped: %s (can't process parent)",
 					block.Height, txIndex, eventIndex, event.Type, err)
 			}
 			if err := processEvent(event, &m); err != nil {
-				miderr.LogEventParseErrorF("block height %d tx %d event %d type %q skipped: %s",
+				btcqerr.LogEventParseErrorF("block height %d tx %d event %d type %q skipped: %s",
 					block.Height, txIndex, eventIndex, event.Type, err)
 			}
 			m.EventId.EventIndex++
@@ -134,7 +134,7 @@ func ProcessBlock(block *chain.Block) {
 			if attr.Key == "mode" {
 				if attr.Value == "EndBlock" {
 					if err := processEvent(event, &m); err != nil {
-						miderr.LogEventParseErrorF("block height %d end event %d type %q skipped: %s",
+						btcqerr.LogEventParseErrorF("block height %d end event %d type %q skipped: %s",
 							block.Height, eventIndex, event.Type, err)
 					}
 					m.EventId.EventIndex++
@@ -546,7 +546,7 @@ func processEvent(event abci.Event, meta *Metadata) error {
 			Recorder.OnCosmWasm(&x, meta)
 			break
 		}
-		miderr.LogEventParseErrorF("Unknown event type: %s, attributes: %s",
+		btcqerr.LogEventParseErrorF("Unknown event type: %s, attributes: %s",
 			event.Type, FormatAttributes(attrs))
 		UnknownsTotal.Add(1)
 		return errEventType

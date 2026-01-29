@@ -5,7 +5,7 @@ import (
 
 	"github.com/btcq/btcq-indexer/internal/fetch/sync/blockstore"
 	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 )
 
 type Iterator struct {
@@ -53,7 +53,7 @@ func (i *Iterator) Next() (*chain.Block, error) {
 		ret, err := i.bStoreIt.Next()
 		if err == nil && ret != nil {
 			if ret.Height != i.height {
-				return nil, miderr.InternalErrF(
+				return nil, btcqerr.InternalErrF(
 					"BlockStore height not incremented by one. Actual: %d Expected: %d", ret.Height, i.height)
 			}
 			i.height++
@@ -71,7 +71,7 @@ func (i *Iterator) Next() (*chain.Block, error) {
 	}
 
 	if i.chainIt == nil {
-		return nil, miderr.InternalErr("Programming error no iterator present")
+		return nil, btcqerr.InternalErr("Programming error no iterator present")
 	}
 	ret, err := i.chainIt.Next()
 	if err != nil {
@@ -79,13 +79,13 @@ func (i *Iterator) Next() (*chain.Block, error) {
 	}
 	if ret != nil {
 		if ret.Height != i.height {
-			return nil, miderr.InternalErrF(
+			return nil, btcqerr.InternalErrF(
 				"Chain height not incremented by one. Actual: %d Expected: %d", ret.Height, i.height)
 		}
 		i.height++
 		return ret, nil
 	}
-	return nil, miderr.InternalErr("Programming error, chain returned no result and no error")
+	return nil, btcqerr.InternalErr("Programming error, chain returned no result and no error")
 }
 
 func newIteratorChecked(s *Sync, startHeight, finalHeight int64) Iterator {
@@ -124,7 +124,7 @@ func (i *Iterator) nextChecked() (*chain.Block, error) {
 	}
 
 	if i.chainIt == nil {
-		return nil, miderr.InternalErr("Programming error no iterator present")
+		return nil, btcqerr.InternalErr("Programming error no iterator present")
 	}
 	chainBlock, err := i.chainIt.Next()
 	if err != nil {
@@ -133,20 +133,20 @@ func (i *Iterator) nextChecked() (*chain.Block, error) {
 
 	if bsBlock != nil {
 		if reflect.DeepEqual(bsBlock, chainBlock) {
-			return nil, miderr.InternalErrF(
+			return nil, btcqerr.InternalErrF(
 				"Blockstore blocks blocks don't match chain blocks at height %d", i.height)
 		}
 	}
 
 	if chainBlock != nil {
 		if chainBlock.Height != i.height {
-			return nil, miderr.InternalErrF(
+			return nil, btcqerr.InternalErrF(
 				"Chain height not incremented by one. Actual: %d Expected: %d", chainBlock.Height, i.height)
 		}
 		i.height++
 		return chainBlock, nil
 	}
-	return nil, miderr.InternalErr("Programming error, chain returned no result and no error")
+	return nil, btcqerr.InternalErr("Programming error, chain returned no result and no error")
 }
 
 func (i *Iterator) FetchingFrom() string {

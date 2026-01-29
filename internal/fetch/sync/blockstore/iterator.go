@@ -8,7 +8,7 @@ import (
 
 	"github.com/DataDog/zstd"
 	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 	"github.com/btcq/btcq-indexer/internal/util/timer"
 )
 
@@ -73,7 +73,7 @@ func (it *Iterator) openNextChunk() error {
 	}
 	f, err := os.Open(nextChunkPath)
 	if err != nil {
-		return miderr.InternalErrF("BlockStore: unable to open chunk %s: %v", nextChunkPath, err)
+		return btcqerr.InternalErrF("BlockStore: unable to open chunk %s: %v", nextChunkPath, err)
 	}
 
 	it.file = f
@@ -97,7 +97,7 @@ func (it *Iterator) unmarshalNextBlock() (*chain.Block, error) {
 			if err != io.EOF {
 				return nil, err
 			}
-			return nil, miderr.InternalErrF(
+			return nil, btcqerr.InternalErrF(
 				"BlockStore: reached end of file, no block found with height %d", it.nextHeight)
 		}
 		if !gobLineMatchHeight(line, it.nextHeight) {

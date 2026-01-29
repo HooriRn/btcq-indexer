@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/btcq/btcq-indexer/internal/db"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 func GetTotalBond(ctx context.Context, time db.Nano) (int64, error) {
@@ -61,7 +61,7 @@ func bondValueForType(event_type string, e8 int64) int64 {
 	case "bond_cost":
 		return -e8
 	default:
-		midlog.ErrorF("Unrecognized bond event type: %s", event_type)
+		btcqlog.ErrorF("Unrecognized bond event type: %s", event_type)
 	}
 	return 0
 }

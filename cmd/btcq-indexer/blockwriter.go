@@ -10,7 +10,7 @@ import (
 	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
 	"github.com/btcq/btcq-indexer/internal/timeseries"
 	"github.com/btcq/btcq-indexer/internal/util/jobs"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 type blockWriter struct {
@@ -21,7 +21,7 @@ type blockWriter struct {
 func (x *blockWriter) Do() {
 	err := x.loop()
 	if err != nil {
-		midlog.ErrorE(err, "Unrecoverable error in BlockWriter, terminating")
+		btcqlog.ErrorE(err, "Unrecoverable error in BlockWriter, terminating")
 		jobs.InitiateShutdown()
 	}
 }
@@ -54,8 +54,8 @@ func (x *blockWriter) loop() error {
 			lastBlockBeforeStop := false
 			if hardForkHeight != 0 {
 				if block.Height == hardForkHeight {
-					midlog.WarnT(
-						midlog.Int64("height", block.Height),
+					btcqlog.WarnT(
+						btcqlog.Int64("height", block.Height),
 						"Last block before fork reached, forcing a write to DB")
 					lastBlockBeforeStop = true
 				}
@@ -95,20 +95,20 @@ func (x *blockWriter) loop() error {
 
 func (x *blockWriter) waitAtForkAndExit(lastHeightWritten int64) {
 	waitTime := 10 * time.Minute
-	midlog.WarnTF(
-		midlog.Int64("height", lastHeightWritten),
+	btcqlog.WarnTF(
+		btcqlog.Int64("height", lastHeightWritten),
 		"Last block at fork reached, quitting in %v automaticaly", waitTime)
 	select {
 	case <-x.ctx.Done():
 		x.logBlockWriteShutdown(lastHeightWritten)
 	case <-time.After(waitTime):
-		midlog.WarnT(
-			midlog.Int64("height", lastHeightWritten),
+		btcqlog.WarnT(
+			btcqlog.Int64("height", lastHeightWritten),
 			"Waited at last block, restarting to see if fork happened")
 		jobs.InitiateShutdown()
 	}
 }
 
 func (x *blockWriter) logBlockWriteShutdown(lastHeightWritten int64) {
-	midlog.InfoF("Shutdown db write process, last height processed: %d", lastHeightWritten)
+	btcqlog.InfoF("Shutdown db write process, last height processed: %d", lastHeightWritten)
 }

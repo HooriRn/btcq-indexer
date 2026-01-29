@@ -16,8 +16,8 @@ import (
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/fetch/record"
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
@@ -325,7 +325,7 @@ func (p ActionsParams) parse() (parsedActionsParams, error) {
 		var err error
 		limit, err = strconv.ParseUint(p.Limit, 10, 64)
 		if err != nil || limit < 1 || MaxLimit < limit {
-			return parsedActionsParams{}, miderr.BadRequestF(
+			return parsedActionsParams{}, btcqerr.BadRequestF(
 				"'limit' must be an integer between 1 and %d",
 				MaxLimit)
 		}
@@ -460,7 +460,7 @@ func (p ActionsParams) parse() (parsedActionsParams, error) {
 	}
 	for _, a := range types {
 		if !validActions[a] {
-			return parsedActionsParams{}, miderr.BadRequestF(
+			return parsedActionsParams{}, btcqerr.BadRequestF(
 				"Your request for actions is '%s' and '%s' action type is unknown. Please see the docs",
 				p.ActionType, a)
 		}
@@ -470,7 +470,7 @@ func (p ActionsParams) parse() (parsedActionsParams, error) {
 	if p.Address != "" {
 		addresses = strings.Split(p.Address, ",")
 		if MaxAddresses < len(addresses) {
-			return parsedActionsParams{}, miderr.BadRequestF(
+			return parsedActionsParams{}, btcqerr.BadRequestF(
 				"too many addresses: %d provided, maximum is %d",
 				len(addresses), MaxAddresses)
 		}
@@ -480,7 +480,7 @@ func (p ActionsParams) parse() (parsedActionsParams, error) {
 	if p.Asset != "" {
 		assets = strings.Split(p.Asset, ",")
 		if MaxAssets < len(assets) {
-			return parsedActionsParams{}, miderr.BadRequestF(
+			return parsedActionsParams{}, btcqerr.BadRequestF(
 				"too many assets: %d provided, maximum is %d",
 				len(assets), MaxAssets)
 		}
@@ -490,7 +490,7 @@ func (p ActionsParams) parse() (parsedActionsParams, error) {
 	if p.TxType != "" {
 		txTypes = strings.Split(p.TxType, ",")
 		if MaxTxTypes < len(txTypes) {
-			return parsedActionsParams{}, miderr.BadRequestF(
+			return parsedActionsParams{}, btcqerr.BadRequestF(
 				"too many tx types: %d provided, maximum is %d",
 				len(assets), MaxTxTypes)
 		}
@@ -500,7 +500,7 @@ func (p ActionsParams) parse() (parsedActionsParams, error) {
 	if p.Affiliate != "" {
 		affiliateAddresses = strings.Split(p.Affiliate, ",")
 		if DefaultLimit < len(affiliateAddresses) {
-			return parsedActionsParams{}, miderr.BadRequestF(
+			return parsedActionsParams{}, btcqerr.BadRequestF(
 				"too many affiliate addresses: %d provided, maximum is %d",
 				len(assets), DefaultLimit)
 		}
@@ -1029,7 +1029,7 @@ func actionsPreparedStatements(moment time.Time,
 		SELECT COUNT(1) FROM relevant_actions ` + db.Where(timeFilters...)
 	}
 
-	midlog.Debug(countQuery)
+	btcqlog.Debug(countQuery)
 
 	countQueryValues := make([]interface{}, 0)
 	for i, queryValue := range baseValues {

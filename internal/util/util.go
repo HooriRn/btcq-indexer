@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 // Chains work with integers which represent fixed point decimals.
@@ -84,9 +84,9 @@ func ConsumeUrlParam(urlParams *url.Values, key string) (value string) {
 	return
 }
 
-func CheckUrlEmpty(urlParams url.Values) miderr.Err {
+func CheckUrlEmpty(urlParams url.Values) btcqerr.Err {
 	for k := range urlParams {
-		return miderr.BadRequestF("Unknown key: %s", k)
+		return btcqerr.BadRequestF("Unknown key: %s", k)
 	}
 	return nil
 }
@@ -114,7 +114,7 @@ func Max[T Number](x, y T) T {
 func MustParseInt64(v string) int64 {
 	res, err := strconv.ParseInt(v, 10, 64)
 	if err != nil {
-		midlog.ErrorE(err, "Cannot parse int64")
+		btcqlog.ErrorE(err, "Cannot parse int64")
 	}
 	return res
 }

@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 )
 
 type chunk struct {
@@ -29,7 +29,7 @@ func NewChunk(name string) (*chunk, error) {
 func (c chunk) maxHeight() (int64, error) {
 	height, err := c.toHeight()
 	if err != nil {
-		return 0, miderr.InternalErrF("BlockStore: cannot convert chunk %v", c)
+		return 0, btcqerr.InternalErrF("BlockStore: cannot convert chunk %v", c)
 	}
 	return height, nil
 }

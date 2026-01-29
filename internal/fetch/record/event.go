@@ -27,7 +27,7 @@ import (
 
 	"github.com/btcq/btcq-indexer/config"
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 )
 
 // Asset Labels
@@ -228,7 +228,7 @@ func (e *ActiveVault) LoadTendermint(attrs []abci.EventAttribute) error {
 			e.AddAsgardAddr = []byte(attr.Value)
 
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown ActiveVault event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -294,7 +294,7 @@ func (e *Add) LoadTendermint(attrs []abci.EventAttribute) error {
 			e.Pool = []byte(attr.Value)
 
 		default:
-			miderr.LogEventParseErrorF("unknown add event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
+			btcqerr.LogEventParseErrorF("unknown add event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
 		}
 	}
 
@@ -330,7 +330,7 @@ func (e *AsgardFundYggdrasil) LoadTendermint(attrs []abci.EventAttribute) error 
 			e.VaultKey = []byte(attr.Value)
 
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown asgard_fund_yggdrasil event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -417,7 +417,7 @@ func (e *Bond) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "signer":
 			e.SignerAddr = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown bond event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
+			btcqerr.LogEventParseErrorF("unknown bond event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
 		}
 	}
 
@@ -465,7 +465,7 @@ func (e *Errata) LoadTendermint(attrs []abci.EventAttribute) error {
 			}
 			flipRune = !add
 		default:
-			miderr.LogEventParseErrorF("unknown errata event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
+			btcqerr.LogEventParseErrorF("unknown errata event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
 		}
 	}
 
@@ -504,7 +504,7 @@ func (e *Fee) LoadTendermint(attrs []abci.EventAttribute) error {
 				return fmt.Errorf("malformed pool_deduct: %w", err)
 			}
 		default:
-			miderr.LogEventParseErrorF("unknown fee event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
+			btcqerr.LogEventParseErrorF("unknown fee event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
 		}
 	}
 
@@ -542,7 +542,7 @@ func (e *Gas) LoadTendermint(attrs []abci.EventAttribute) error {
 			}
 
 		default:
-			miderr.LogEventParseErrorF("unknown gas event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
+			btcqerr.LogEventParseErrorF("unknown gas event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
 		}
 	}
 
@@ -561,7 +561,7 @@ func (e *InactiveVault) LoadTendermint(attrs []abci.EventAttribute) error {
 			e.AddAsgardAddr = []byte(attr.Value)
 
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown InactiveVault event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -588,7 +588,7 @@ func (e *Message) LoadTendermint(attrs []abci.EventAttribute) error {
 			//     currently seen values: "module"="governance"
 
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown message event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -608,7 +608,7 @@ func (e *NewNode) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "address":
 			e.NodeAddr = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown new_node event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -664,7 +664,7 @@ func (e *Outbound) LoadTendermint(attrs []abci.EventAttribute) error {
 			e.InTx = []byte(attr.Value)
 
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown outbound event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -753,7 +753,7 @@ func (e *ScheduledOutbound) LoadTendermint(attrs []abci.EventAttribute) error {
 					e.MaxGasDecimal = append(e.MaxGasDecimal, decimals)
 				}
 			} else {
-				miderr.LogEventParseErrorF(
+				btcqerr.LogEventParseErrorF(
 					"unknown outbound event attribute %q=%q",
 					[]byte(attr.Key), []byte(attr.Value))
 			}
@@ -782,7 +782,7 @@ func (e *Pool) LoadTendermint(attrs []abci.EventAttribute) error {
 			e.Status = []byte(attr.Value)
 
 		default:
-			miderr.LogEventParseErrorF("unknown pool event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
+			btcqerr.LogEventParseErrorF("unknown pool event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
 		}
 	}
 
@@ -854,7 +854,7 @@ func (e *Refund) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "reason":
 			e.Reason = sanitizeBytes([]byte(attr.Value))
 		default:
-			miderr.LogEventParseErrorF("unknown refund event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
+			btcqerr.LogEventParseErrorF("unknown refund event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
 		}
 	}
 
@@ -910,7 +910,7 @@ func (e *Reserve) LoadTendermint(attrs []abci.EventAttribute) error {
 			}
 
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown reserve event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -939,7 +939,7 @@ func (e *Rewards) LoadTendermint(attrs []abci.EventAttribute) error {
 		default:
 			v, err := strconv.ParseInt(string([]byte(attr.Value)), 10, 64)
 			if err != nil {
-				miderr.LogEventParseErrorF(
+				btcqerr.LogEventParseErrorF(
 					"unknown rewards event attribute %q=%q",
 					[]byte(attr.Key), []byte(attr.Value))
 				break
@@ -965,7 +965,7 @@ func (e *SetIPAddress) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "address":
 			e.IPAddr = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown set_ip_address event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -989,7 +989,7 @@ func (e *SetMimir) LoadTendermint(attrs []abci.EventAttribute) error {
 			e.Value = []byte(attr.Value)
 
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown set_mimir event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -1018,7 +1018,7 @@ func (e *SetNodeKeys) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "validator_consensus_pub_key":
 			e.ValidatorConsensus = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown set_node_keys event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -1041,7 +1041,7 @@ func (e *SetVersion) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "version":
 			e.Version = string([]byte(attr.Value))
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown set_version event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -1143,10 +1143,10 @@ func (e *PendingLiquidity) LoadTendermint(attrs []abci.EventAttribute) error {
 			if sValue == "add" || sValue == "withdraw" {
 				e.PendingType = []byte(attr.Value)
 			} else {
-				miderr.LogEventParseErrorF("unknown pending_liquidity type: %q", []byte(attr.Value))
+				btcqerr.LogEventParseErrorF("unknown pending_liquidity type: %q", []byte(attr.Value))
 			}
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown pending_liquidity event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -1176,7 +1176,7 @@ func (e *Stake) LoadTendermint(attrs []abci.EventAttribute) error {
 				return fmt.Errorf("malformed liquidity_provider_units: %w", err)
 			}
 		default:
-			miderr.LogEventParseErrorF("unknown stake event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
+			btcqerr.LogEventParseErrorF("unknown stake event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
 		}
 	}
 
@@ -1198,7 +1198,7 @@ func (e *Slash) LoadTendermint(attrs []abci.EventAttribute) error {
 		default:
 			v, err := strconv.ParseInt(string([]byte(attr.Value)), 10, 64)
 			if err != nil {
-				miderr.LogEventParseErrorF(
+				btcqerr.LogEventParseErrorF(
 					"unknown slash event attribute %q=%q",
 					[]byte(attr.Key), []byte(attr.Value))
 				break
@@ -1298,7 +1298,7 @@ func (e *Swap) LoadTendermint(attrs []abci.EventAttribute) error {
 			}
 		case "pool_slip":
 		default:
-			miderr.LogEventParseErrorF("unknown swap event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
+			btcqerr.LogEventParseErrorF("unknown swap event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
 		}
 	}
 
@@ -1360,7 +1360,7 @@ func (e *Switch) LoadTendermint(attrs []abci.EventAttribute) error {
 				return fmt.Errorf("malformed mint value in switch event: %w", err)
 			}
 		default:
-			miderr.LogEventParseErrorF("unknown switch event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
+			btcqerr.LogEventParseErrorF("unknown switch event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
 		}
 	}
 	if !hadMintValue {
@@ -1397,7 +1397,7 @@ func (e *Transfer) LoadTendermint(attrs []abci.EventAttribute) error {
 				return err
 			}
 		default:
-			miderr.LogEventParseErrorF("unknown transfer event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
+			btcqerr.LogEventParseErrorF("unknown transfer event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
 		}
 	}
 
@@ -1495,7 +1495,7 @@ func (e *Withdraw) LoadTendermint(attrs []abci.EventAttribute) error {
 			}
 
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown withdraw event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -1543,7 +1543,7 @@ func (e *UpdateNodeAccountStatus) LoadTendermint(attrs []abci.EventAttribute) er
 			e.Current = []byte(attr.Value)
 
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown UpdateNodeAccountStatus event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -1570,7 +1570,7 @@ func (e *ValidatorRequestLeave) LoadTendermint(attrs []abci.EventAttribute) erro
 			e.NodeAddr = []byte(attr.Value)
 
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown validator_request_leave event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -1625,7 +1625,7 @@ func (e *PoolBalanceChange) LoadTendermint(attrs []abci.EventAttribute) error {
 			// TODO(acsaba): Reason is not in the events, raise with core team.
 			e.Reason = value
 		default:
-			miderr.LogEventParseErrorF("unknown validator_request_leave event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown validator_request_leave event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -1685,7 +1685,7 @@ func (e *THORNameChange) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "signer":
 			e.Sender = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown thorname event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -1765,7 +1765,7 @@ func (e *SlashPoints) LoadTendermint(attrs []abci.EventAttribute) error {
 				return fmt.Errorf("malformed slash points: %w", err)
 			}
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown slash points event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -1793,7 +1793,7 @@ func (e *SetNodeMimir) LoadTendermint(attrs []abci.EventAttribute) error {
 				return fmt.Errorf("malformed value: %w", err)
 			}
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown set_node_mimir event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -1834,10 +1834,10 @@ func (e *MintBurn) LoadTendermint(attrs []abci.EventAttribute) error {
 			if sValue == "mint" || sValue == "burn" {
 				e.Supply = []byte(attr.Value)
 			} else {
-				miderr.LogEventParseErrorF("unknown supply type: %q", []byte(attr.Value))
+				btcqerr.LogEventParseErrorF("unknown supply type: %q", []byte(attr.Value))
 			}
 		default:
-			miderr.LogEventParseErrorF("unknown mint_burn event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
+			btcqerr.LogEventParseErrorF("unknown mint_burn event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
 		}
 	}
 
@@ -1854,7 +1854,7 @@ func (e *Version) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "version":
 			e.Version = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown version event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
+			btcqerr.LogEventParseErrorF("unknown version event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
 		}
 	}
 	return nil
@@ -1898,7 +1898,7 @@ func (e *LoanOpen) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "tx_id":
 			e.TxID = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown loan_open event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -1935,7 +1935,7 @@ func (e *LoanRepayment) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "tx_id":
 			e.TxID = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown loan_repayment event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -2024,7 +2024,7 @@ func (e *StreamingSwapDetails) LoadTendermint(attrs []abci.EventAttribute) error
 				e.FailedReasons = strings.Split(string([]byte(attr.Value)), "\n ")
 			}
 		default:
-			miderr.LogEventParseErrorF(
+			btcqerr.LogEventParseErrorF(
 				"unknown streaming_swap event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
@@ -2057,7 +2057,7 @@ func (e *TSSKeygenFailure) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "reason":
 			e.Reason = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown tss_keygen_failure event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown tss_keygen_failure event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2088,7 +2088,7 @@ func (e *TSSKeygenSuccess) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "members":
 			e.Members = strings.Split(value, ", ")
 		default:
-			miderr.LogEventParseErrorF("unknown tss_keygen_success event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown tss_keygen_success event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2125,7 +2125,7 @@ func (e *TradeAccountWithdraw) LoadTendermint(attrs []abci.EventAttribute) error
 		case "rune_address":
 			e.RuneAddr = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown trade_account_withdraw event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown trade_account_withdraw event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2162,7 +2162,7 @@ func (e *TradeAccountDeposit) LoadTendermint(attrs []abci.EventAttribute) error 
 		case "rune_address":
 			e.RuneAddr = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown trade_account_deposit event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown trade_account_deposit event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2208,7 +2208,7 @@ func (e *RunePoolDeposit) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "units":
 			e.Units, err = ParseInt(value)
 		default:
-			miderr.LogEventParseErrorF("unknown rune_pool_deposit event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown rune_pool_deposit event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2254,7 +2254,7 @@ func (e *RunePoolWithdraw) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "units":
 			e.Units, err = ParseInt(value)
 		default:
-			miderr.LogEventParseErrorF("unknown rune_pool_withdraw event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown rune_pool_withdraw event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2291,7 +2291,7 @@ func (e *SecureAssetWithdraw) LoadTendermint(attrs []abci.EventAttribute) error 
 		case "rune_address":
 			e.RuneAddr = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown secure_asset_withdraw event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown secure_asset_withdraw event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2328,7 +2328,7 @@ func (e *SecureAssetDeposit) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "rune_address":
 			e.RuneAddr = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown secure_asset_deposit event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown secure_asset_deposit event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2374,7 +2374,7 @@ func (e *AffiliateFee) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "asset":
 			e.Asset = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown affiliate_fee event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown affiliate_fee event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2460,7 +2460,7 @@ func (e *Instantiate) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "funds":
 			e.Funds = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown instantiate event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown instantiate event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2498,7 +2498,7 @@ func (e *TcyClaim) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "memo":
 			e.Memo = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown tcy_claim event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown tcy_claim event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2524,7 +2524,7 @@ func (e *TcyDistribution) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "rune_amount":
 			e.RuneAmtE8, err = ParseInt(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown tcy_distribution event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown tcy_distribution event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2556,7 +2556,7 @@ func (e *TcyStake) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "memo":
 			e.Memo = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown tcy_stake event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown tcy_stake event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2588,7 +2588,7 @@ func (e *TcyUnstake) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "memo":
 			e.Memo = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown tcy_unstake event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown tcy_unstake event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2628,7 +2628,7 @@ func (e *LimitSwap) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "memo":
 			e.Memo = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown limit_swap event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown limit_swap event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 
@@ -2669,7 +2669,7 @@ func (e *Rebond) LoadTendermint(attrs []abci.EventAttribute) error {
 		case "to":
 			e.ToAddrress = []byte(attr.Value)
 		default:
-			miderr.LogEventParseErrorF("unknown rebond event attribute %q=%q",
+			btcqerr.LogEventParseErrorF("unknown rebond event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 

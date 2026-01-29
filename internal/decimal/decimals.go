@@ -7,7 +7,7 @@ import (
 
 	"github.com/btcq/btcq-indexer/config"
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 //go:embed decimals.json
@@ -17,7 +17,7 @@ var poolsDecimal util.NativeDecimalMap
 func init() {
 	err := json.Unmarshal([]byte(decimalString), &poolsDecimal)
 	if err != nil {
-		midlog.FatalE(err, "There is no decimals.json file to open. please run the decimal script first: `go run ./cmd/decimal` to get the native decimal values in the pools endpoint")
+		btcqlog.FatalE(err, "There is no decimals.json file to open. please run the decimal script first: `go run ./cmd/decimal` to get the native decimal values in the pools endpoint")
 	}
 }
 
@@ -33,7 +33,7 @@ func AddConfigDecimals() {
 			AssetSeen:      append(poolDecimal.AssetSeen, "environment"),
 			DecimalSource:  append(poolDecimal.DecimalSource, "environment"),
 		}
-		midlog.InfoF("%s pool decimals has been overwritten by config to %d", pool, decimal)
+		btcqlog.InfoF("%s pool decimals has been overwritten by config to %d", pool, decimal)
 	}
 }
 

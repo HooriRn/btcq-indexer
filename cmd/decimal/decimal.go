@@ -12,7 +12,7 @@ import (
 
 	"github.com/btcq/btcq-indexer/config"
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 	"gopkg.in/yaml.v3"
 )
@@ -23,7 +23,7 @@ import (
 type ResultMap util.NativeDecimalMap
 
 func main() {
-	midlog.LogCommandLine()
+	btcqlog.LogCommandLine()
 	config.ReadGlobal()
 
 	thorNodePools := readFromThorNodePools()
@@ -38,15 +38,15 @@ func main() {
 
 	content, err := json.MarshalIndent(finalMergedPools, "", " ")
 	if err != nil {
-		midlog.FatalE(err, "Can't Marshal the resulted decimal pools to json.")
+		btcqlog.FatalE(err, "Can't Marshal the resulted decimal pools to json.")
 	}
 
 	err = os.WriteFile("./internal/decimal/decimals.json", content, 0644)
 	if err != nil {
-		midlog.FatalE(err, "Can't Marshal pools to decimals json.")
+		btcqlog.FatalE(err, "Can't Marshal pools to decimals json.")
 	}
 
-	midlog.Info("decimals.json is created successfully.")
+	btcqlog.Info("decimals.json is created successfully.")
 }
 
 type PoolsResponse struct {
@@ -152,7 +152,7 @@ func (to *ResultMap) mergeFrom(from ...ResultMap) {
 				toInfo.NativeDecimals = fromInfo.NativeDecimals
 			} else {
 				if -1 < fromInfo.NativeDecimals && fromInfo.NativeDecimals != toInfo.NativeDecimals {
-					midlog.Fatal(fmt.Sprintf(
+					btcqlog.Fatal(fmt.Sprintf(
 						"The %s source has %d decimal which is different than %d decimals on %v",
 						fromInfo.AssetSeen,
 						fromInfo.NativeDecimals,
@@ -168,28 +168,28 @@ func (to *ResultMap) mergeFrom(from ...ResultMap) {
 func checkMissingDecimals(pools ResultMap) {
 	for poolName, pool := range pools {
 		if pool.NativeDecimals == -1 {
-			midlog.Warn(fmt.Sprintf("%s pool doesn't have native decimal. Please add it to manual.yaml", poolName))
+			btcqlog.Warn(fmt.Sprintf("%s pool doesn't have native decimal. Please add it to manual.yaml", poolName))
 		}
 	}
 }
 
 func queryEndpoint(urlAddress string, urlPath string, dest interface{}) {
 	url := urlAddress + urlPath
-	midlog.DebugF("Querying the endpoint: %s", url)
+	btcqlog.DebugF("Querying the endpoint: %s", url)
 	resp, err := http.Get(url)
 	if err != nil {
-		midlog.FatalE(err, fmt.Sprintf("Error while querying endpoint: %s", url+urlPath))
+		btcqlog.FatalE(err, fmt.Sprintf("Error while querying endpoint: %s", url+urlPath))
 	}
 
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		midlog.Fatal("Cannot read the body of the response")
+		btcqlog.Fatal("Cannot read the body of the response")
 	}
 
 	err = json.Unmarshal(body, dest)
 	if err != nil {
-		midlog.FatalE(err, fmt.Sprintf("Error while querying endpoint: %s", url+urlPath))
+		btcqlog.FatalE(err, fmt.Sprintf("Error while querying endpoint: %s", url+urlPath))
 	}
 
 }
@@ -197,27 +197,27 @@ func queryEndpoint(urlAddress string, urlPath string, dest interface{}) {
 func queryEthplorerAsset(assetAddress string) int64 {
 	url := fmt.Sprintf("https://api.ethplorer.io/getTokenInfo/%s?apiKey=freekey", assetAddress)
 
-	midlog.DebugF("Querying Ethplorer: %s", url)
+	btcqlog.DebugF("Querying Ethplorer: %s", url)
 	resp, err := http.Get(url)
 	if err != nil {
-		midlog.FatalE(err, "Error querying Ethplorer")
+		btcqlog.FatalE(err, "Error querying Ethplorer")
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		midlog.Fatal("Can't read the response body.")
+		btcqlog.Fatal("Can't read the response body.")
 	}
 
 	var dest EthResponse
 	err = json.Unmarshal(body, &dest)
 	if err != nil {
-		midlog.WarnF("Json unmarshal error for url: %s", url)
-		midlog.FatalE(err, "Error unmarshalling ThorNode response")
+		btcqlog.WarnF("Json unmarshal error for url: %s", url)
+		btcqlog.FatalE(err, "Error unmarshalling ThorNode response")
 	}
 
 	decimal, err := strconv.ParseInt(dest.Decimals, 10, 64)
 	if err != nil {
-		midlog.FatalE(err, "Can't parse the decimal")
+		btcqlog.FatalE(err, "Can't parse the decimal")
 	}
 
 	return decimal
@@ -262,7 +262,7 @@ func readManualJson() ResultMap {
 	yamlFile, err := os.Open("./cmd/decimal/manual.yaml")
 	manualResult := make(ResultMap)
 	if err != nil {
-		midlog.Fatal("There was no manual.yaml file")
+		btcqlog.Fatal("There was no manual.yaml file")
 		return manualResult
 	}
 	defer yamlFile.Close()
@@ -271,11 +271,11 @@ func readManualJson() ResultMap {
 	if err == nil {
 		rawData, err := io.ReadAll(yamlFile)
 		if err != nil {
-			midlog.FatalE(err, "Can't read manual.yaml")
+			btcqlog.FatalE(err, "Can't read manual.yaml")
 		}
 		err = yaml.Unmarshal(rawData, &rawPools)
 		if err != nil {
-			midlog.FatalE(err, "Can't Unmarshal manual pools yaml.")
+			btcqlog.FatalE(err, "Can't Unmarshal manual pools yaml.")
 		}
 	}
 

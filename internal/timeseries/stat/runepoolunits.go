@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/btcq/btcq-indexer/internal/db"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 )
 
 func totalRUNEPoolUnitChanges(ctx context.Context, tableName string, until *db.Nano) (
@@ -115,7 +115,7 @@ func RUNEPoolUnitsHistory(ctx context.Context, buckets db.Buckets) (int64, []Uni
 		return 0, nil, err
 	}
 	if len(ret) != len(withdraws) {
-		return 0, nil, miderr.InternalErr("bucket count is different for deposits and withdraws")
+		return 0, nil, btcqerr.InternalErr("bucket count is different for deposits and withdraws")
 	}
 	for i := range ret {
 		ret[i].Units -= withdraws[i].Units

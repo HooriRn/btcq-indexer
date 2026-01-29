@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 )
 
 // Window specifies the applicable time period.
@@ -136,7 +136,7 @@ const (
 )
 
 // Returns all the buckets for the window, so other queries don't have to care about gapfill functionality.
-func generateTimestamps(ctx context.Context, interval Interval, w Window) (Seconds, miderr.Err) {
+func generateTimestamps(ctx context.Context, interval Interval, w Window) (Seconds, btcqerr.Err) {
 	// We use an SQL query to use the date_trunc of sql.
 	// It's not important which table we select we just need a timestamp type and we use WHERE 1=0
 	// in order not to actually select any data.
@@ -144,7 +144,7 @@ func generateTimestamps(ctx context.Context, interval Interval, w Window) (Secon
 
 	intervalParams := intervalMap[interval]
 	if intervalParams.maxDuration*cutoffWindowLength < (w.Until - w.From) {
-		return nil, miderr.BadRequestF(
+		return nil, btcqerr.BadRequestF(
 			"Too wide range requested, max allowed intervals (%d).\n%s",
 			maxIntervalCount, usage)
 	}
@@ -171,7 +171,7 @@ func generateTimestamps(ctx context.Context, interval Interval, w Window) (Secon
 		fromParam, untilParam,
 		intervalParams.dateTruncName)
 	if err != nil {
-		return nil, miderr.InternalErrE(err)
+		return nil, btcqerr.InternalErrE(err)
 	}
 	defer rows.Close()
 
@@ -180,7 +180,7 @@ func generateTimestamps(ctx context.Context, interval Interval, w Window) (Secon
 		var timestamp Second
 		err := rows.Scan(&timestamp)
 		if err != nil {
-			return nil, miderr.InternalErrE(err)
+			return nil, btcqerr.InternalErrE(err)
 		}
 		timestamps = append(timestamps, timestamp)
 	}
@@ -196,21 +196,21 @@ func generateTimestamps(ctx context.Context, interval Interval, w Window) (Secon
 
 	if len(ret) < 2 {
 		// We need at least 2 elements to have an [from, to) interval.
-		return nil, miderr.BadRequestF(
+		return nil, btcqerr.BadRequestF(
 			"No interval requested. Use count or a wider from/to range.\n%s", usage)
 	}
 	return ret, nil
 }
 
 // TODO(acsaba): Migrate graphql to use GenerateBuckets.
-func BucketsFromWindow(ctx context.Context, window Window, interval Interval) (ret Buckets, merr miderr.Err) {
+func BucketsFromWindow(ctx context.Context, window Window, interval Interval) (ret Buckets, merr btcqerr.Err) {
 	ret.interval = &interval
 	ret.Timestamps, merr = generateTimestamps(ctx, *ret.interval, window)
 	if merr != nil {
 		return
 	}
 	if maxIntervalCount < ret.Count() {
-		return Buckets{}, miderr.BadRequestF("Too wide range requested: %d, max allowed intervals (%d).\n%s",
+		return Buckets{}, btcqerr.BadRequestF("Too wide range requested: %d, max allowed intervals (%d).\n%s",
 			ret.Count(), maxIntervalCount, usage)
 	}
 	return
@@ -253,7 +253,7 @@ func restrictBuckets(firstBlock, lastBlock Second, buckets *Buckets) {
 	buckets.Timestamps = buckets.Timestamps[firstok : lastok+1]
 }
 
-func generateBucketsWithInterval(ctx context.Context, from, to *Second, count *int64, interval Interval) (ret Buckets, merr miderr.Err) {
+func generateBucketsWithInterval(ctx context.Context, from, to *Second, count *int64, interval Interval) (ret Buckets, merr btcqerr.Err) {
 	firstSecond := FirstBlock.Get().Timestamp.ToSecond()
 	nowSecond := NowSecond()
 
@@ -278,12 +278,12 @@ func generateBucketsWithInterval(ctx context.Context, from, to *Second, count *i
 	// count != nil
 
 	if *count < 1 || maxIntervalCount < *count {
-		return Buckets{}, miderr.BadRequestF("Count out of range: %d, allowed [1..%d].\n%s",
+		return Buckets{}, btcqerr.BadRequestF("Count out of range: %d, allowed [1..%d].\n%s",
 			*count, maxIntervalCount, usage)
 	}
 	requestedCountInt := (int)(*count)
 	if from != nil && to != nil {
-		return Buckets{}, miderr.BadRequestF(
+		return Buckets{}, btcqerr.BadRequestF(
 			"Count and from and to was specified. Specify max 2 of them.\n%s", usage)
 	}
 	if from == nil && to == nil {
@@ -320,9 +320,9 @@ func generateBucketsWithInterval(ctx context.Context, from, to *Second, count *i
 }
 
 // No interval was provided, we do a single From..To query
-func generateBucketsOnlyMeta(ctx context.Context, fromP, toP *Second, count *int64) (ret Buckets, merr miderr.Err) {
+func generateBucketsOnlyMeta(ctx context.Context, fromP, toP *Second, count *int64) (ret Buckets, merr btcqerr.Err) {
 	if count != nil {
-		return Buckets{}, miderr.BadRequestF(
+		return Buckets{}, btcqerr.BadRequestF(
 			"count was provided but no interval parameter.\n%s", usage)
 	}
 	if toP == nil {
@@ -336,25 +336,25 @@ func generateBucketsOnlyMeta(ctx context.Context, fromP, toP *Second, count *int
 	return OneIntervalBuckets(*fromP, *toP), nil
 }
 
-func optionalIntParam(urlParams *url.Values, name string) (*int64, miderr.Err) {
+func optionalIntParam(urlParams *url.Values, name string) (*int64, btcqerr.Err) {
 	input := util.ConsumeUrlParam(urlParams, name)
 	if input == "" {
 		return nil, nil
 	}
 	i, err := strconv.ParseInt(input, 10, 64)
 	if err != nil {
-		return nil, miderr.BadRequestF(
+		return nil, btcqerr.BadRequestF(
 			"Parameter '%s' is not integer: %s\n%s", name, input, usage)
 	}
 	return &i, nil
 }
 
-func optionalSecParam(urlParams *url.Values, name string) (*Second, miderr.Err) {
+func optionalSecParam(urlParams *url.Values, name string) (*Second, btcqerr.Err) {
 	intp, merr := optionalIntParam(urlParams, name)
 	return (*Second)(intp), merr
 }
 
-func BucketsFromQuery(ctx context.Context, urlParams *url.Values) (Buckets, miderr.Err) {
+func BucketsFromQuery(ctx context.Context, urlParams *url.Values) (Buckets, btcqerr.Err) {
 	from, merr := optionalSecParam(urlParams, "from")
 	if merr != nil {
 		return Buckets{}, merr
@@ -374,7 +374,7 @@ func BucketsFromQuery(ctx context.Context, urlParams *url.Values) (Buckets, mide
 	}
 	interval, ok := intervalFromJSONParamMap[strings.ToLower(intervalStr)]
 	if !ok {
-		return Buckets{}, miderr.BadRequestF(
+		return Buckets{}, btcqerr.BadRequestF(
 			"Invalid interval '(%s)', accepted values: 5min, hour, day, week, month, quarter, year.\n%s",
 			intervalStr, usage)
 	}

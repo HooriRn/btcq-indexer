@@ -7,25 +7,25 @@ import (
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/fetch/sync/blockstore"
 	"github.com/btcq/btcq-indexer/internal/util/jobs"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 func main() {
-	midlog.LogCommandLine()
+	btcqlog.LogCommandLine()
 	config.ReadGlobal()
 
 	mainContext := jobs.InitSignals()
 
-	midlog.InfoF("BlockStore: local directory: %s", config.Global.BlockStore.Local)
+	btcqlog.InfoF("BlockStore: local directory: %s", config.Global.BlockStore.Local)
 
 	fragmentClient, err := NewClient(mainContext)
 	if err != nil {
-		midlog.FatalE(err, "Error during chain client initialization")
+		btcqlog.FatalE(err, "Error during chain client initialization")
 	}
 
 	status, err := fragmentClient.RefreshStatus()
 	if err != nil {
-		midlog.FatalE(err, "Error during fetching chain status")
+		btcqlog.FatalE(err, "Error during fetching chain status")
 	}
 
 	db.InitializeChainVarsFromThorNodeStatus(status)
@@ -41,14 +41,14 @@ func main() {
 
 	startHeight, err := blockStore.FistFetchedHeight()
 	if err != nil {
-		midlog.FatalE(err, "Error during getting the first height from blockstore")
+		btcqlog.FatalE(err, "Error during getting the first height from blockstore")
 	}
 	var endHeight int64 = blockStore.LastFetchedHeight()
 
 	itb := blockStore.Iterator(startHeight)
 	itc := fragmentClient.Iterator(startHeight, endHeight)
 
-	midlog.InfoF("BlockStore: start fragmenting from %d to %d", startHeight, endHeight)
+	btcqlog.InfoF("BlockStore: start fragmenting from %d to %d", startHeight, endHeight)
 
 	finishedNormally := false
 
@@ -57,16 +57,16 @@ func main() {
 		defer blockStore.Close()
 		for {
 			if mainContext.Err() != nil {
-				midlog.InfoF("BlockStore: write shutdown")
+				btcqlog.InfoF("BlockStore: write shutdown")
 				return
 			}
 			bBlock, err := itb.Next()
 			if err != nil {
-				midlog.WarnF("BlockStore: error while opening at height %d : %v", currentHeight, err)
+				btcqlog.WarnF("BlockStore: error while opening at height %d : %v", currentHeight, err)
 				return
 			}
 			if bBlock == nil {
-				midlog.Info("BlockStore: Reached Blockstore last block")
+				btcqlog.Info("BlockStore: Reached Blockstore last block")
 				jobs.InitiateShutdown()
 				finishedNormally = true
 				return
@@ -76,7 +76,7 @@ func main() {
 				itc = fragmentClient.Iterator(currentHeight, endHeight)
 				if currentHeight%1000 == 0 {
 					percentGlobal := 100 * float64(currentHeight) / float64(endHeight)
-					midlog.InfoF(
+					btcqlog.InfoF(
 						"BlockStore: block %d is already filled [%.2f%%]",
 						currentHeight, percentGlobal)
 				}
@@ -85,21 +85,21 @@ func main() {
 
 			cBlock, err := itc.Next()
 			if err != nil {
-				midlog.WarnF("BlockStore: error while fetching at height %d : %v", currentHeight, err)
+				btcqlog.WarnF("BlockStore: error while fetching at height %d : %v", currentHeight, err)
 				db.SleepWithContext(mainContext, 7*time.Second)
 				itc = fragmentClient.Iterator(currentHeight, endHeight)
 				itb = blockStore.Iterator(currentHeight)
 				continue
 			}
 			if bBlock.Height != cBlock.Height {
-				midlog.ErrorEF(
+				btcqlog.ErrorEF(
 					err,
 					"BlockStore: height not incremented by one. Expected (Blockstore): %d Actual (Thornode): %d",
 					bBlock.Height, cBlock.Height)
 				return
 			}
 			if cBlock == nil && bBlock != nil {
-				midlog.Error("BlockStore: Reached ThorNode last block while blockstore")
+				btcqlog.Error("BlockStore: Reached ThorNode last block while blockstore")
 				return
 			}
 
@@ -111,7 +111,7 @@ func main() {
 
 			if currentHeight%1000 == 0 {
 				percentGlobal := 100 * float64(block.Height) / float64(endHeight)
-				midlog.InfoF(
+				btcqlog.InfoF(
 					"BlockStore: filled block with height %d [%.2f%%]",
 					currentHeight, percentGlobal)
 			}

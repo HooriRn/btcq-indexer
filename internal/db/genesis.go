@@ -7,7 +7,7 @@ import (
 
 	"github.com/btcq/btcq-indexer/config"
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 var (
@@ -168,35 +168,35 @@ func InitGenesis() {
 
 	genesisFile, err := os.ReadFile(config.Global.Genesis.Local)
 	if err != nil {
-		midlog.Fatal("Can't read genesis file!")
+		btcqlog.Fatal("Can't read genesis file!")
 	}
 
 	var genesisData GenesisType
 	err = json.Unmarshal(genesisFile, &genesisData)
 	if err != nil {
-		midlog.ErrorE(err, "Can't unmarshal genesis file! seems the file is not right.")
+		btcqlog.ErrorE(err, "Can't unmarshal genesis file! seems the file is not right.")
 	}
 
 	genesisChainId := genesisData.ChainID
 	genesisRootId := GetRootFromChainIdName(genesisChainId)
 	rootFromThorNodeSatusChainId := RootChain.Get().Name
 	if rootFromThorNodeSatusChainId != genesisRootId {
-		midlog.WarnF("Genesis file chain id mismatch: root chain: %s, genesis: %s",
+		btcqlog.WarnF("Genesis file chain id mismatch: root chain: %s, genesis: %s",
 			RootChain.Get().Name, genesisChainId)
 	}
 
 	height := genesisData.GetGenesisHeight()
 	if height <= 0 {
-		midlog.Fatal("Genesis block height should be more than zero.")
+		btcqlog.Fatal("Genesis block height should be more than zero.")
 	}
 
 	dbHeight := ReadDBGenesisHeight()
 	if dbHeight > 0 && dbHeight != height {
-		midlog.Fatal("The DB current genesis height is not the same as the file, Please nukedb first.")
+		btcqlog.Fatal("The DB current genesis height is not the same as the file, Please nukedb first.")
 	}
 
 	if config.Global.Genesis.InitialBlockHash == "" {
-		midlog.Fatal("There is no hash in genesis config! Please add genesis block hash to config.")
+		btcqlog.Fatal("There is no hash in genesis config! Please add genesis block hash to config.")
 	}
 	GenesisInfo.set(height, config.Global.Genesis.InitialBlockHash)
 

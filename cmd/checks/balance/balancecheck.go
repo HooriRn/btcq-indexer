@@ -8,7 +8,7 @@ import (
 
 	"github.com/btcq/btcq-indexer/config"
 	"github.com/btcq/btcq-indexer/internal/db/dbinit"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 type Balance struct {
@@ -39,7 +39,7 @@ func main() {
 }
 
 func parseCommandLineArguments() commandLineArguments {
-	midlog.LogCommandLine()
+	btcqlog.LogCommandLine()
 	if len(os.Args) != 3 {
 		printUsage()
 	}

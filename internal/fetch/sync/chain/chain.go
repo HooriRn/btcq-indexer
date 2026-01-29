@@ -11,15 +11,15 @@ import (
 	"github.com/pascaldekloe/metrics"
 	"github.com/btcq/btcq-indexer/config"
 	"github.com/btcq/btcq-indexer/internal/db"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 	"github.com/btcq/btcq-indexer/internal/util/timer"
 
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 )
 
-var logger = midlog.LoggerForModule("chain")
+var logger = btcqlog.LoggerForModule("chain")
 
 func init() {
 	metrics.MustHelp("btcq_indexer_chain_cursor_height", "The Tendermint sequence identifier that is next in line.")
@@ -161,7 +161,7 @@ func (i *Iterator) Next() (*Block, error) {
 
 func (i *Iterator) nextBatch() (hasMore bool, err error) {
 	if len(i.batch) != 0 {
-		return false, miderr.InternalErr("Batch still filled")
+		return false, btcqerr.InternalErr("Batch still filled")
 	}
 	if i.finalBlockHeight < i.nextBatchStart {
 		return false, nil

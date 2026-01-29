@@ -9,31 +9,31 @@ import (
 	"github.com/btcq/btcq-indexer/internal/timeseries"
 	"github.com/btcq/btcq-indexer/internal/timeseries/stat"
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
 func setAggregatesStats(
 	ctx context.Context, pool string, buckets db.Buckets,
-	ret *oapigen.PoolStatsResponse) (merr miderr.Err) {
+	ret *oapigen.PoolStatsResponse) (merr btcqerr.Err) {
 
 	state := timeseries.Latest.GetState()
 
 	poolInfo := state.PoolInfo(pool)
 	if poolInfo == nil || !poolInfo.ExistsNow() {
-		merr = miderr.BadRequestF("Unknown pool: %s", pool)
+		merr = btcqerr.BadRequestF("Unknown pool: %s", pool)
 		return
 	}
 
 	liquidityUnitsMap, err := stat.CurrentPoolsLiquidityUnits(ctx, []string{pool})
 	if err != nil {
-		return miderr.InternalErrE(err)
+		return btcqerr.InternalErrE(err)
 	}
 	lpUnits := liquidityUnitsMap[pool]
 
 	earningsMap, err := stat.GetPoolsEarnings(ctx, buckets)
 	if err != nil {
-		return miderr.InternalErrE(err)
+		return btcqerr.InternalErrE(err)
 	}
 
 	earnings, ok := earningsMap[pool]
@@ -48,7 +48,7 @@ func setAggregatesStats(
 
 	status, err := timeseries.PoolStatus(ctx, pool)
 	if err != nil {
-		merr = miderr.InternalErrE(err)
+		merr = btcqerr.InternalErrE(err)
 		return
 	}
 
@@ -78,11 +78,11 @@ func setAggregatesStats(
 
 func setSwapStats(
 	ctx context.Context, pool string, buckets db.Buckets,
-	ret *oapigen.PoolStatsResponse) (merr miderr.Err) {
+	ret *oapigen.PoolStatsResponse) (merr btcqerr.Err) {
 
 	swapHistory, err := stat.GetOneIntervalSwapsNoUSD(ctx, &pool, buckets)
 	if err != nil {
-		merr = miderr.InternalErrE(err)
+		merr = btcqerr.InternalErrE(err)
 		return
 	}
 
@@ -108,13 +108,13 @@ func setSwapStats(
 // TODO (HooriRn): Delete imp loss protection calculation from the code.
 func setLiquidityStats(
 	ctx context.Context, pool string, buckets db.Buckets,
-	ret *oapigen.PoolStatsResponse) (merr miderr.Err) {
+	ret *oapigen.PoolStatsResponse) (merr btcqerr.Err) {
 
 	var allLiquidity oapigen.LiquidityHistoryResponse
 	// TODO(muninn): replace with GetLiquidityHistoryNOUSD to speed up
 	allLiquidity, err := stat.GetLiquidityHistory(ctx, buckets, pool)
 	if err != nil {
-		merr = miderr.InternalErrE(err)
+		merr = btcqerr.InternalErrE(err)
 		return
 	}
 	ret.AddAssetLiquidityVolume = allLiquidity.Meta.AddAssetLiquidityVolume
@@ -129,7 +129,7 @@ func setLiquidityStats(
 }
 
 func statsForPool(ctx context.Context, pool string, buckets db.Buckets) (
-	ret oapigen.PoolStatsResponse, merr miderr.Err) {
+	ret oapigen.PoolStatsResponse, merr btcqerr.Err) {
 
 	merr = setAggregatesStats(ctx, pool, buckets, &ret)
 	if merr != nil {
@@ -150,7 +150,7 @@ func statsForPool(ctx context.Context, pool string, buckets db.Buckets) (
 	// TODO(huginn): optimize unique member adresses to use latest
 	_, memberBucket, err := stat.GetMembersCountBucket(ctx, buckets, pool)
 	if err != nil {
-		merr = miderr.InternalErrE(err)
+		merr = btcqerr.InternalErrE(err)
 		return
 	}
 	ret.UniqueMemberCount = util.IntStr(memberBucket[buckets.Count()-1].Count)
@@ -166,7 +166,7 @@ func jsonPoolStats(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	urlParams := r.URL.Query()
 	buckets, err := parsePeriodParam(&urlParams, "14d")
 	if err != nil {
-		miderr.BadRequest(err.Error()).ReportHTTP(w)
+		btcqerr.BadRequest(err.Error()).ReportHTTP(w)
 		return
 	}
 

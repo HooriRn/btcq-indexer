@@ -17,7 +17,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 
 	"github.com/btcq/btcq-indexer/internal/fetch/notinchain"
@@ -499,7 +499,7 @@ func GetNetworkData(ctx context.Context) (oapigen.Network, error) {
 	for _, node := range nodes {
 		if node == nil {
 			// TODO(muninn): check if this was the reason of the errors in production
-			midlog.Warn("ThorNode returned nil node in thorchain/nodes")
+			btcqlog.Warn("ThorNode returned nil node in thorchain/nodes")
 			NetworkNilNode.Add(1)
 			continue
 		}

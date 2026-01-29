@@ -13,13 +13,13 @@ import (
 	"github.com/btcq/btcq-indexer/config"
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
-	"github.com/btcq/btcq-indexer/internal/util/miderr"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
-//TODO(freki): replace midloglog.Fatal()-s to midlog.Warn()-s on write path
+//TODO(freki): replace btcqlog.Fatal()-s to btcqlog.Warn()-s on write path
 
-var logger = midlog.LoggerForModule("blockstore")
+var logger = btcqlog.LoggerForModule("blockstore")
 
 type BlockStore struct {
 	cfg               config.BlockStore
@@ -53,7 +53,7 @@ func NewBlockStore(ctx context.Context, cfg config.BlockStore, chainId string) *
 
 func (b *BlockStore) FistFetchedHeight() (int64, error) {
 	if b == nil {
-		return 0, miderr.InternalErr("No blockstore struct!")
+		return 0, btcqerr.InternalErr("No blockstore struct!")
 	}
 	chunks, err := b.getLocalChunks()
 	if err != nil {
@@ -201,22 +201,22 @@ func (b *BlockStore) finalizeChunk(chunkName string) error {
 		return nil
 	}
 	if err := b.blockWriter.Close(); err != nil {
-		return miderr.InternalErrF("BlockStore: error closing block writer: %v", err)
+		return btcqerr.InternalErrF("BlockStore: error closing block writer: %v", err)
 	}
 	if _, err := os.Stat(chunkPath); err == nil {
-		midlog.InfoF("BlockStore: error renaming temporary file to already existing: %s", chunkPath)
+		btcqlog.InfoF("BlockStore: error renaming temporary file to already existing: %s", chunkPath)
 		if err = os.Remove(chunkPath); err != nil {
-			return miderr.InternalErrF("Blockstore: error deleting the existing file for replace: %s (%v)", chunkPath, err)
+			return btcqerr.InternalErrF("Blockstore: error deleting the existing file for replace: %s (%v)", chunkPath, err)
 		}
 	}
 	oldName := b.currentFile.Name()
 	if b.blockWriter != b.currentFile {
 		if err := b.currentFile.Close(); err != nil {
-			return miderr.InternalErrF("BlockStore: error closing %s (%v)", oldName, err)
+			return btcqerr.InternalErrF("BlockStore: error closing %s (%v)", oldName, err)
 		}
 	}
 	if err := os.Rename(oldName, chunkPath); err != nil {
-		return miderr.InternalErrF("BlockStore: error renaming %s (%v)", oldName, err)
+		return btcqerr.InternalErrF("BlockStore: error renaming %s (%v)", oldName, err)
 	}
 	b.currentFile = nil
 	return nil

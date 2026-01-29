@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/btcq/btcq-indexer/internal/db"
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 func readMidgardBalancesAt(timestamp int64) map[string]Balance {
@@ -24,7 +24,7 @@ func readMidgardBalancesAt(timestamp int64) map[string]Balance {
 			row_number = 1`,
 		timestamp)
 	if err != nil {
-		midlog.FatalE(err, "Error querying midgard balances")
+		btcqlog.FatalE(err, "Error querying midgard balances")
 	}
 	defer rows.Close()
 	balances := map[string]Balance{}
@@ -32,7 +32,7 @@ func readMidgardBalancesAt(timestamp int64) map[string]Balance {
 		b := Balance{}
 		err := rows.Scan(&b.addr, &b.asset, &b.amountE8)
 		if err != nil {
-			midlog.FatalE(err, "Error reading account balances")
+			btcqlog.FatalE(err, "Error reading account balances")
 		}
 		balances[b.key()] = b
 	}

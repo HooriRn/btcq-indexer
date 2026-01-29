@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/btcq/btcq-indexer/internal/util/midlog"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
 // BaseURL defines the REST root.
@@ -161,7 +161,7 @@ func AsyncNodeAccountsLookup(wg *sync.WaitGroup, ch chan<- interface{}) {
 	defer wg.Done()
 	ret, err := CachedNodeAccountsLookup()
 	if err != nil {
-		midlog.Err(err)
+		btcqlog.Err(err)
 	}
 	ch <- ret
 }
@@ -207,7 +207,7 @@ func AsyncNetworkLookup(wg *sync.WaitGroup, ch chan<- interface{}) {
 	defer wg.Done()
 	ret, err := NetworkLookup()
 	if err != nil {
-		midlog.Err(err)
+		btcqlog.Err(err)
 	}
 	ch <- ret
 }
@@ -242,7 +242,7 @@ func AsyncAsgardVaultsLookup(wg *sync.WaitGroup, ch chan<- interface{}) {
 	defer wg.Done()
 	ret, err := AsgardVaultsLookup()
 	if err != nil {
-		midlog.Err(err)
+		btcqlog.Err(err)
 	}
 	ch <- ret
 }
