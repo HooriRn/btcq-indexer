@@ -32,8 +32,8 @@ func main() {
 	setupDB(args.dbConfigPath)
 
 	thorBalances, height, timestamp := readThorBalances(args.thorGenesisPath)
-	midgardBalances := readMidgardBalancesAt(timestamp)
-	corrections := getCorrections(thorBalances, midgardBalances)
+	indexerBalances := readBalancesAt(timestamp)
+	corrections := getCorrections(thorBalances, indexerBalances)
 
 	printCorrections(height, timestamp, corrections)
 }

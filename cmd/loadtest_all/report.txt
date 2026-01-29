@@ -1,4 +1,4 @@
-Starting midgard_url=http://localhost:8080
+Starting indexer_url=http://localhost:8080
 0.63 endpoint=/v2/history/depths/BNB.BNB params= s_avg=0.633 s_max=0.68 s_median=0.634
 0.60 endpoint=/v2/history/depths/BNB.BNB params=interval=day&count=100 s_avg=0.604 s_max=0.642 s_median=0.626
 0.76 endpoint=/v2/history/swaps params= s_avg=0.761 s_max=0.774 s_median=0.762

@@ -12,7 +12,7 @@ import (
 	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
-var midgardURL = flag.String("midgard_url", "http://localhost:8080", "Base URL of Midgard to test")
+var indexerURL = flag.String("indexer_url", "http://localhost:8080", "Base URL of btcq-indexer to test")
 
 const tries = 3 // Number of times to query each URL
 
@@ -110,7 +110,7 @@ func measureHTTP(url string) (result measurement) {
 
 func (ep *Endpoint) measureWithParams(params []string) {
 	p := strings.Join(params, "&")
-	url := *midgardURL + ep.path
+	url := *indexerURL + ep.path
 	if len(p) != 0 {
 		url += "?" + p
 	}
@@ -166,7 +166,7 @@ func (ep *Endpoint) measureAll() {
 func main() {
 	flag.Parse()
 
-	btcqlog.InfoT(btcqlog.Str("midgard_url", *midgardURL), "Starting")
+	btcqlog.InfoT(btcqlog.Str("indexer_url", *indexerURL), "Starting")
 
 	for _, ep := range endpoints {
 		ep.measureAll()

@@ -370,7 +370,7 @@ WHERE block_timestamp <= $1`
 }
 
 var NetworkNilNode = metrics.MustCounter(
-	"midgard_network_nil_node",
+	"btcq_indexer_network_nil_node",
 	"Number of times thornode returned nil node in thorchain/nodes.")
 
 func GetNetworkData(ctx context.Context) (oapigen.Network, error) {

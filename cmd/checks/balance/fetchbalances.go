@@ -5,7 +5,7 @@ import (
 	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 )
 
-func readMidgardBalancesAt(timestamp int64) map[string]Balance {
+func readBalancesAt(timestamp int64) map[string]Balance {
 	rows, err := db.TheDB.Query(
 		`SELECT 
 			addr,asset,amount_e8
@@ -24,7 +24,7 @@ func readMidgardBalancesAt(timestamp int64) map[string]Balance {
 			row_number = 1`,
 		timestamp)
 	if err != nil {
-		btcqlog.FatalE(err, "Error querying midgard balances")
+		btcqlog.FatalE(err, "Error querying indexer balances")
 	}
 	defer rows.Close()
 	balances := map[string]Balance{}
