@@ -1,11 +1,11 @@
 version: '3'
 
 services:
-  midgard:
+  btcq-indexer:
     build:
       context: .
       dockerfile: Dockerfile
-    image: midgard
+    image: btcq-indexer
     ports:
       - 8080:8080
     links:
@@ -21,8 +21,8 @@ services:
     shm_size: 512m
     command: postgres -c plan_cache_mode=force_custom_plan
     environment:
-      - POSTGRES_DB=midgard
-      - POSTGRES_USER=midgard
+      - POSTGRES_DB=btcq_indexer
+      - POSTGRES_USER=btcq_indexer
       - POSTGRES_PASSWORD=password
     ports:
       - 5432:5432
@@ -33,8 +33,8 @@ services:
     image: timescale/timescaledb:2.13.0-pg15
     command: postgres -c plan_cache_mode=force_custom_plan
     environment:
-      - POSTGRES_DB=midgard
-      - POSTGRES_USER=midgard
+      - POSTGRES_DB=btcq_indexer
+      - POSTGRES_USER=btcq_indexer
       - POSTGRES_PASSWORD=password
     ports:
       - 5433:5432
