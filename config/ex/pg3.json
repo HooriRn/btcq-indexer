@@ -1,0 +1,6 @@
+{
+  "timescale": {
+    "host": "localhost",
+    "port": 7432
+  }
+}

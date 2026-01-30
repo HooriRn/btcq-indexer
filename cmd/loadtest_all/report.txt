@@ -1,0 +1,25 @@
+Starting midgard_url=http://localhost:8080
+0.63 endpoint=/v2/history/depths/BNB.BNB params= s_avg=0.633 s_max=0.68 s_median=0.634
+0.60 endpoint=/v2/history/depths/BNB.BNB params=interval=day&count=100 s_avg=0.604 s_max=0.642 s_median=0.626
+0.76 endpoint=/v2/history/swaps params= s_avg=0.761 s_max=0.774 s_median=0.762
+0.36 endpoint=/v2/history/swaps params=interval=day&count=100 s_avg=0.363 s_max=0.372 s_median=0.361
+0.51 endpoint=/v2/history/swaps params=pool=BNB.BNB s_avg=0.507 s_max=0.546 s_median=0.507
+0.34 endpoint=/v2/history/swaps params=pool=BNB.BNB&interval=day&count=100 s_avg=0.337 s_max=0.357 s_median=0.345
+2.05 endpoint=/v2/history/earnings params= s_avg=2.046 s_max=2.501 s_median=1.941
+0.86 endpoint=/v2/history/earnings params=interval=day&count=100 s_avg=0.862 s_max=1.212 s_median=0.72
+0.85 endpoint=/v2/history/liquidity_changes params= s_avg=0.851 s_max=1.023 s_median=0.781
+0.46 endpoint=/v2/history/liquidity_changes params=interval=day&count=100 s_avg=0.463 s_max=0.475 s_median=0.467
+0.69 endpoint=/v2/history/liquidity_changes params=pool=BNB.BNB s_avg=0.692 s_max=0.716 s_median=0.688
+0.40 endpoint=/v2/history/liquidity_changes params=pool=BNB.BNB&interval=day&count=100 s_avg=0.401 s_max=0.415 s_median=0.4
+1.00 endpoint=/v2/history/tvl params= s_avg=0.999 s_max=1.118 s_median=0.994
+0.57 endpoint=/v2/history/tvl params=interval=day&count=100 s_avg=0.567 s_max=0.616 s_median=0.549
+2.24 endpoint=/v2/actions params= s_avg=2.241 s_max=2.413 s_median=2.206
+2.23 endpoint=/v2/actions params=offset=1000&limit=50 s_avg=2.23 s_max=2.301 s_median=2.223
+0.01 endpoint=/v2/actions params=address=someaddr s_avg=0.008 s_max=0.01 s_median=0.008
+0.01 endpoint=/v2/actions params=address=someaddr&offset=1000&limit=50 s_avg=0.007 s_max=0.008 s_median=0.007
+2.16 endpoint=/v2/pools params= s_avg=2.16 s_max=2.417 s_median=2.111
+1.22 endpoint=/v2/pool/BNB.BNB/stats params= s_avg=1.218 s_max=1.369 s_median=1.15
+0.02 endpoint=/v2/members params= s_avg=0.022 s_max=0.023 s_median=0.022
+0.35 endpoint=/v2/thorchain/inbound_addresses params= s_avg=0.351 s_max=0.646 s_median=0.241
+Fetch failed error="status: 404 Not Found" time_ms=0 url=http://localhost:8080/bad
+. error=unhealthy endpoint=/bad params=

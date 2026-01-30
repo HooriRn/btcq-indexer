@@ -1,0 +1,6 @@
+{
+  "thorchain": {
+    "tendermint_url": "http://localhost:26657/websocket",
+    "thornode_url": "http://localhost:1318/thorchain"
+  }
+}

@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+
+  mainnet:
+    hostname: thornode
+    restart: on-failure
+    profiles:
+      - default
+      - mainnet
+    image: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.95.1
+    environment:
+      NET: mainnet
+      CHAIN_ID: thorchain-mainnet-v1
+    ports:
+      - 1317:1317
+      - 27147:27147
+    volumes:
+      - mainnet:/root/.thornode
+
+  testnet:
+    hostname: thornode
+    restart: on-failure
+    profiles:
+      - default
+      - testnet
+    image: registry.gitlab.com/thorchain/thornode:testnet-1.96.0
+    environment:
+      NET: testnet
+      CHAIN_ID: thorchain-testnet-v2
+    ports:
+      - 1318:1317
+      - 26657:26657
+    volumes:
+      - testnet:/root/.thornode
+
+  recovery:
+    restart: "no"
+    profiles:
+      - recovery
+    image: google/cloud-sdk@sha256:f94bacf262ad8f5e7173cea2db3d969c43b938a036e3c6294036c3d96261f2f4
+    command: tail -f /dev/null
+    volumes:
+      - mainnet:/root/.thornode
+
+volumes:
+  mainnet:
+  testnet:

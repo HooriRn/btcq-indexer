@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>LP Earnings Reference Implementation</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="src/controller/controller.js"></script>
+    <script src="src/model/model.js"></script>
+    <script src="src/view/view.js"></script>
+</head>
+
+<body>
+    <h1>Liquidity Provider Returns (Work in Progress)</h1>
+    <div>
+        <h2>Methodology</h2>
+        <p>We intend to measure the difference in <strong>current value</strong> vs. the
+            <strong>value added</strong>. Value can be measured in USD, RUNE, or the pool
+            asset, hereafter just Asset.
+        </br>
+            For simple scenarios the definitions of "current value" and "value added" are
+            straightforward, for example, consider the case of a liquidity provider adding
+            liquidity once, and waiting some time:
+            <ul>
+                <li>The <strong>current value</strong> corresponds to the value of withdrawing the provided
+                liquidity and converting it to the valuation currency at the market
+                price. This is called "mark to market" value or "redeemable value". The valuation currency
+                can be USD, RUNE, or Asset.</li>
+                <li>The <strong>value added</strong> corresponds to the value of the added liquidity
+                    just before it was added. For this, the market price of the added RUNE and Asset
+                    <em>at the time of the action</em> are used to compute the value in
+                    the valuation currency.
+                </li>
+            </ul>
+            <p>For more complicated cases, since we do not know the source of funds for added
+                liquidity, nor what happened to the withdrawn liquidity, we need to make some
+                assumptions. Here are some sensible options:
+                <ol>
+                    <li>USD: Assume all provided liquidity was funded by converting USD,
+                        and all withdrawn liquidity was immediately converted to USD.</li>
+                    <li>RUNE: Assume all provided liquidity was funded by converting RUNE,
+                        and all withdrawn liquidity was immediately converted to RUNE.</li>
+                    <li>Asset: Assume all provided liquidity was funded by converting Asset,
+                        and all withdrawn liquidity was immediately converted to Asset.</li>
+                </ol>
+                Let's consider the first case: USD. With this assumption we can compute
+                "current value" and "value added" as follows:
+                <ul>
+                    <li><strong>Current value</strong> is the sum of the "mark to market" value of liquidity
+                    still in the pool (as above) and the value of the withdrawn liquidity in the
+                    valuation currency. Note that we use the market price of the RUNE and Asset
+                    <em>at the time the liquidity was withdrawn</em> and not the current price.</li>
+                    <li><strong>Value added</strong> is the value of all added liquidity in
+                        the valuation currency. We use the market price of the RUNE and Asset
+                        <em>at the time the liquidity was added</em> and not the current price.
+                    </li>
+                </ul>
+                Using the above methodology, we compute:
+                <ul>
+                    <li>The <strong>added value</strong></li>
+                    <li>The <strong>withdrawn value</strong></li>
+                    <li>The <strong>redeemable value</strong>: the mark to market value of the liquidity in the pool (it excludes withdrawn value)</li>
+                    <li>The <strong>realized return value</strong>: value withdrawn less the added value</li>
+                    <li>The <strong>total return value</strong>: the sum of the redeemable value and the realized return</li>
+                </ul>
+                These are computed for each of the three valuation currencies - USD, RUNE, Asset - using the
+                assumption that the added and withdrawn liquidity are sourced and converted to the valuation
+                currency at the time of the event, as described above.
+            </p>
+        </p>
+    </div>
+    <h2>Calculate Returns</h2>
+    <form name="lp">
+        <p>
+            <label>THOR or other blockchain address:
+                </br><input name="address" value="" type="text" size="50">
+            </label>
+        </p>
+        <p>
+            <label>Pool:
+                </br><input name="pool" value="" type="text" size="50">
+            </label>
+        </p>
+        <button type="button" onclick="g.c.queryEarnings()">
+            Show Returns
+        </button>
+    </form>
+    <div id="poolReturns">
+    </div>
+    <div id="view">
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,6 @@
+{
+  "blockstore": {
+    "local": "./tmp/blockstore",
+    "remote": "https://snapshots.ninerealms.com/snapshots/midgard-blockstore/"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "blockstore": {
+    "local": "./tmp/blockstore-stage",
+    "remote": "https://stagenet-snapshots.ninerealms.com/snapshots/midgard-blockstore/"
+  }
+}

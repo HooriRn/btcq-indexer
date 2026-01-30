@@ -1,0 +1,16 @@
+linters:
+  disable-all: true
+  enable:
+    - gofmt
+    - unused
+    - errcheck
+    - misspell
+    # TODO(acsaba): readd linters.
+    # - golint
+    # - ineffassign
+    # - unconvert
+    # - misspell
+    # - govet
+run:
+  deadline: 5m
+  timeout: 5m

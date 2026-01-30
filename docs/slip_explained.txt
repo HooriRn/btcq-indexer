@@ -1,0 +1,141 @@
+This doc goes through with concrete midgard examples thourgh this doc:
+https://docs.thorchain.org/how-it-works/continuous-liquidity-pools
+
+Summary:
+========
+
+- Pool depths X,Y swapping a.
+- Expected amount would be b=a*Y/X, but it's less because of the slip.
+- Slip is a number around 0 slip=swap_slip_bp*0.0001
+- R is a number around 1 R=(1-slip)
+- Actual amount is bA=b*R
+- Final amount deducts fees: bF=b*R*R
+
+- On doubleswap depths: X,Y,Z a=input among, expected c=a*Z/X
+- slip1, slip2 -> R1=(1-slip1), R2=(1-slip2)
+- Final amount is cF=a*R1*R1*R2*R2
+- Therefore R=R1*R2
+- Therefore slip = slip1 + slip2 + slip1*slip2
+
+
+Incremental approach
+====================
+
+Instead of doing the differential equation to conclude the slip formula one can converge a series of
+small swaps with Y/X price to the same value:
+https://docs.google.com/spreadsheets/d/1G3APbkoZaT-k0lI2RSCwfEX84nWssgO0z8JFnwzu4IY/edit?usp=sharing
+
+Going through an example:
+=========================
+
+midgard=# select * from block_pool_depths  where pool='BNB.BNB' order by block_timestamp;
+ pool   |  asset_e8  |   rune_e8    |   block_timestamp    
+---------+------------+--------------+---------------------
+BNB.BNB | 8000000000 | 104000000000 | 1612415387742639681
+BNB.BNB | 8100000000 | 102716049383 | 1612420911125838092
+BNB.BNB | 8150000000 | 102085889571 | 1612421096934250590
+BNB.BNB | 8200000000 | 101463414636 | 1612421227545682226
+BNB.BNB | 8300000000 | 102700773351 | 1612440487559397884
+BNB.BNB | 8299112500 | 102687007735 | 1612441361534349533
+BNB.BNB | 8299075000 | 102687471732 | 1612441371577670935
+(7 rows)
+
+midgard=# select * from block_pool_depths  where pool='LTC.LTC' order by block_timestamp;
+  pool   |  asset_e8   |   rune_e8    |   block_timestamp   
+---------+-------------+--------------+---------------------
+ LTC.LTC |     1000000 |     35000000 | 1612416095760205266
+ LTC.LTC | 10001000000 | 350035000000 | 1612419926877697175
+ LTC.LTC |  9965115187 | 351295524273 | 1612420911125838092
+ LTC.LTC |  9965072437 | 351297031319 | 1612420921167889476
+ LTC.LTC |  9962748914 | 351378961228 | 1612421639292468389
+ LTC.LTC |  9962729414 | 351379648979 | 1612421654355383238
+(6 rows)
+
+
+midgard=# select block_timestamp, pool, from_asset, from_e8, to_e8, to_e8_min, swap_slip_bp, liq_fee_e8, liq_fee_in_rune_e8 from swap_events  where tx='BF3F949D257980CE3FDB12CA49F741CB3D6364830F0B21B5FB424B766D6D7B0B' order by block_timestamp;
+   block_timestamp   |  pool   | from_asset |  from_e8   |   to_e8    | to_e8_min | swap_slip_bp  | liq_fee_e8 | liq_fee_in_rune_e8 
+---------------------+---------+------------+------------+------------+-----------+---------------+------------+--------------------
+ 1612420911125838092 | BNB.BNB | BNB.BNB    |  100000000 | 1268099375 |         0 |           123 |   15851242 |           15851242
+ 1612420911125838092 | LTC.LTC | THOR.RUNE  | 1268099375 |   35970313 |         0 |            36 |     130312 |            4560920
+(2 rows)
+
+
+t0 = 1612415387742639681
+priceA0 = 8000000000 / 104000000000 = 0.07692307692307693
+priceR = 1/pricaA = 13.0
+
+Trade1, first swap (1612420911125838092)
+============================
+from_e8=100000000
+to_e8=1268099375
+swap_slip_bp = 123
+liq_fee_e8 = 15851242
+
+// (from:) a=100000000 -> (to:) b=?
+a = 100000000
+
+// X: from_depth_before, Y: to_depth_before
+X1 = 8000000000
+Y1 = 104000000000
+
+// Expected to (ratio only, without fees)
+bE = (a * Y1) / X1 = 1300000000.0
+
+// Actual to (without fees)
+bA = (a * Y1) / (a + X1) = 1283950617.2839506
+
+bDiffEA = bE - bA = 16049382.716049433
+
+// Expected/Actual Ratio
+R1Formula1 = bA / bE = 0.9876543209876543
+R1 = X1 / (a+X1) = 0.9876543209876543
+
+
+// slip = diffEA / bE ( == 1 - ear), formulas are the same, except loat rounding errors
+slip1Formula1 = diffEA / bE = 0.012345679012345718 ( ~= 123 * 1e4)
+slip1Formula2 = 1 - R1 = 0.012345679012345734
+slip1 = a / (a + X1) = 0.012345679012345678
+
+// Fee = (actual to)*slip
+fee1 = slip1 * bA = 15851242.188690798 ~= 15851242
+
+// Final to = (actual to) - fee
+bFormula1 = bA - fee1 = 1268099375.09526
+bF = bE*R1*R1 = 1268099375.0952597 ~= 1268099375
+
+Trade1, second swap
+====================
+from_e8=1268099375
+to_e8=35970313
+swap_slip_bp = 36
+liq_fee_e8 = 130312
+
+X2 = 350035000000
+Y2 = 10001000000
+b = 1268099375
+
+cE = b*Y2 / X2 = 36231410.71428572
+cA = b*Y2 / (b + X2) = 36100626.13150266
+R2 = X2 / (b + X2) = 0.996390298357014
+cAFormula2 = ce*R2
+
+slip2 = 1 - R2 = 0.0036097016429860185 ( ~= 36*1e4)
+
+fee2 = slip2 * cE*R2 = 130312.48945970729 ~= 130312
+
+cFFormula1 = cA - fee2 = 35970313.64204295 = 35970313
+cF = cE*R2*R2
+
+
+Doubleswap formula:
+===================
+X->Y->Z
+a->b->c
+
+c = (a*Z/X)*R1*R1*R2*R2 = expectedPrice * (1-slip1)^2 * (1-slip2)^2
+
+slipTotal = slip1 + slip2 - slip1*slip2
+
+c = expectedPrice * (1-slipTotal)^2
+
+slipTotalBP = slip1BP + slip2BP - slip1BP*slip2BP/1e4

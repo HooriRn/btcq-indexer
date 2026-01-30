@@ -1,0 +1,75 @@
+version: '3'
+
+services:
+  midgard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: midgard
+    ports:
+      - 8080:8080
+    links:
+      - pg
+    depends_on:
+      - pg
+    volumes:
+      - ./config/local.json:/config.json
+      - blockstore:/blockstore
+
+  pg:
+    image: timescale/timescaledb:2.13.0-pg15
+    shm_size: 512m
+    command: postgres -c plan_cache_mode=force_custom_plan
+    environment:
+      - POSTGRES_DB=midgard
+      - POSTGRES_USER=midgard
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5432:5432
+    volumes:
+      - pg:/var/lib/postgresql/data
+
+  pg2:
+    image: timescale/timescaledb:2.13.0-pg15
+    shm_size: 512m
+    command: postgres -c plan_cache_mode=force_custom_plan
+    environment:
+      - POSTGRES_DB=midgard
+      - POSTGRES_USER=midgard
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 6432:5432
+    volumes:
+      - pg2:/var/lib/postgresql/data
+
+  pg3:
+    image: timescale/timescaledb:2.13.0-pg15
+    shm_size: 512m
+    command: postgres -c plan_cache_mode=force_custom_plan
+    environment:
+      - POSTGRES_DB=midgard
+      - POSTGRES_USER=midgard
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 7432:5432
+    volumes:
+      - pg3:/var/lib/postgresql/data
+
+  pgtest:
+    image: timescale/timescaledb:2.13.0-pg15
+    command: postgres -c plan_cache_mode=force_custom_plan
+    environment:
+      - POSTGRES_DB=midgard
+      - POSTGRES_USER=midgard
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 5433:5432
+    volumes:
+      - pgtest:/var/lib/postgresql/data
+
+volumes:
+  pg:
+  pg2:
+  pg3:
+  pgtest:
+  blockstore:

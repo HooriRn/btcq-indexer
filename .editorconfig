@@ -1,0 +1,22 @@
+# top-most EditorConfig file
+root = true
+
+[*]
+# Unix-style newlines with a newline ending every file
+end_of_line = lf
+insert_final_newline = true
+# Consistent indent size
+indent_size = 4
+
+[*.go]
+indent_style = tab
+
+[Makefile]
+indent_style = tab
+
+[*.sql]
+indent_style = space
+
+[*.{json,yml}]
+indent_size = 2
+indent_style = space

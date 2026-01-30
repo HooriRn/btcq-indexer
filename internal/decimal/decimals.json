@@ -1,0 +1,1068 @@
+{
+ "AVAX.AVAX": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "AVAX.SOL-0XFE6B19286885A4F7F55ADAD09C3CD1F906D2478F": {
+  "decimals": 9,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E": {
+  "decimals": 6,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "constants"
+  ]
+ },
+ "AVAX.USDT-0X9702230A8EA53601F5CD2DC00FDBC13D4DF4A8C7": {
+  "decimals": 6,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet",
+   "constants"
+  ],
+  "decimal_source": [
+   "thornode-mainnet",
+   "constants"
+  ]
+ },
+ "AVAX/AVAX": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "AVAX/USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BASE.CBBTC-0XCBB7C0000AB88B473B1F5AFD9EF808440EED33BF": {
+  "decimals": 8,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BASE.ETH": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BASE.USDC-0X833589FCD6EDB6E08F4C7C32D4F71B54BDA02913": {
+  "decimals": 6,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet"
+  ],
+  "decimal_source": [
+   "thornode-mainnet",
+   "thornode-stagenet"
+  ]
+ },
+ "BASE.VVV-0XACFE6019ED1A7DC6F7B508C02D1B04EC88CC21BF": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BASE/ETH": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-stagenet"
+  ],
+  "decimal_source": []
+ },
+ "BCH.BCH": {
+  "decimals": 8,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BCH/BCH": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BNB.ADA-9F4": {
+  "decimals": 8,
+  "asset_seen": [
+   "midgard-mainnet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BNB.AERGO-46B": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BNB.AVA-645": {
+  "decimals": 8,
+  "asset_seen": [
+   "midgard-mainnet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BNB.AWC-986": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BNB.BAT-07A": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BNB.BNB": {
+  "decimals": 8,
+  "asset_seen": [
+   "midgard-mainnet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BNB.BTCB-1DE": {
+  "decimals": 8,
+  "asset_seen": [
+   "midgard-mainnet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BNB.BULL-BE4": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BNB.BUSD-74E": {
+  "decimals": 8,
+  "asset_seen": [
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BNB.BUSD-BD1": {
+  "decimals": 8,
+  "asset_seen": [
+   "midgard-mainnet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BNB.CAKE-435": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BNB.EQL-586": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BNB.ETH-1C9": {
+  "decimals": 8,
+  "asset_seen": [
+   "midgard-mainnet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BNB.ETHBULL-D33": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BNB.FRM-DE7": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BNB.NEXO-A84": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BNB.RUNE": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BNB.TWT-8C2": {
+  "decimals": 8,
+  "asset_seen": [
+   "midgard-mainnet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BNB.USDT-6D8": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BNB.XRP-BF2": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BNB/BNB": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BNB/BUSD-BD1": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BSC.BNB": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BSC.BTCB-0X7130D2A12B9BCBFAE4F2634D864A1EE1CE3EAD9C": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BSC.BUSD-0XE9E7CEA3DEDCA5984780BAFC599BD69ADD087D56": {
+  "decimals": -1,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BSC.ETH-0X2170ED0880AC9A755FD29B2688956BD959F933F8": {
+  "decimals": -1,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "BSC.TWT-0X4B0F1812E5DF2A09796481FF14017E6005508003": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BSC.USDC-0X8AC76A51CC950D9822D68B83FE1AD97B32CD580D": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BSC.USDT-0X55D398326F99059FF775485246999027B3197955": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BSC/BNB": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet",
+   "midgard-stagenet"
+  ],
+  "decimal_source": []
+ },
+ "BTC.BTC": {
+  "decimals": 8,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "BTC/BTC": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "DOGE.DOGE": {
+  "decimals": 8,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "DOGE/DOGE": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "ETH.AAAA": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "ETH.AAVE-0X7FC66500C84A76AD7E9C93437BFC5AC33E2DDAE9": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.ALCX-0XDBDB4D16EDA451D0503B854CF79D55697F90C8DF": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.ALPHA-0XA1FAA113CBE53436DF28FF0AEE54275C13B40975": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.CELR-0X4F9254C83EB525F9FCF346490BBB3ED28A81C667": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.CREAM-0X2BA592F78DB6436527729929AAF6C908497CB200": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.CRV-0XD533A949740BB3306D119CC777FA900BA034CD52": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.DAI-0X6B175474E89094C44DA98B954EEDEAC495271D0F": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.DPI-0X1494CA1F11D487C2BBE4543E90080AEBA4BA3C2B": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.ETH": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "ETH.FLIP-0X826180541412D574CF1336D22C0C0A287822678A": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.FOX-0XC770EEFAD204B5180DF6A14EE197D99D808EE52D": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.GUSD-0X056FD409E1D7A124BD7017459DFEA2F387B6D5CD": {
+  "decimals": 2,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "thornode-mainnet",
+   "ERC20"
+  ]
+ },
+ "ETH.HEGIC-0X584BC13C7D411C00C01A62E8019472DE68768430": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.HOT-0X6C6EE5E31D828DE241282B9606C8E98EA48526E2": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.KYL-0X67B6D479C7BB412C54E03DCA8E1BC6740CE6B99C": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.LENDS-0X2C06BA9E7F0DACCBC1F6A33EA67E85BB68FBEE3A": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.LINK-0X514910771AF9CA656AF840DFF83E8264ECF986CA": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.LUSD-0X5F98805A4E8BE255A32880FDEC7F6728C6568BA0": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.MKR-0X9F8F72AA9304C8B593D555F12EF6589CC3A579A2": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.PERP-0XBC396689893D065F41BC2C6ECBEE5E0085233447": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.QWERTY": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "ETH.RAZE-0X5EAA69B29F99C84FE5DE8200340B4E9B4AB38EAC": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.SNX-0XC011A73EE8576FB46F5E1C5751CA3B9FE0AF2A6F": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.SUSHI-0X6B3595068778DD592E39A122F4F5A5CF09C90FE2": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.TGT-0X108A850856DB3F85D0269A2693D896B394C80325": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.THOR-0XA5F2211B9B8170F694421F2046281775E8468044": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.TVK-0XD084B83C305DAFD76AE3E1B4E1F1FE2ECCCB3988": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.UOS-0XD13C7342E1EF687C5AD21B27C2B65D772CAB5C8C": {
+  "decimals": 4,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48": {
+  "decimals": 6,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet"
+  ],
+  "decimal_source": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "ERC20"
+  ]
+ },
+ "ETH.USDP-0X8E870D67F660D95D5BE530380D0EC0BD388289E1": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7": {
+  "decimals": 6,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet"
+  ],
+  "decimal_source": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "ERC20"
+  ]
+ },
+ "ETH.VIU-0X519475B31653E46D20CD09F9FDCF3B12BDACB4F5": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.VTHOR-0X815C23ECA83261B6EC689B60CC4A58B54BC24D8D": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.WBTC-0X2260FAC5E5542A773AA44FBCFEDF7C193BC2C599": {
+  "decimals": 8,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.WSTETH-0X7F39C581F595B53C5CB19BD0B3F8DA6C935E2CA0": {
+  "decimals": 18,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.XDEFI-0X72B886D09C117654AB7DA13A14D603001DE0B777": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.XRUNE-0X69FA0FEE221AD11012BAB0FDB45D444D3D2CE71C": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH.XRUNEE": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "ETH.YFI-0X0BC529C00C6401AEF6D220BE8C6EA1667F6AD93E": {
+  "decimals": 18,
+  "asset_seen": [
+   "thornode-mainnet",
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH/ETH": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet",
+   "midgard-stagenet"
+  ],
+  "decimal_source": []
+ },
+ "ETH/USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48": {
+  "decimals": 6,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "ETH/USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7": {
+  "decimals": 6,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": [
+   "ERC20"
+  ]
+ },
+ "GAIA.ATOM": {
+  "decimals": 6,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet"
+  ],
+  "decimal_source": [
+   "thornode-mainnet",
+   "thornode-stagenet"
+  ]
+ },
+ "GAIA/ATOM": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "LTC.LTC": {
+  "decimals": 8,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "LTC/LTC": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "TERRA.LUNA": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "TERRA.UST": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "THOR.ATOM": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "THOR.AVAX": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "THOR.BCH": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "THOR.BNB": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "THOR.BTC": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "THOR.BTC.BTC": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "THOR.DOGE": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "THOR.ETH": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "THOR.LTC": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "THOR.NAMI": {
+  "decimals": 8,
+  "asset_seen": [
+   "thornode-stagenet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "constants"
+  ]
+ },
+ "THOR.RUJI": {
+  "decimals": 8,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "thornode-mainnet",
+   "constants"
+  ]
+ },
+ "THOR.TCY": {
+  "decimals": 8,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet"
+  ],
+  "decimal_source": [
+   "thornode-mainnet"
+  ]
+ },
+ "THOR.TOR": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "THOR.XRP": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-mainnet"
+  ],
+  "decimal_source": []
+ },
+ "TRON.TRX": {
+  "decimals": 6,
+  "asset_seen": [
+   "thornode-stagenet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "thornode-stagenet",
+   "constants"
+  ]
+ },
+ "TRON.USDT-TR7NHQJEKQXGTCI8Q8ZY4PL8OTSZGJLJ6T": {
+  "decimals": 6,
+  "asset_seen": [
+   "thornode-stagenet",
+   "midgard-stagenet",
+   "constants"
+  ],
+  "decimal_source": [
+   "thornode-stagenet",
+   "constants"
+  ]
+ },
+ "XRP.XRP": {
+  "decimals": 6,
+  "asset_seen": [
+   "thornode-mainnet",
+   "thornode-stagenet",
+   "midgard-mainnet",
+   "midgard-stagenet"
+  ],
+  "decimal_source": [
+   "thornode-mainnet",
+   "thornode-stagenet"
+  ]
+ },
+ "XRP/XRP": {
+  "decimals": -1,
+  "asset_seen": [
+   "midgard-stagenet"
+  ],
+  "decimal_source": []
+ }
+}

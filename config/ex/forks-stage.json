@@ -1,0 +1,21 @@
+{
+  "thorchain": {
+    "fork_infos": [
+      {
+        "chain_id": "thorchain-stagenet-1",
+        "earliest_block_hash": "E0F77EE63D901B41F51D62977B7034A11EA65CBC9C3C9057BF0B657FF27B908D",
+        "earliest_block_height": 1,
+        "hard_fork_height": 12500
+      },
+      {
+        "chain_id": "thorchain-stagenet-2",
+        "parent_chain_id": "thorchain-stagenet-1",
+        "earliest_block_hash": "6F872F4DBF9D52AAE14F2296941C3A90F07D312634EC192AABAF02643047B82E",
+        "earliest_block_height": 12501
+      }
+    ]
+  },
+  "blockstore": {
+    "chunk_hashes_path": "./resources/hashes/thorchain-stagenet-1"
+  }
+}

@@ -1,0 +1,58 @@
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_TLS_VERIFY: 1
+  DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+
+.use_dind: &use_dind
+  image: docker:27.5.0
+  services:
+    - docker:27.5.0-dind
+
+stages:
+  - test
+  - build
+
+lint:
+  stage: test
+  image: golangci/golangci-lint:v1.64.5
+  script:
+    - golangci-lint run -v
+
+test:
+  stage: test
+  <<: *use_dind
+  image: golang:1.24.6-bullseye
+  variables:
+    DB_HOST: docker
+    DB_PORT: "5433"
+  script:
+    - apt update && apt install -y docker-compose git make gcc libc-dev
+    - until docker info; do echo "Waiting for docker..."; sleep 1; done
+    - docker-compose up -d pgtest
+    - go version
+    - go test -v -p 1 ./...
+
+build:
+  stage: build
+  <<: *use_dind
+  only:
+    - master
+    - develop
+    - tags
+  before_script:
+    - |
+      for i in $(seq 1 30)
+      do
+          docker info && break
+          echo "Waiting for docker to start"
+          sleep 1s
+      done
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - docker build --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA --tag $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
