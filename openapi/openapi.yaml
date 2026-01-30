@@ -1,15 +1,15 @@
 openapi: 3.0.0
 info:
-    title: Midgard Public API
+    title: btcq-indexer Public API
     version: 2.34.1
     contact:
         email: devs@thorchain.org
     description: >-
-        The Midgard Public API queries THORChain and any chains linked via the Bifröst
+        btcq-indexer is a fork of Midgard. This Public API queries THORChain and any chains linked via the Bifröst
         and prepares information about the network to be readily available for public users.
         The API parses transaction event data from THORChain and stores them
         in a time-series database to make time-dependent queries easy.
-        Midgard does not hold critical information.
+        btcq-indexer does not hold critical information.
         To interact with THORChain protocol, users should query THORNode directly.
 
 paths:
@@ -55,7 +55,7 @@ paths:
 
                 lastAggregated - Latest block fully processed and aggregated.
 
-                genesisInfo - The genesis height Midgard bootstrapped with.
+                genesisInfo - The genesis height btcq-indexer bootstrapped with.
             responses:
                 "200":
                     $ref: "#/components/responses/HealthResponse"
@@ -1590,7 +1590,7 @@ paths:
                 height, or at the latest process block if neither is provided. (Only one of
                 timestamp or height can be specified, not both.)
 
-                This endpoint is enabled only if the midgard startup config allows it.
+                This endpoint is enabled only if the btcq-indexer startup config allows it.
             parameters:
                 - name: address
                   in: path
@@ -1626,7 +1626,7 @@ paths:
             description: |
                 Returns all coin amounts of the given asset ordered by their amounts in descending order.
 
-                This endpoint is enabled only if the midgard startup config allows it.
+                This endpoint is enabled only if the btcq-indexer startup config allows it.
             parameters:
                 - name: asset
                   in: query
@@ -1651,7 +1651,7 @@ paths:
 components:
     responses:
         HealthResponse:
-            description: Returns health status for Midgard
+            description: Returns health status for btcq-indexer
             content:
                 application/json:
                     schema:
@@ -1784,7 +1784,7 @@ components:
                                 type: string
                                 description: |
                                     Int64, number of results matching the given filters. It may be -1 if
-                                    Midgard is having trouble counting the results and has to cancel the count query
+                                    btcq-indexer is having trouble counting the results and has to cancel the count query
                                     (temporary fix). Also, if new action parameters is used it won't be returned.
                             actions:
                                 type: array
@@ -1968,7 +1968,7 @@ components:
                     description: Int64, the current block count
                 inSync:
                     type: boolean
-                    description: True means healthy. False means Midgard is still catching up to the chain
+                    description: True means healthy. False means btcq-indexer is still catching up to the chain
                 # It's not possible to add description to $ref fields, it's descriped above.
                 # https://github.com/OAI/OpenAPI-Specification/issues/1514
                 lastThorNode:
@@ -2094,7 +2094,7 @@ components:
                     description: Int64, Total Units (synthUnits + liquidityUnits) in the pool.
                 nativeDecimal:
                     type: string
-                    description: Int64, The native decimal number of the pool asset. (If the value is "-1", it means midgard doesn't know the pool native decimal)
+                    description: Int64, The native decimal number of the pool asset. (If the value is "-1", it means btcq-indexer doesn't know the pool native decimal)
                 saversUnits:
                     type: string
                     description: Int64, Units tracking savers vault ownership.

@@ -17,16 +17,16 @@ make -C build/docker reset-mocknet-standalone
 
 sleep 1
 
-docker stop midgard
+docker stop btcq-indexer
 docker stop timescale-db
 
 sleep
 
-cd ../midgard
+cd ../btcq-indexer
 pwd
 
 docker-compose up -d pgtest
 
 sleep 1
 
-go run cmd/midgard/main.go config/config.json
+go run cmd/btcq-indexer/main.go config/config.json

@@ -122,7 +122,7 @@ func serveRoot(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain;charset=UTF-8")
 
 	// Discarding errors
-	_, _ = io.WriteString(w, `# THORChain Midgard
+	_, _ = io.WriteString(w, `# btcq-indexer
 
 Welcome to the HTTP interface.
 `)

@@ -1,26 +1,20 @@
-[![pipeline status](https://gitlab.com/thorchain/midgard/badges/master/pipeline.svg)](https://gitlab.com/thorchain/midgard/commits/master)
+# btcq-indexer API
 
-
-# Midgard API
-
-Midgard is a layer 2 REST API that provides front-end consumers with semi real-time rolled up data
-and analytics of the THORChain network. Most requests to the network will come through Midgard. This
-daemon is here to keep the chain itself from fielding large quantities of requests. You can think of
+btcq-indexer is a fork of Midgard: a layer 2 REST API that provides front-end consumers with semi real-time rolled up data and analytics of the THORChain network. This daemon keeps the chain from fielding large quantities of requests. You can think of
 it as a “read-only slave” to the chain. This keeps the resources of the network focused on
 processing transactions.
 
 
-## Running Midgard
+## Running btcq-indexer
 
-Midgard can be run locally with native code or via Docker Compose. Midgard populates the PSQL
-database with content from the blockchain. Progress is traceable with the Prometheus Metrics
+btcq-indexer can be run locally with native code or via Docker Compose. It populates the PSQL database with content from the blockchain. Progress is traceable with the Prometheus Metrics
 propagated on <http://localhost:8080/debug/metrics>, specifically the measurements
 `btcq_indexer_chain_cursor_height` v.s. `btcq_indexer_chain_height`.
 Open <http://localhost:8080/v2/doc> in your browser.
 
 ### Config
 
-You can configure Midgard with a big config file, a list of smaller config files, or with
+You can configure btcq-indexer with a big config file, a list of smaller config files, or with
 environment variables.
 
 The easiest is composing multiple config files with `:`, later configs overwrite values from
@@ -43,22 +37,22 @@ Fields in nested structs are accessed using underscores. Examples:
 * `BTCQ_INDEXER_USD_POOLS="A,B,C"` will override the UsdPools
 * `BTCQ_INDEXER_POOLS_DECIMAL="A.A:8,B.B:18"` will override the pools decimals
 
-### Start native Midgard
+### Start native btcq-indexer
 
 ```sh
 # One time setup:
 docker-compose up -d pg
 mkdir -p ./tmp/blockstore
 
-# run midgard
-go run ./cmd/midgard/ config/ex/base.json:config/ex/pg.json:config/ex/bs-m.json:config/ex/net-main-9r.json
+# run btcq-indexer
+go run ./cmd/btcq-indexer/ config/ex/base.json:config/ex/pg.json:config/ex/bs-m.json:config/ex/net-main-9r.json
 ```
 
 ### Use genesis files to bootstrap
 
-You can also run midgard at any block height based on your THORNode genesis file.
+You can also run btcq-indexer at any block height based on your THORNode genesis file.
 
-Just add the genesis file config to the your Midgard config. Should be like this:
+Just add the genesis file config to your btcq-indexer config. Should be like this:
 
 ```json
 ...
@@ -75,7 +69,7 @@ Just add the genesis file config to the your Midgard config. Should be like this
 Running with Docker Compose it's possible with a single config file at `config/local.json` or
 environment variables.
 
-To allow Midgard to connect properly to Postgres do `cp config/config.json config/local.json`
+To allow btcq-indexer to connect properly to Postgres do `cp config/config.json config/local.json`
 then edit `local.json` and change `timescale.host` to `"pg"`.
 
 Then:
@@ -84,12 +78,12 @@ Then:
 # One time setup:
 docker-compose up -d pg
 
-docker-compose up --build midgard
+docker-compose up --build btcq-indexer
 ```
 
 ## Running Local ThorNode
 
-To work on Midgard we don't need or want a proper validator setup, just the full thornode that
+To work on btcq-indexer we don't need or want a proper validator setup, just the full thornode that
 follows and syncs the thorchain locally.
 
 You can find an example Docker Compose configuration for running a full node for ThorChain mainnet
@@ -107,7 +101,7 @@ docker-compose up -d mainnet
 For testnet start the `testnet` service, of course. Note, the API of the testnet fullnode will
 be on port 1318, instead of the usual 1317.
 
-For Midgard config use `config/ex/net-main-local.json` or `config/ex/net-test-local.json`
+For btcq-indexer config use `config/ex/net-main-local.json` or `config/ex/net-test-local.json`
 correspondingly.
 
 Syncing up a mainnet thornode take a really long time, you might want to use a NineRealms snapshot
@@ -125,7 +119,7 @@ the docker container will be in a crash loop. To upgrade, update the image in
 ## Websockets
 
 Websockets is an experimental feature supported for Linux only. If you need to use it for develop
-using a different OS you may need to run Midgard using Docker.
+using a different OS you may need to run btcq-indexer using Docker.
 
 ## Testing
 
@@ -142,16 +136,16 @@ Repo `Settings` -> `CI/CD` -> `Runners` -> enable `Shared Runners`
 
 ## State Checks
 
-A cmd that checks the state recreated by Midgard through events and the actual state stored
+A cmd that checks the state recreated by btcq-indexer through events and the actual state stored
 in the Thorchain can be run with:
 
 ```bash
 go run ./cmd/statechecks config/ex/base.json:config/ex/pg.json:config/ex/bs-m.json:config/ex/net-main-9r.json:config/ex/loginfo.json
 ```
 
-## Connecting to Midgard's PostgreSQL DB
+## Connecting to btcq-indexer's PostgreSQL DB
 
-To inspect Midgard's DB (run manual queries etc.) connect with `psql`. Install postgres client
+To inspect the DB (run manual queries etc.) connect with `psql`. Install postgres client
 tools; on Debian based systems:
 
 ```bash
@@ -161,21 +155,21 @@ sudo apt install postgres-client
 And then:
 
 ```bash
-psql -h localhost -U midgard midgard -p 5432
+psql -h localhost -U btcq_indexer btcq_indexer -p 5432
 ```
 
 For test DB use port 5433; the `pg2` instance is on port 6432. The password is `password`. To
 avoid entering it over and over again, do:
 
 ```bash
-echo '*:*:midgard:*:password' >> ~/.pgpass && chmod 0600 ~/.pgpass
+echo '*:*:btcq_indexer:*:password' >> ~/.pgpass && chmod 0600 ~/.pgpass
 ```
 
 Alternatively, you can use the psql from within the appropriate Docker container (no need to
 install postgres-client on your machine):
 
 ```bash
-docker exec -it midgard_pg_1 psql -h localhost -U midgard midgard
+docker exec -it btcq-indexer_pg_1 psql -h localhost -U btcq_indexer btcq_indexer
 ```
 
 ## Trimming the database
@@ -194,12 +188,12 @@ If you'd like to do some (potentially destructive) experiments with the database
 a good idea to make a backup of it first, so you don't have to resync in case things don't go as
 expected.
 
-Provided that the directory where you checked out Midgard code is named `midgard` the standard
-location of the `pg` database instance will be under `/var/lib/docker/volumes/midgard_pg/_data`.
+Provided that the directory where you checked out the code is named `btcq-indexer` the standard
+location of the `pg` database instance will be under `/var/lib/docker/volumes/btcq-indexer_pg/_data`.
 But you can check this with `docker inspect` on the appropriate docker container. Like this:
 
 ```bash
-docker inspect midgard_pg_1 | jq -r '.[].Mounts | .[].Source'
+docker inspect btcq-indexer_pg_1 | jq -r '.[].Mounts | .[].Source'
 ```
 
 Consider treating unset parameters as an error when substituting.
@@ -214,27 +208,27 @@ Creating a backup of the `pg` instance:
 # choose where to put the backup:
 backup_dir=/tmp/pgbackup
 # query the location of the docker volume:
-pg_volume=/var/lib/docker/volumes/midgard_pg/_data
+pg_volume=/var/lib/docker/volumes/btcq-indexer_pg/_data
 
 # stop, backup, restart:
-docker stop midgard_pg_1
+docker stop btcq-indexer_pg_1
 sudo cp -a $pg_volume/ $backup_dir/
-docker start midgard_pg_1
+docker start btcq-indexer_pg_1
 ```
 
 Restoring the DB from the backup:
 
 ```bash
-docker stop midgard_pg_1
+docker stop btcq-indexer_pg_1
 sudo rsync -ac --del $backup_dir/ $pg_volume/
-docker start midgard_pg_1
+docker start btcq-indexer_pg_1
 ```
 
 Of course, you can do this with the `pg2` or `pgtest` instances too.
 
 ## Monitoring more than one chain
 
-It is possible to rune more than one Midgard instance against different chains (e.g. main/testnet).
+It is possible to run more than one btcq-indexer instance against different chains (e.g. main/testnet).
 Create two config files (e.g. mainnet.json, testnet.json):
 * set listen_port to 8080 and 8081
 * edit thornode and tendermint urls
@@ -243,8 +237,8 @@ Create two config files (e.g. mainnet.json, testnet.json):
 ```sh
 docker-compose up -d pg
 docker-compose up -d pg2
-go run ./cmd/midgard tmp/mainnet.json
-go run ./cmd/midgard tmp/testnet.json
+go run ./cmd/btcq-indexer tmp/mainnet.json
+go run ./cmd/btcq-indexer tmp/testnet.json
 ```
 
 Then you can check depths separately for them:
@@ -272,9 +266,9 @@ make generated
 
 ## Generate blockstore hashes
 
-Midgard can read blockstore to speed up fetching from ThorNode. Blockstore consists of compressed
-files containing the raw Bloks in batches of 10K.
-These batches (chunks) are stored in a remote location. Midgard will download them on startup, but
+btcq-indexer can read blockstore to speed up fetching from ThorNode. Blockstore consists of compressed
+files containing the raw blocks in batches of 10K.
+These batches (chunks) are stored in a remote location. btcq-indexer will download them on startup, but
 it accepts only if the hashes of the chunks match the predefined values.
 
 To regenerate the hashes and store them in git do these two steps:
@@ -283,7 +277,7 @@ To regenerate the hashes and store them in git do these two steps:
 Fetch all blocks from thornode to have them locally:
 
 ```bash
-# Stop midgard first.
+# Stop btcq-indexer first.
 go run ./cmd/blockstore/dump config
 ```
 
@@ -295,7 +289,7 @@ Save the hashes in the git repository:
 
 ## Refresh native decimals
 
-Midgard is a source of truth for the native decimal values of different coins. To regenerate the
+btcq-indexer is a source of truth for the native decimal values of different coins. To regenerate the
 constant table run:
 
 ```
@@ -340,7 +334,7 @@ go get github.com/deepmap/oapi-codegen@latest
 ```
 
 But, to prevent `go mod tidy` from removing this dependency it should be added to a `.go` file.
-In Midgard we use `cmd/deps/deps.go` for this purpose.
+In btcq-indexer we use `cmd/deps/deps.go` for this purpose.
 
 ## Architecture
 
@@ -366,7 +360,7 @@ Queries give consistent [cachable] results when executed with a (time) `db.Windo
   * Also note the commits which might be quickly testable as a last check
     (e.g. new endpoint, changes in a specific field of an endpoint, etc.)
   * Do note if there were DDL changes which will cause DB resync
-- Start up Midgard with mainnet and do a quick check that everything looks sane
+- Start up btcq-indexer with mainnet and do a quick check that everything looks sane
 - If there were changes to endpoints/fields do eyeball that results seems sane,
   no 404, no 0 values, etc.
 - Bump the version in a commit:
@@ -378,10 +372,10 @@ Queries give consistent [cachable] results when executed with a (time) `db.Windo
   * The commit message should be "Bump version to 2.x.x"
 - Create an MR. If people are expecting that you'll do a release then merge right away,
   you don't need to wait for additional approval.
-  [Example MR](https://gitlab.com/thorchain/midgard/-/merge_requests/451)
+  [Example MR](https://gitlab.com/thorchain/midgard/-/merge_requests/451) (upstream Midgard)
 - You don't necesarrily need to wait until smoke test is passing, but the image will not build
   until it passes, you might need to sync with other teams to get it passing.
-- Once merged create the release (example https://gitlab.com/thorchain/midgard/-/releases/2.9.6 ):
+- Once merged create the release (upstream example https://gitlab.com/thorchain/midgard/-/releases/2.9.6 ):
   * In gitlab click: `Deployments > Releases > New release` .
   * Tagname: type in the version number (`2.x.x`)  and click create tag
   * Create from: develop
@@ -389,7 +383,7 @@ Queries give consistent [cachable] results when executed with a (time) `db.Windo
   * Milestone: leave empty
   * Release date: leave default
   * Release notes: copy the release notes you gathered when looking through the commits
-- Announce on Midgard Discord channel the release, tag ursa, copy the release notes there too.
+- Announce on Discord the release, tag ursa, copy the release notes there too.
   [Example](https://discord.com/channels/838986635756044328/839002340354424842/1033018380728406026)
 
 ## Bookmarks
@@ -404,4 +398,4 @@ Direct links:
 Documentation:
 * Thorchain Docs: https://docs.thorchain.org/
 * Tendermint doc: https://docs.tendermint.com/master/rpc/#/
-* Midgard doc: https://testnet.midgard.thorchain.info/v2/doc
+* Midgard doc (upstream): https://testnet.midgard.thorchain.info/v2/doc
