@@ -258,6 +258,12 @@ func LoadConstants() error {
 	if err != nil {
 		return fmt.Errorf("constants unavailable from REST on %w", err)
 	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNotImplemented { // 501
+		btcqlog.Info("Constants endpoint not implemented on node (501), using empty constants")
+		constants = &Constants{Int64Values: make(map[string]int64)}
+		return nil
+	}
 	if resp.StatusCode/100 != 2 {
 		return fmt.Errorf("constants REST HTTP status %q, want 2xx", resp.Status)
 	}
