@@ -530,8 +530,14 @@ func processEvent(event abci.Event, meta *Metadata) error {
 	case "mint":
 	case "wasm":
 	case "limit_swap_close":
+	// BTCQ specific events
+	case "commission":
+	case "reward":
 	default:
 		// Check if the string starts with "wasm-"
+		if strings.HasPrefix(event.Type, "cosmos.epochs.") {
+			return nil
+		}
 		if strings.HasPrefix(event.Type, "wasm-") {
 			var x CosmWasmEvent
 			// Add type as attributes
