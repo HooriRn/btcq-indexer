@@ -4,16 +4,17 @@ import (
 	"encoding/hex"
 	"strings"
 
+	"github.com/btcq/btcq-indexer/internal/db"
+	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	tendtypes "github.com/cometbft/cometbft/types"
+	qbtctypes "github.com/btcq-org/qbtc/x/qbtc/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
 	ctypes "github.com/cosmos/cosmos-sdk/types"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	btypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/btcq/btcq-indexer/internal/db"
-	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 	prefix "gitlab.com/thorchain/thornode/v3/cmd"
 	"gitlab.com/thorchain/thornode/v3/common/cosmos"
 	"gitlab.com/thorchain/thornode/v3/x/thorchain/ebifrost"
@@ -38,6 +39,7 @@ func init() {
 	std.RegisterInterfaces(interfaceRegistry)
 	btypes.RegisterInterfaces(interfaceRegistry)
 	stypes.RegisterInterfaces(interfaceRegistry)
+	qbtctypes.RegisterInterfaces(interfaceRegistry)
 	ctypes.RegisterInterfaces(interfaceRegistry)
 	wasmtypes.RegisterInterfaces(interfaceRegistry)
 	protoCodec = codec.NewProtoCodec(interfaceRegistry)
