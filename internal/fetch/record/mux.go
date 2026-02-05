@@ -19,7 +19,6 @@ import (
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/btcq-org/qbtc/x/qbtc/types"
-	btypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stypes "gitlab.com/thorchain/thornode/v3/x/thorchain/types"
 )
 
@@ -178,25 +177,6 @@ func processEvent(event abci.Event, meta *Metadata) error {
 	attrs = newAttrs
 
 	switch event.Type {
-	case "ActiveVault":
-		var x ActiveVault
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnActiveVault(&x, meta)
-	case "donate":
-		// TODO(acsaba): rename add to donate
-		var x Add
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnAdd(&x, meta)
-	case "asgard_fund_yggdrasil":
-		var x AsgardFundYggdrasil
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnAsgardFundYggdrasil(&x, meta)
 	case "bond":
 		var x Bond
 		if err := x.LoadTendermint(attrs); err != nil {
@@ -217,48 +197,18 @@ func processEvent(event abci.Event, meta *Metadata) error {
 		if CorrectionsFeeEventIsOK(&x, meta) {
 			Recorder.OnFee(&x, meta)
 		}
-	case "InactiveVault":
-		var x InactiveVault
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnInactiveVault(&x, meta)
 	case "gas":
 		var x Gas
 		if err := x.LoadTendermint(attrs); err != nil {
 			return err
 		}
 		Recorder.OnGas(&x, meta)
-	case "message":
-		var x Message
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnMessage(&x, meta)
-	case "new_node":
-		var x NewNode
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnNewNode(&x, meta)
-	case "outbound":
-		var x Outbound
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnOutbound(&x, meta)
 	case "pool":
 		var x Pool
 		if err := x.LoadTendermint(attrs); err != nil {
 			return err
 		}
 		Recorder.OnPool(&x, meta)
-	case "refund":
-		var x Refund
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnRefund(&x, meta)
 	case "reserve":
 		var x Reserve
 		if err := x.LoadTendermint(attrs); err != nil {
@@ -278,12 +228,6 @@ func processEvent(event abci.Event, meta *Metadata) error {
 			return err
 		}
 		Recorder.OnSetIPAddress(&x, meta)
-	case "set_mimir":
-		var x SetMimir
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnSetMimir(&x, meta)
 	case "set_node_keys":
 		var x SetNodeKeys
 		if err := x.LoadTendermint(attrs); err != nil {
@@ -302,18 +246,6 @@ func processEvent(event abci.Event, meta *Metadata) error {
 			return err
 		}
 		Recorder.OnSlash(&x, meta)
-	case "pending_liquidity":
-		var x PendingLiquidity
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnPendingLiquidity(&x, meta)
-	case "add_liquidity", "add":
-		var x Stake
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnStake(&x, meta)
 	case "transfer":
 		var x Transfer
 		if err := x.LoadTendermint(attrs); err != nil {
@@ -325,21 +257,6 @@ func processEvent(event abci.Event, meta *Metadata) error {
 			return err
 		}
 		Recorder.OnTransfer(&x, meta)
-	case "withdraw":
-		var x Withdraw
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		if CorrectWithdraw(&x, meta) == Discard {
-			break
-		}
-		Recorder.OnWithdraw(&x, meta)
-	case "UpdateNodeAccountStatus":
-		var x UpdateNodeAccountStatus
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnUpdateNodeAccountStatus(&x, meta)
 	case "validator_request_leave":
 		var x ValidatorRequestLeave
 		if err := x.LoadTendermint(attrs); err != nil {
@@ -352,18 +269,6 @@ func processEvent(event abci.Event, meta *Metadata) error {
 			return err
 		}
 		Recorder.OnPoolBalanceChange(&x, meta)
-	case "thorname":
-		var x THORNameChange
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnTHORNameChange(&x, meta)
-	case "switch":
-		var x Switch
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnSwitch(&x, meta)
 	case "slash_points":
 		var x SlashPoints
 		if err := x.LoadTendermint(attrs); err != nil {
@@ -379,17 +284,8 @@ func processEvent(event abci.Event, meta *Metadata) error {
 	case "tx":
 	case "coin_spent", "coin_received":
 	case "coinbase":
-	case "burn":
-	case "tss_keygen", "tss_keysign":
-	case "create_client", "update_client":
-	case "connection_open_init":
-	case "store_code":
-	case "pin_code":
 	case "security":
 	case "execute":
-	case "approve_upgrade":
-	case "reply":
-	case "oracle_price":
 	case "mint":
 	case "wasm":
 	case "limit_swap_close":
@@ -426,30 +322,6 @@ func processTx(tx DecodedTx, result *abci.ExecTxResult, meta *Metadata) error {
 	// Thornode txs seems to have mainly one message
 	for _, msg := range tx.Msgs {
 		switch m := msg.(type) {
-		case *stypes.MsgSend:
-			var x Send
-			if err := x.LoadTendermint(tx, result, *m); err != nil {
-				return err
-			}
-			Recorder.OnMsgSend(&x, meta)
-		case *btypes.MsgSend:
-			var x Send
-			if err := x.LoadTendermintBank(tx, result, *m); err != nil {
-				return err
-			}
-			Recorder.OnMsgSend(&x, meta)
-		case *stypes.MsgDeposit:
-			var x Deposit
-			// for now just parse error deposits
-			if result.Code == 0 || TxState[x.Hash] != nil {
-				return nil
-			}
-			if err := x.LoadTendermint(tx, result, *m); err != nil {
-				return err
-			}
-			// Add the deposit to the state global variable
-			TxState[x.Hash] = x
-			Recorder.OnDeposit(&x, meta)
 		case *types.MsgBtcBlock:
 			// qbtc block submission (qbtc.qbtc.v1.MsgBtcBlock), no indexer action
 		default:
@@ -467,87 +339,6 @@ func processParentTx(tx DecodedTx, event *abci.Event) error {
 	}
 
 	switch event.Type {
-	case "thorname":
-		var signer string
-		var memo string = tx.Memo
-
-		for _, msg := range tx.Msgs {
-			switch m := msg.(type) {
-			case *stypes.MsgDeposit:
-				signer = m.Signer.String()
-				if memo == "" {
-					memo = m.Memo
-				}
-				break
-			case *stypes.MsgSend:
-				signer = m.GetFromAddress().String()
-				break
-			}
-		}
-
-		event.Attributes = append(event.Attributes, abci.EventAttribute{
-			Key:   "tx_id",
-			Value: tx.Hash,
-		}, abci.EventAttribute{
-			Key:   "memo",
-			Value: tx.Memo,
-		}, abci.EventAttribute{
-			Key:   "signer",
-			Value: signer,
-		})
-	case "add_liquidity", "add":
-		// Add missing memo to the add_liquidity event
-		var memo string
-		for _, msg := range tx.Msgs {
-			switch m := msg.(type) {
-			case *stypes.MsgDeposit:
-				memo = m.Memo
-			case *stypes.MsgObservedTxIn:
-				memo = m.Txs[0].Tx.Memo
-			case *stypes.MsgObservedTxQuorum:
-				memo = m.QuoTx.ObsTx.Tx.Memo
-			}
-		}
-
-		event.Attributes = append(event.Attributes, abci.EventAttribute{
-			Key:   "memo",
-			Value: memo,
-		})
-	case "switch":
-		var depositCoin string
-		var depositAmt string
-		var txID string
-		for _, v := range event.Attributes {
-			if v.Key == "tx_id" {
-				txID = v.Value
-			}
-		}
-
-		for _, msg := range tx.Msgs {
-			switch m := msg.(type) {
-			case *stypes.MsgObservedTxIn:
-				for _, tx := range m.Txs {
-					if tx.Tx.ID.String() == txID {
-						depositCoin = tx.Tx.Coins[0].Asset.String()
-						depositAmt = tx.Tx.Coins[0].Amount.String()
-					}
-				}
-			case *stypes.MsgObservedTxQuorum:
-				tx := m.QuoTx.ObsTx
-				if tx.Tx.ID.String() == txID {
-					depositCoin = tx.Tx.Coins[0].Asset.String()
-					depositAmt = tx.Tx.Coins[0].Amount.String()
-				}
-			}
-		}
-
-		event.Attributes = append(event.Attributes, abci.EventAttribute{
-			Key:   "burn_asset",
-			Value: depositCoin,
-		}, abci.EventAttribute{
-			Key:   "burn_amount",
-			Value: depositAmt,
-		})
 	case "instantiate":
 		msgIndex := 0
 		for _, v := range event.Attributes {
@@ -590,29 +381,6 @@ func processParentTx(tx DecodedTx, event *abci.Event) error {
 			}
 			break
 		}
-	case "tcy_claim", "tcy_stake", "tcy_unstake":
-		hash := tx.Hash
-		memo := tx.Memo
-		for _, msg := range tx.Msgs {
-			switch m := msg.(type) {
-			case *stypes.MsgDeposit:
-				memo = m.Memo
-			case *stypes.MsgObservedTxIn:
-				memo = m.Txs[0].Tx.Memo
-				hash = m.Txs[0].Tx.ID.String()
-			case *stypes.MsgObservedTxQuorum:
-				memo = m.QuoTx.ObsTx.Tx.Memo
-				hash = m.QuoTx.ObsTx.Tx.ID.String()
-			}
-		}
-
-		event.Attributes = append(event.Attributes, abci.EventAttribute{
-			Key:   "memo",
-			Value: memo,
-		}, abci.EventAttribute{
-			Key:   "tx_id",
-			Value: hash,
-		})
 	case "bond":
 		msgIndex := 0
 		for _, v := range event.Attributes {
@@ -645,41 +413,6 @@ func processParentTx(tx DecodedTx, event *abci.Event) error {
 			}
 			break
 		}
-	case "limit_swap":
-		var toAddress string
-		var fromAddr string
-		var memo string
-
-		for _, msg := range tx.Msgs {
-			switch m := msg.(type) {
-			case *stypes.MsgDeposit:
-				memo = m.Memo
-				fromAddr = m.Signer.String()
-				// Third part of the memo is the to address
-				if strings.Contains(m.Memo, ":") && len(strings.Split(m.Memo, ":")) > 2 {
-					toAddress = strings.Split(m.Memo, ":")[2]
-				}
-			case *stypes.MsgObservedTxIn:
-				memo = m.Txs[0].Tx.Memo
-				fromAddr = m.Txs[0].Tx.FromAddress.String()
-				toAddress = m.Txs[0].Tx.ToAddress.String()
-			case *stypes.MsgObservedTxQuorum:
-				memo = m.QuoTx.ObsTx.Tx.Memo
-				fromAddr = m.QuoTx.ObsTx.Tx.FromAddress.String()
-				toAddress = m.QuoTx.ObsTx.Tx.ToAddress.String()
-			}
-		}
-
-		event.Attributes = append(event.Attributes, abci.EventAttribute{
-			Key:   "memo",
-			Value: memo,
-		}, abci.EventAttribute{
-			Key:   "from_address",
-			Value: fromAddr,
-		}, abci.EventAttribute{
-			Key:   "to_address",
-			Value: toAddress,
-		})
 	default:
 		if strings.HasPrefix(event.Type, "wasm-") {
 			msgIndex := 0

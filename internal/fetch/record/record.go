@@ -36,65 +36,6 @@ func InsertWithMeta(table string, meta *Metadata, cols []string, values ...inter
 	return db.Inserter.Insert(table, cols, values...)
 }
 
-func (*eventRecorder) OnActiveVault(e *ActiveVault, meta *Metadata) {
-	cols := []string{"add_asgard_addr"}
-	err := InsertWithMeta("active_vault_events", meta, cols, e.AddAsgardAddr)
-	if err != nil {
-		btcqerr.LogEventParseErrorF("ActiveVault event from height %d lost on %s", meta.BlockHeight, err)
-	}
-}
-
-func (r *eventRecorder) OnAdd(e *Add, meta *Metadata) {
-	if e.Memo == nil {
-		e.Memo = empty
-	}
-
-	txType := util.TxTypeFromMemo(string(e.Memo))
-	// donate events for saver yield mint synths
-	if GetCoinType(e.Pool) == AssetSynth && string(e.Memo) == "THOR-SAVERS-YIELD" {
-		r.AddPoolSynthE8Depth([]byte(util.ConvertSynthPoolToNative(string(e.Pool))), e.AssetE8)
-
-		// On a donate event with `THOR-SAVERS-YIELD` we add a row to the `rewards_event_entries` table
-		// which would be normally filled only from reward events.
-		// This is unlike other cases where we have 1:1 mapping between events and tables,
-		// but we do this to simplify serving.
-		err := InsertWithMeta("rewards_event_entries", meta,
-			[]string{"pool", "rune_e8", "saver_e8"},
-			util.ConvertSynthPoolToNative(string(e.Pool)), 0, e.AssetE8)
-		if err != nil {
-			btcqerr.LogEventParseErrorF(
-				"synth donate event from height %d lost on %s",
-				meta.BlockHeight, err)
-			return
-		}
-	} else {
-		cols := []string{
-			"tx", "chain", "from_addr", "to_addr", "asset", "asset_e8", "memo", "rune_e8", "pool",
-			"_tx_type"}
-		err := InsertWithMeta("add_events", meta, cols,
-			e.Tx, e.Chain, e.FromAddr, e.ToAddr, e.Asset, e.AssetE8, e.Memo, e.RuneE8, e.Pool,
-			txType)
-		if err != nil {
-			btcqerr.LogEventParseErrorF("add event from height %d lost on %s", meta.BlockHeight, err)
-			return
-		}
-	}
-
-	r.AddPoolAssetE8Depth(e.Pool, e.AssetE8)
-	r.AddPoolRuneE8Depth(e.Pool, e.RuneE8)
-}
-
-func (r *eventRecorder) OnAsgardFundYggdrasil(e *AsgardFundYggdrasil, meta *Metadata) {
-	cols := []string{"tx", "asset", "asset_e8", "vault_key"}
-	err := InsertWithMeta("asgard_fund_yggdrasil_events", meta, cols,
-		e.Tx, e.Asset, e.AssetE8, e.VaultKey)
-	if err != nil {
-		btcqerr.LogEventParseErrorF(
-			"asgard_fund_yggdrasil event from height %d lost on %s",
-			meta.BlockHeight, err)
-	}
-}
-
 func (*eventRecorder) OnBond(e *Bond, meta *Metadata) {
 	if e.Memo == nil {
 		e.Memo = empty
@@ -166,57 +107,6 @@ func (r *eventRecorder) OnGas(e *Gas, meta *Metadata) {
 	r.AddPoolRuneE8Depth(e.Asset, e.RuneE8)
 }
 
-func (*eventRecorder) OnInactiveVault(e *InactiveVault, meta *Metadata) {
-	cols := []string{"add_asgard_addr"}
-	err := InsertWithMeta("inactive_vault_events", meta, cols, e.AddAsgardAddr)
-	if err != nil {
-		btcqerr.LogEventParseErrorF(
-			"InactiveVault event from height %d lost on %s",
-			meta.BlockHeight, err)
-	}
-}
-
-func (*eventRecorder) OnMessage(e *Message, meta *Metadata) {
-	if !config.Global.EventRecorder.OnMessageEnabled {
-		return
-	}
-	if e.FromAddr == nil {
-		e.FromAddr = empty
-	}
-	if e.Action == nil {
-		e.Action = empty
-	}
-	cols := []string{"from_addr", "action"}
-	err := InsertWithMeta("message_events", meta, cols, e.FromAddr, e.Action)
-	if err != nil {
-		btcqerr.LogEventParseErrorF("message event from height %d lost on %s", meta.BlockHeight, err)
-	}
-}
-
-func (*eventRecorder) OnNewNode(e *NewNode, meta *Metadata) {
-	cols := []string{"node_addr"}
-	err := InsertWithMeta("new_node_events", meta, cols, e.NodeAddr)
-	if err != nil {
-		btcqerr.LogEventParseErrorF("new_node event from height %d lost on %s", meta.BlockHeight, err)
-	}
-}
-
-func (*eventRecorder) OnOutbound(e *Outbound, meta *Metadata) {
-	var internal *bool
-	if string(e.Memo) == "noop" {
-		internal = new(bool)
-		*internal = true
-	}
-	txType := util.TxTypeFromMemo(string(e.Memo))
-	cols := []string{"tx", "chain", "from_addr", "to_addr", "asset", "asset_e8", "memo", "in_tx",
-		"internal", "_tx_type"}
-	err := InsertWithMeta("outbound_events", meta, cols,
-		e.Tx, e.Chain, e.FromAddr, e.ToAddr, e.Asset, e.AssetE8, e.Memo, e.InTx, internal, txType)
-	if err != nil {
-		btcqerr.LogEventParseErrorF("outbound event from height %d lost on %s", meta.BlockHeight, err)
-	}
-}
-
 func (r *eventRecorder) OnPool(e *Pool, meta *Metadata) {
 	cols := []string{"asset", "status"}
 	err := InsertWithMeta("pool_events", meta, cols, e.Asset, e.Status)
@@ -231,24 +121,6 @@ func (r *eventRecorder) OnPool(e *Pool, meta *Metadata) {
 	}
 
 	r.chainInfo.SetPoolStatus(string(e.Asset), string(e.Status))
-}
-
-func (*eventRecorder) OnRefund(e *Refund, meta *Metadata) {
-	if e.Memo == nil {
-		e.Memo = empty
-	}
-	txType := util.TxTypeFromMemo(string(e.Memo))
-
-	cols := []string{
-		"tx", "chain", "from_addr", "to_addr", "asset", "asset_e8", "asset_2nd", "asset_2nd_e8",
-		"memo", "code", "reason", "_tx_type"}
-	err := InsertWithMeta("refund_events", meta, cols,
-		e.Tx, e.Chain, e.FromAddr, e.ToAddr, e.Asset, e.AssetE8, e.Asset2nd, e.Asset2ndE8, e.Memo,
-		e.Code, e.Reason, txType)
-
-	if err != nil {
-		btcqerr.LogEventParseErrorF("refund event from height %d lost on %s", meta.BlockHeight, err)
-	}
 }
 
 func (*eventRecorder) OnReserve(e *Reserve, meta *Metadata) {
@@ -306,24 +178,6 @@ func (*eventRecorder) OnSetIPAddress(e *SetIPAddress, meta *Metadata) {
 	}
 }
 
-func (r *eventRecorder) OnSetMimir(e *SetMimir, meta *Metadata) {
-	cols := []string{"key", "value"}
-	err := InsertWithMeta("set_mimir_events", meta, cols,
-		e.Key, e.Value)
-	if err != nil {
-		btcqerr.LogEventParseErrorF(
-			"set_mimir event from height %d lost on %s",
-			meta.BlockHeight, err)
-	}
-
-	value, err := ParseInt(string(e.Value))
-	if err != nil {
-		btcqerr.LogEventParseErrorF("can't set_mimir status from height %d lost on %s",
-			meta.BlockHeight, err)
-	}
-	r.chainInfo.SetMimirStatus(string(e.Key), value)
-}
-
 func (*eventRecorder) OnSetNodeKeys(e *SetNodeKeys, meta *Metadata) {
 	cols := []string{"node_addr", "secp256k1", "ed25519", "validator_consensus"}
 	err := InsertWithMeta("set_node_keys_events", meta, cols,
@@ -366,24 +220,7 @@ func (r *eventRecorder) OnSlash(e *Slash, meta *Metadata) {
 	}
 }
 
-func (*eventRecorder) OnPendingLiquidity(e *PendingLiquidity, meta *Metadata) {
-	cols := []string{
-		"pool", "asset_tx", "asset_chain", "asset_addr", "asset_e8",
-		"rune_tx", "rune_addr", "rune_e8",
-		"pending_type"}
-	err := InsertWithMeta("pending_liquidity_events", meta, cols, e.Pool,
-		e.AssetTx, e.AssetChain, e.AssetAddr, e.AssetE8,
-		e.RuneTx, e.RuneAddr, e.RuneE8,
-		e.PendingType)
-
-	if err != nil {
-		btcqerr.LogEventParseErrorF(
-			"pending_liquidity event from height %d lost on %s",
-			meta.BlockHeight, err)
-		return
-	}
-}
-
+// OnStake is kept for corrections/historical data fixes
 func (r *eventRecorder) OnStake(e *Stake, meta *Metadata) {
 	// TODO(muninn): Separate this side data calculation from the sync process.
 	aE8, rE8, _ := r.CurrentDepths(e.Pool)
@@ -501,21 +338,6 @@ func (r *eventRecorder) OnWithdraw(e *Withdraw, meta *Metadata) {
 	}
 }
 
-func (*eventRecorder) OnUpdateNodeAccountStatus(e *UpdateNodeAccountStatus, meta *Metadata) {
-	if e.Former == nil {
-		e.Former = empty
-	}
-	cols := []string{"node_addr", "former", "current"}
-	err := InsertWithMeta("update_node_account_status_events", meta, cols,
-		e.NodeAddr, e.Former, e.Current)
-
-	if err != nil {
-		btcqerr.LogEventParseErrorF(
-			"UpdateNodeAccountStatus event from height %d lost on %s",
-			meta.BlockHeight, err)
-	}
-}
-
 func (*eventRecorder) OnValidatorRequestLeave(e *ValidatorRequestLeave, meta *Metadata) {
 	cols := []string{"tx", "from_addr", "node_addr"}
 	err := InsertWithMeta("validator_request_leave_events", meta, cols,
@@ -556,6 +378,18 @@ func (r *eventRecorder) OnPoolBalanceChange(e *PoolBalanceChange, meta *Metadata
 	}
 }
 
+func (*eventRecorder) OnSlashPoints(e *SlashPoints, meta *Metadata) {
+	cols := []string{"node_address", "slash_points", "reason"}
+	err := InsertWithMeta("slash_points_events", meta, cols,
+		e.NodeAddress, e.SlashPoints, e.Reason)
+	if err != nil {
+		btcqerr.LogEventParseErrorF(
+			"slash_points event from height %d lost on %s",
+			meta.BlockHeight, err)
+	}
+}
+
+// OnTHORNameChange is kept for corrections/historical data fixes
 func (*eventRecorder) OnTHORNameChange(e *THORNameChange, meta *Metadata) {
 	cols := []string{
 		"name", "chain", "address", "registration_fee_e8", "fund_amount_e8", "expire", "owner", "tx_id", "memo", "sender"}
@@ -569,68 +403,14 @@ func (*eventRecorder) OnTHORNameChange(e *THORNameChange, meta *Metadata) {
 	}
 }
 
-func (*eventRecorder) OnSwitch(e *Switch, meta *Metadata) {
-	if e.FromAddr == nil {
-		e.FromAddr = empty
-	}
-	// Switches before v3.4.0 are all just THOR.RUNE
-	if meta.BlockHeight < undelayedLiquidityFeesHeight || e.MintAsset == nil {
-		e.MintAsset = []byte("THOR.RUNE")
-	}
-
-	cols := []string{
-		"tx", "from_addr", "to_addr", "burn_asset", "burn_e8", "mint_e8", "mint_asset"}
-	err := InsertWithMeta("switch_events", meta, cols,
-		e.Tx, e.FromAddr, e.ToAddr, e.BurnAsset, e.BurnE8, e.MintE8, e.MintAsset)
-
-	if err != nil {
-		btcqerr.LogEventParseErrorF("switch event from height %d lost on %s", meta.BlockHeight, err)
-	}
-}
-
-func (*eventRecorder) OnSlashPoints(e *SlashPoints, meta *Metadata) {
-	cols := []string{"node_address", "slash_points", "reason"}
-	err := InsertWithMeta("slash_points_events", meta, cols,
-		e.NodeAddress, e.SlashPoints, e.Reason)
-	if err != nil {
-		btcqerr.LogEventParseErrorF(
-			"slash_points event from height %d lost on %s",
-			meta.BlockHeight, err)
-	}
-}
-
-// TODO: add these events to Midgard records and deprecate other synth Burn/Mint
-
-// Mint synthetic assets from cosmos native messages
-func (r *eventRecorder) OnCoinbase(e *Coinbase, meta *Metadata) {
-	r.AddPoolSynthE8Depth([]byte(util.ConvertSynthPoolToNative(string(e.Asset))), e.AssetE8)
-}
-
-// Burn synthetic assets from cosmos native messages
+// OnBurn is kept for corrections/historical data fixes
 func (r *eventRecorder) OnBurn(e *Burn, meta *Metadata) {
 	r.AddPoolSynthE8Depth([]byte(util.ConvertSynthPoolToNative(string(e.Asset))), -e.AssetE8)
 }
 
-func (*eventRecorder) OnMsgSend(e *Send, meta *Metadata) {
-	cols := []string{"amount_e8", "asset", "from_addr", "to_addr", "memo", "tx_id", "code", "raw_log"}
-	err := InsertWithMeta("send_messages", meta, cols, e.AssetE8, e.Asset, e.FromAddr, e.ToAddr,
-		e.Memo, e.Hash, e.Code, e.Log)
-	if err != nil {
-		btcqerr.LogEventParseErrorF(
-			"send_message tx from height %d lost on %s",
-			meta.BlockHeight, err)
-	}
-}
-
-func (*eventRecorder) OnDeposit(e *Deposit, meta *Metadata) {
-	cols := []string{"amount_e8", "asset", "from_addr", "reason", "code", "memo", "tx_id"}
-	err := InsertWithMeta("failed_deposit_messages", meta, cols, e.AssetE8, e.Asset, e.FromAddr, e.Log, e.Code,
-		e.Memo, e.Hash)
-	if err != nil {
-		btcqerr.LogEventParseErrorF(
-			"failed_deposit_messages tx from height %d lost on %s",
-			meta.BlockHeight, err)
-	}
+// OnCoinbase is kept for corrections/historical data fixes
+func (r *eventRecorder) OnCoinbase(e *Coinbase, meta *Metadata) {
+	r.AddPoolSynthE8Depth([]byte(util.ConvertSynthPoolToNative(string(e.Asset))), e.AssetE8)
 }
 
 func (*eventRecorder) OnInstantiate(e *Instantiate, meta *Metadata) {

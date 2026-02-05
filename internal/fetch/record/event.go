@@ -216,129 +216,6 @@ type Amount struct {
 
 // BUG(pascaldekloe): Duplicate keys in Tendermint transactions overwrite on another.
 
-// ActiveVault defines the "ActiveVault" event type.
-type ActiveVault struct {
-	AddAsgardAddr []byte
-}
-
-func (e *ActiveVault) LoadTendermint(attrs []abci.EventAttribute) error {
-	for _, attr := range attrs {
-		switch string([]byte(attr.Key)) {
-		case "add new asgard vault":
-			e.AddAsgardAddr = []byte(attr.Value)
-
-		default:
-			btcqerr.LogEventParseErrorF(
-				"unknown ActiveVault event attribute %q=%q",
-				[]byte(attr.Key), []byte(attr.Value))
-		}
-	}
-
-	return nil
-}
-
-// Add defines the "donate" event type.
-type Add struct {
-	Tx       []byte
-	Chain    []byte
-	FromAddr []byte
-	ToAddr   []byte
-	Asset    []byte
-	AssetE8  int64 // Asset quantity times 100 M
-	Memo     []byte
-
-	RuneE8 int64 // Number of runes times 100 M
-
-	Pool []byte
-}
-
-func (e *Add) LoadTendermint(attrs []abci.EventAttribute) error {
-	for _, attr := range attrs {
-		var err error
-		switch string([]byte(attr.Key)) {
-		case "id":
-			e.Tx = []byte(attr.Value)
-		case "chain":
-			e.Chain = []byte(attr.Value)
-		case "from":
-			e.FromAddr = []byte(attr.Value)
-		case "to":
-			e.ToAddr = []byte(attr.Value)
-		case "coin":
-			b := []byte(attr.Value)
-			for len(b) != 0 {
-				var asset []byte
-				var amountE8 int64
-				if i := bytes.Index(b, coinSep); i >= 0 {
-					asset, amountE8, err = parseCoin(b[:i])
-					b = b[i+len(coinSep):]
-				} else {
-					asset, amountE8, err = parseCoin(b)
-					b = nil
-				}
-				if err != nil {
-					return fmt.Errorf("malformed coin: %w", err)
-				}
-
-				if IsRune(asset) {
-					e.RuneE8 = amountE8
-				} else {
-					e.AssetE8 = amountE8
-					e.Asset = asset
-				}
-			}
-		case "memo":
-			e.Memo = sanitizeBytes([]byte(attr.Value))
-
-		case "pool":
-			e.Pool = []byte(attr.Value)
-
-		default:
-			btcqerr.LogEventParseErrorF("unknown add event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
-		}
-	}
-
-	if config.Global.CaseInsensitiveChains[string(e.Chain)] {
-		e.FromAddr = util.ToLowerBytes(e.FromAddr)
-		e.ToAddr = util.ToLowerBytes(e.ToAddr)
-	}
-
-	return nil
-}
-
-// AsgardFundYggdrasil defines the "asgard_fund_yggdrasil" event type.
-type AsgardFundYggdrasil struct {
-	Tx       []byte // THORChain transaction identifier
-	Asset    []byte
-	AssetE8  int64  // Asset quantity times 100 M
-	VaultKey []byte // public key of yggdrasil
-}
-
-func (e *AsgardFundYggdrasil) LoadTendermint(attrs []abci.EventAttribute) error {
-	for _, attr := range attrs {
-		var err error
-		switch string([]byte(attr.Key)) {
-
-		case "tx":
-			e.Tx = []byte(attr.Value)
-		case "coins":
-			e.Asset, e.AssetE8, err = parseCoin([]byte(attr.Value))
-			if err != nil {
-				return fmt.Errorf("malformed coins: %w", err)
-			}
-		case "pubkey":
-			e.VaultKey = []byte(attr.Value)
-
-		default:
-			btcqerr.LogEventParseErrorF(
-				"unknown asgard_fund_yggdrasil event attribute %q=%q",
-				[]byte(attr.Key), []byte(attr.Value))
-		}
-	}
-
-	return nil
-}
-
 // Bond defines the "bond" event type.
 type Bond struct {
 	Tx         []byte
@@ -549,135 +426,6 @@ func (e *Gas) LoadTendermint(attrs []abci.EventAttribute) error {
 	return nil
 }
 
-// InactiveVault defines the "InactiveVault" event type.
-type InactiveVault struct {
-	AddAsgardAddr []byte
-}
-
-func (e *InactiveVault) LoadTendermint(attrs []abci.EventAttribute) error {
-	for _, attr := range attrs {
-		switch string([]byte(attr.Key)) {
-		case "set asgard vault to inactive":
-			e.AddAsgardAddr = []byte(attr.Value)
-
-		default:
-			btcqerr.LogEventParseErrorF(
-				"unknown InactiveVault event attribute %q=%q",
-				[]byte(attr.Key), []byte(attr.Value))
-		}
-	}
-
-	return nil
-}
-
-// Message defines the "message" event type.
-type Message struct {
-	FromAddr []byte // optional sender
-	Action   []byte
-}
-
-func (e *Message) LoadTendermint(attrs []abci.EventAttribute) error {
-	for _, attr := range attrs {
-		switch string([]byte(attr.Key)) {
-		case "sender":
-			e.FromAddr = []byte(attr.Value)
-		case "action":
-			e.Action = []byte(attr.Value)
-		case "module":
-			// TODO(acsaba): this is discarded now, but figure out what it is and store it.
-			//     currently seen values: "module"="governance"
-
-		default:
-			btcqerr.LogEventParseErrorF(
-				"unknown message event attribute %q=%q",
-				[]byte(attr.Key), []byte(attr.Value))
-		}
-	}
-
-	return nil
-}
-
-// NewNode defines the "new_node" event type.
-type NewNode struct {
-	NodeAddr []byte // THOR address
-}
-
-func (e *NewNode) LoadTendermint(attrs []abci.EventAttribute) error {
-	for _, attr := range attrs {
-		switch string([]byte(attr.Key)) {
-		case "address":
-			e.NodeAddr = []byte(attr.Value)
-		default:
-			btcqerr.LogEventParseErrorF(
-				"unknown new_node event attribute %q=%q",
-				[]byte(attr.Key), []byte(attr.Value))
-		}
-	}
-
-	return nil
-}
-
-// Outbound defines the "outbound" event type, which records a transfer
-// confirmation from pools. Each Swap, Withdraw, UnBond or Refunds event is
-// completed with an Outbound.
-//
-// All zeros on Tx are ignored, thus keeping a nil value. E.g., the Outbound of
-// the “to RUNE swap” on double-swaps has no transaction ID.
-type Outbound struct {
-	Tx       []byte // THORChain transaction ID
-	Chain    []byte // transfer backend ID
-	FromAddr []byte // transfer pool address
-	ToAddr   []byte // transfer contender address
-	Asset    []byte // transfer unit ID
-	AssetE8  int64  // transfer quantity times 100 M
-	Memo     []byte // transfer description
-	InTx     []byte // THORChain transaction ID reference
-}
-
-func (e *Outbound) LoadTendermint(attrs []abci.EventAttribute) error {
-	for _, attr := range attrs {
-		var err error
-		switch string([]byte(attr.Key)) {
-		case "id":
-			// omit all-zero placeholders
-			for _, c := range []byte(attr.Value) {
-				if c != '0' {
-					e.Tx = []byte(attr.Value)
-					break
-				}
-			}
-		case "chain":
-			e.Chain = []byte(attr.Value)
-		case "from":
-			e.FromAddr = []byte(attr.Value)
-		case "to":
-			e.ToAddr = []byte(attr.Value)
-		case "coin":
-			e.Asset, e.AssetE8, err = parseCoin([]byte(attr.Value))
-			if err != nil {
-				return fmt.Errorf("malformed coin: %w", err)
-			}
-		case "memo":
-			e.Memo = []byte(attr.Value)
-
-		case "in_tx_id":
-			e.InTx = []byte(attr.Value)
-
-		default:
-			btcqerr.LogEventParseErrorF(
-				"unknown outbound event attribute %q=%q",
-				[]byte(attr.Key), []byte(attr.Value))
-		}
-	}
-
-	if config.Global.CaseInsensitiveChains[string(e.Chain)] {
-		e.FromAddr = util.ToLowerBytes(e.FromAddr)
-		e.ToAddr = util.ToLowerBytes(e.ToAddr)
-	}
-
-	return nil
-}
-
 // Pool defines the "pool" event type.
 type Pool struct {
 	Asset  []byte
@@ -700,22 +448,6 @@ func (e *Pool) LoadTendermint(attrs []abci.EventAttribute) error {
 	return nil
 }
 
-// Refund defines the "refund" event type.
-type Refund struct {
-	Tx         []byte
-	Chain      []byte
-	FromAddr   []byte
-	ToAddr     []byte
-	Asset      []byte
-	AssetE8    int64 // Asset quantity times 100 M
-	Asset2nd   []byte
-	Asset2ndE8 int64 // Asset2 quantity times 100 M
-	Memo       []byte
-
-	Code   int64
-	Reason []byte
-}
-
 // Correct v if it's not valid utf8 or it contains 0 bytes.
 // Sometimes refund attribute is not valid utf8 and can't be inserted into the DB as is.
 // Unfortunately bytes.ToValidUTF8 is not enough to fix because golang accepts
@@ -726,55 +458,6 @@ func sanitizeBytes(v []byte) []byte {
 	} else {
 		return []byte("MidgardBadUTF8EncodedBase64: " + base64.StdEncoding.EncodeToString(v))
 	}
-}
-
-func (e *Refund) LoadTendermint(attrs []abci.EventAttribute) error {
-	for _, attr := range attrs {
-		var err error
-		switch string([]byte(attr.Key)) {
-		case "id":
-			e.Tx = []byte(attr.Value)
-		case "chain":
-			e.Chain = []byte(attr.Value)
-		case "from":
-			e.FromAddr = []byte(attr.Value)
-		case "to":
-			e.ToAddr = []byte(attr.Value)
-		case "coin":
-			v := []byte(attr.Value)
-			if i := bytes.Index(v, []byte{',', ' '}); i >= 0 {
-				e.Asset2nd, e.Asset2ndE8, err = parseCoin(v[i+2:])
-				if err != nil {
-					return fmt.Errorf("malformed coin: %w", err)
-				}
-
-				v = v[:i]
-			}
-			e.Asset, e.AssetE8, err = parseCoin(v)
-			if err != nil {
-				return fmt.Errorf("malformed coin: %w", err)
-			}
-
-		case "memo":
-			e.Memo = sanitizeBytes([]byte(attr.Value))
-		case "code":
-			e.Code, err = strconv.ParseInt(string([]byte(attr.Value)), 10, 64)
-			if err != nil {
-				return fmt.Errorf("malformed code: %w", err)
-			}
-		case "reason":
-			e.Reason = sanitizeBytes([]byte(attr.Value))
-		default:
-			btcqerr.LogEventParseErrorF("unknown refund event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
-		}
-	}
-
-	if config.Global.CaseInsensitiveChains[string(e.Chain)] {
-		e.FromAddr = util.ToLowerBytes(e.FromAddr)
-		e.ToAddr = util.ToLowerBytes(e.ToAddr)
-	}
-
-	return nil
 }
 
 // Reserve defines the "reserve" event type.
@@ -881,30 +564,6 @@ func (e *SetIPAddress) LoadTendermint(attrs []abci.EventAttribute) error {
 		default:
 			btcqerr.LogEventParseErrorF(
 				"unknown set_ip_address event attribute %q=%q",
-				[]byte(attr.Key), []byte(attr.Value))
-		}
-	}
-
-	return nil
-}
-
-// SetMimir defines the "set_mimir" event type.
-type SetMimir struct {
-	Key   []byte
-	Value []byte
-}
-
-func (e *SetMimir) LoadTendermint(attrs []abci.EventAttribute) error {
-	for _, attr := range attrs {
-		switch string([]byte(attr.Key)) {
-		case "key":
-			e.Key = []byte(attr.Value)
-		case "value":
-			e.Value = []byte(attr.Value)
-
-		default:
-			btcqerr.LogEventParseErrorF(
-				"unknown set_mimir event attribute %q=%q",
 				[]byte(attr.Key), []byte(attr.Value))
 		}
 	}
@@ -1037,38 +696,6 @@ func (e *AddBase) parse(attrs []abci.EventAttribute) (
 	return
 }
 
-// PendingLiquidity defines the "pending_liquidity" event type,
-// which records a partially received add_liquidity.
-type PendingLiquidity struct {
-	AddBase
-	PendingType []byte
-}
-
-func (e *PendingLiquidity) LoadTendermint(attrs []abci.EventAttribute) error {
-	remainder, err := e.parse(attrs)
-	if err != nil {
-		return err
-	}
-
-	for _, attr := range remainder {
-		switch string([]byte(attr.Key)) {
-		case "type":
-			sValue := string([]byte(attr.Value))
-			if sValue == "add" || sValue == "withdraw" {
-				e.PendingType = []byte(attr.Value)
-			} else {
-				btcqerr.LogEventParseErrorF("unknown pending_liquidity type: %q", []byte(attr.Value))
-			}
-		default:
-			btcqerr.LogEventParseErrorF(
-				"unknown pending_liquidity event attribute %q=%q",
-				[]byte(attr.Key), []byte(attr.Value))
-		}
-	}
-
-	return nil
-}
-
 // Stake defines the "stake" event type, which records a participation result."
 type Stake struct {
 	AddBase
@@ -1119,64 +746,6 @@ func (e *Slash) LoadTendermint(attrs []abci.EventAttribute) error {
 			}
 			e.Amounts = append(e.Amounts, Amount{[]byte(attr.Key), v})
 		}
-	}
-
-	return nil
-}
-
-// Upgrade Rune to Native rune.
-type Switch struct {
-	Tx        []byte
-	FromAddr  []byte
-	ToAddr    []byte
-	BurnAsset []byte
-	MintAsset []byte
-	BurnE8    int64
-	MintE8    int64
-}
-
-func (e *Switch) LoadTendermint(attrs []abci.EventAttribute) error {
-	hadMintValue := false
-
-	for _, attr := range attrs {
-		var err error
-		switch string([]byte(attr.Key)) {
-		case "txid", "tx_id":
-			e.Tx = []byte(attr.Value)
-		case "from", "asset_address":
-			e.FromAddr = []byte(attr.Value)
-		case "to", "rune_address":
-			e.ToAddr = []byte(attr.Value)
-		case "burn":
-			e.BurnAsset, e.BurnE8, err = parseCoin([]byte(attr.Value))
-			if err != nil {
-				return fmt.Errorf("malformed coins in switch event: %w", err)
-			}
-		case "burn_asset":
-			e.BurnAsset = []byte(attr.Value)
-		case "burn_amount":
-			e.BurnE8, err = strconv.ParseInt(attr.Value, 10, 64)
-		case "amount":
-			hadMintValue = true
-			e.MintE8, err = strconv.ParseInt(attr.Value, 10, 64)
-		case "asset":
-			e.MintAsset = []byte(attr.Value)
-		case "mint":
-			hadMintValue = true
-			e.MintE8, err = strconv.ParseInt(attr.Value, 10, 64)
-			if err != nil {
-				return fmt.Errorf("malformed mint value in switch event: %w", err)
-			}
-		default:
-			btcqerr.LogEventParseErrorF("unknown switch event attribute %q=%q", []byte(attr.Key), []byte(attr.Value))
-		}
-	}
-	if !hadMintValue {
-		// In the beginning all switch was 1:1, e.g. 12345 BNB.RUNE-B1A was switched to 12345 Rune.
-		// After a while this becomes less then 1:1 and a new field was introduced to differentiate
-		// mint from burn.
-		// For old values we set Mint value to Burn.
-		e.MintE8 = e.BurnE8
 	}
 
 	return nil
@@ -1328,33 +897,6 @@ func (e *Withdraw) LoadTendermint(attrs []abci.EventAttribute) error {
 	// https://discord.com/channels/838986635756044328/1027399282678054962
 	if e.Memo == nil {
 		e.Memo = []byte("MEMO-MISSING-PROBABLY-POL")
-	}
-
-	return nil
-}
-
-// UpdateNodeAccountStatus defines the "UpdateNodeAccountStatus" event type.
-type UpdateNodeAccountStatus struct {
-	NodeAddr []byte // THORChain address
-	Former   []byte // previous status label
-	Current  []byte // new status label
-}
-
-func (e *UpdateNodeAccountStatus) LoadTendermint(attrs []abci.EventAttribute) error {
-	for _, attr := range attrs {
-		switch string([]byte(attr.Key)) {
-		case "Address":
-			e.NodeAddr = []byte(attr.Value)
-		case "Former:":
-			e.Former = []byte(attr.Value)
-		case "Current:":
-			e.Current = []byte(attr.Value)
-
-		default:
-			btcqerr.LogEventParseErrorF(
-				"unknown UpdateNodeAccountStatus event attribute %q=%q",
-				[]byte(attr.Key), []byte(attr.Value))
-		}
 	}
 
 	return nil

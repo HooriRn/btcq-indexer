@@ -10,34 +10,22 @@ import (
 
 type FakeDemux struct {
 	reuse struct {
-		record.ActiveVault
-		record.Add
-		record.PendingLiquidity
-		record.AsgardFundYggdrasil
 		record.Bond
 		record.Errata
 		record.Fee
 		record.Gas
-		record.InactiveVault
-		record.Message
-		record.NewNode
-		record.Outbound
 		record.Pool
-		record.Refund
 		record.Reserve
 		record.Rewards
 		record.SetIPAddress
-		record.SetMimir
 		record.SetNodeKeys
 		record.SetVersion
 		record.Slash
 		record.Stake
 		record.Transfer
 		record.Withdraw
-		record.UpdateNodeAccountStatus
 		record.ValidatorRequestLeave
 		record.PoolBalanceChange
-		record.Switch
 		record.THORNameChange
 		record.SlashPoints
 	}
@@ -49,11 +37,6 @@ func (d *FakeDemux) processDemux(event abci.Event) int64 {
 	attrs := event.Attributes
 
 	switch event.Type {
-	case "switch":
-		if err := d.reuse.Switch.LoadTendermint(attrs); err != nil {
-			panic(err)
-		}
-		return d.reuse.Switch.BurnE8
 	case "transfer":
 		if err := d.reuse.Transfer.LoadTendermint(attrs); err != nil {
 			panic(err)
@@ -71,12 +54,6 @@ func processDirect(event abci.Event) int64 {
 	attrs := event.Attributes
 
 	switch event.Type {
-	case "switch":
-		var x record.Switch
-		if err := x.LoadTendermint(attrs); err != nil {
-			panic(err)
-		}
-		return x.BurnE8
 	case "transfer":
 		var x record.Transfer
 		if err := x.LoadTendermint(attrs); err != nil {
@@ -91,11 +68,6 @@ func processDirect(event abci.Event) int64 {
 var total int64
 
 var events = []abci.Event{
-	testdb.Switch{
-		FromAddress: "b2",
-		ToAddress:   "thor2",
-		Burn:        "42 BNB.RUNE-B1A",
-	}.ToTendermint(),
 	testdb.Transfer{
 		FromAddr:    "thorAddr2",
 		ToAddr:      "thorAddr1",
