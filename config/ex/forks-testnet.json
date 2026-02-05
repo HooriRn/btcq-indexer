@@ -1,0 +1,11 @@
+{
+  "thorchain": {
+    "fork_infos": [
+      {
+        "chain_id": "qbtc-testnet",
+        "earliest_block_hash": "984B1BD187F373AE6F2EE32A922F87773ABE7E213CE4305B4743F380ED2554AA",
+        "earliest_block_height": 1
+      }
+    ]
+  }
+}

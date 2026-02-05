@@ -3,8 +3,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	_ "embed"
-	"encoding/hex"
 	"fmt"
 
 	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
@@ -21,99 +19,10 @@ func ReadChainID(ctx context.Context) (string, error) {
 	return chainId, err
 }
 
+// GetMigrateUpdates returns SQL to run for schema migrations.
+// There are no current migrations for this chain app; add blocks here when needed.
 func GetMigrateUpdates(currentDdlHash md5Hash, tag string) (data []byte, err error) {
-	currentDdlHashString := hex.EncodeToString(currentDdlHash[:])
-
-	// Get the current chain id
-	chainId, err := ReadChainID(context.Background())
-	if err != nil {
-		// Might be test environment without THORNode
-		return nil, nil
-	}
-
-	if chainId != "thorchain" {
-		btcqlog.Info("Skipping migration for non-mainnet")
-		return nil, nil
-	}
-
-	latestHeight, err := GetLatestHeight(context.Background())
-	if err != nil {
-		btcqlog.FatalE(err, "Couldn't get latest height")
-	}
-
-	// v2.32.1 migration from v2.32.2
-	if currentDdlHashString == "7da33d35fbcdb6f9ad375e199ba722e8" {
-
-		// Trim migration for v2.32.2
-		if latestHeight > 20996000 {
-			btcqlog.Info("Trimming DB to height 20996001")
-			TrimDB(context.Background(), 20996001)
-		}
-
-		data = []byte("UPDATE constants SET value = E'\\\\x741ae065783c76df8218e3a75298d633' WHERE key = 'ddl_hash';")
-		currentDdlHashString = "741ae065783c76df8218e3a75298d633"
-		latestHeight = 20996000
-	}
-
-	// v2.32.2 migration from v2.32.3
-	if currentDdlHashString == "741ae065783c76df8218e3a75298d633" {
-		// Trim migration for v2.32.3
-		if latestHeight > 20996000 {
-			btcqlog.Info("Trimming DB to height 20996001")
-			TrimDB(context.Background(), 20996001)
-		}
-
-		data = []byte("UPDATE constants SET value = E'\\\\x38cc2cea31c31512f4d02ee13e36a91e' WHERE key = 'ddl_hash';")
-		currentDdlHashString = "38cc2cea31c31512f4d02ee13e36a91e"
-		latestHeight = 20996000
-	}
-
-	if currentDdlHashString == "38cc2cea31c31512f4d02ee13e36a91e" {
-		// Trim migration
-		if latestHeight > 21595000 {
-			btcqlog.Info("Trimming DB to height 21595001")
-			TrimDB(context.Background(), 21595001)
-		}
-
-		data = []byte("UPDATE constants SET value = E'\\\\xc6a7c41748d2d0cbee3f2337fc9f21d6' WHERE key = 'ddl_hash';")
-		currentDdlHashString = "c6a7c41748d2d0cbee3f2337fc9f21d6"
-		latestHeight = 21595000
-	}
-
-	// Aggregate update for v2.32.9
-	if currentDdlHashString == "20d72bbaa9cade9fdfc90e432391edfd" {
-
-		// Trim for THOR.NAMI
-		if latestHeight > 22624800 {
-			btcqlog.Info("Trimming DB to height 22624001")
-			TrimDB(context.Background(), 22624001)
-		}
-
-		sql := `
-			CREATE OR REPLACE VIEW btcq_indexer_agg.thorname_last_owner AS
-			WITH owner_changes AS (
-					SELECT 
-						name, 
-						owner, 
-						block_timestamp,
-						LAG(owner) OVER (PARTITION BY name ORDER BY block_timestamp) AS previous_owner
-					FROM thorname_change_events
-				)
-				SELECT DISTINCT ON (name)
-					name,
-					block_timestamp
-				FROM owner_changes
-				WHERE owner <> previous_owner OR previous_owner IS NULL
-				ORDER BY name, block_timestamp DESC;
-		`
-
-		hash := []byte("UPDATE constants SET value = E'\\\\x763034e303c4e588d46f6fb0fa68d598' WHERE key = 'aggregates_ddl_hash';")
-
-		data = append(data, []byte(sql)...)
-		data = append(data, hash...)
-	}
-
-	return data, nil
+	return nil, nil
 }
 
 // TrimDB deletes all blocks including and after certain height.
