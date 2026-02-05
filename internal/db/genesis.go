@@ -3,6 +3,7 @@ package db
 import (
 	"encoding/json"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/btcq/btcq-indexer/config"
@@ -39,17 +40,40 @@ type JsonMap map[string]interface{}
 
 // This genesis type is custom made from THORNode:
 // https://gitlab.com/thorchain/thornode/-/blob/95ece18f92e363381aa0d09a9df779b4d63318f5/x/thorchain/genesis.pb.go#L132
+// initial_height can be string (THORChain export) or number (e.g. qbtc genesis).
 type GenesisType struct {
-	GenesisTime   time.Time `json:"genesis_time"`
-	ChainID       string    `json:"chain_id"`
-	InitialHeight string    `json:"initial_height"`
-	AppState      AppState  `json:"app_state,omitempty"`
+	GenesisTime   time.Time     `json:"genesis_time"`
+	ChainID       string        `json:"chain_id"`
+	InitialHeight flexibleHeight `json:"initial_height"`
+	AppState      AppState      `json:"app_state,omitempty"`
+}
+
+// flexibleHeight unmarshals from JSON string or number (e.g. "1" or 1).
+type flexibleHeight string
+
+func (h *flexibleHeight) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 {
+		return nil
+	}
+	if data[0] == '"' {
+		var s string
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+		*h = flexibleHeight(s)
+		return nil
+	}
+	var n int64
+	if err := json.Unmarshal(data, &n); err != nil {
+		return err
+	}
+	*h = flexibleHeight(strconv.FormatInt(n, 10))
+	return nil
 }
 
 type AppState struct {
-	Auth      JsonMap   `json:"auth"`
-	Bank      Bank      `json:"bank"`
-	Thorchain Thorchain `json:"thorchain"`
+	Auth JsonMap `json:"auth"`
+	Bank Bank    `json:"bank"`
 }
 
 type Bank struct {
@@ -65,75 +89,6 @@ type Balance struct {
 type Coin struct {
 	Amount int64  `json:"amount,string"`
 	Denom  string `json:"denom"`
-}
-
-type Node struct {
-	NodeAddress string `json:"node_address"`
-	Status      string `json:"status"`
-	BondE8      int64  `json:"bond,string"`
-	BondAddr    string `json:"bond_address"`
-}
-
-type Thorchain struct {
-	LPs       []LP       `json:"liquidity_providers"`
-	Loans     []Loan     `json:"loans"`
-	Pools     []Pool     `json:"pools"`
-	THORNames []THORName `json:"THORNames"`
-	Nodes     []Node     `json:"node_accounts"`
-	Mimirs    []Mimir    `json:"mimirs"`
-}
-
-type Mimir struct {
-	Key   string `json:"Key"`
-	Value int64  `json:"value,string"`
-}
-
-type LP struct {
-	Pool         string `json:"asset"`
-	AssetAddr    string `json:"asset_address"`
-	AssetE8      int64  `json:"asset_deposit_value,string"`
-	PendingAsset int64  `json:"pending_asset,string"`
-	RuneAddr     string `json:"rune_address"`
-	RuneE8       int64  `json:"rune_deposit_value,string"`
-	PendingRune  int64  `json:"pending_rune,string"`
-	Units        int64  `json:"units,string"`
-	LastHeight   int64  `json:"last_add_height,string"`
-}
-
-type Pool struct {
-	BalanceRune         int64  `json:"balance_rune,string"`
-	BalanceAsset        int64  `json:"balance_asset,string"`
-	Asset               string `json:"asset"`
-	LPUnits             int64  `json:"LP_units,string"`
-	Status              string `json:"status"`
-	StatusSince         int64  `json:"status_since,string"`
-	Decimals            int64  `json:"decimals,string"`
-	SynthUnits          int64  `json:"synth_units,string"`
-	PendingInboundRune  int64  `json:"pending_inbound_rune,string"`
-	PendingInboundAsset int64  `json:"pending_inbound_asset,string"`
-}
-
-type THORName struct {
-	Name              string          `json:"name"`
-	ExpireBlockHeight int64           `json:"expire_block_height,string"`
-	Owner             string          `json:"owner"`
-	PreferredAsset    string          `json:"preferred_asset"`
-	Aliases           []THORNameAlias `json:"aliases"`
-}
-
-type THORNameAlias struct {
-	Chain   string `json:"chain"`
-	Address string `json:"address"`
-}
-
-type Loan struct {
-	Asset               string `json:"asset"`
-	Owner               string `json:"owner"`
-	CollateralDeposited int64  `json:"collateral_deposited,string"`
-	CollateralWithdrawn int64  `json:"collateral_withdrawn,string"`
-	DebtIssued          int64  `json:"debt_issued,string"`
-	DebtRepaid          int64  `json:"debt_repaid,string"`
-	LastOpenHeight      int64  `json:"last_open_height,string"`
 }
 
 func GenesisExits() bool {
