@@ -1,7 +1,6 @@
 package record
 
 import (
-	"bytes"
 	"testing"
 
 	abci "github.com/cometbft/cometbft/abci/types"
@@ -82,68 +81,6 @@ func TestOutbound(t *testing.T) {
 	}
 }
 
-func TestScheduledOutbound(t *testing.T) {
-	var event ScheduledOutbound
-	err := event.LoadTendermint(toAttrs(map[string]string{
-		"chain":              "BTC",
-		"coin_amount":        "3137611526",
-		"coin_asset":         "BTC.BTC",
-		"coin_decimals":      "0",
-		"gas_rate":           "22",
-		"in_hash":            "40A3D546F349F9CF8E907B6676E6187AD01F24C76AD9D0B9D2958E8C9E059E2C",
-		"max_gas_amount_0":   "22500",
-		"max_gas_asset_0":    "BTC.BTC",
-		"max_gas_decimals_0": "8",
-		"memo":               "OUT:40A3D546F349F9CF8E907B6676E6187AD01F24C76AD9D0B9D2958E8C9E059E2C",
-		"to_address":         "bc1qwxwl5l209je4c2ycr8hc7dq7jqfptk23esmn5s",
-		"vault_pub_key":      "thorpub1addwnpepqg2qqe0fc9h09q2hy3lkmyprkfe2r4ycymxxdlguzae52z7k9wk9yvmh8eu",
-	}))
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-// DoubleAsset returns the follow-up pool or nil. Follow-ups occur in so-called
-// double-swaps, whereby the trader sells .Pool asset with this event, and then
-// consecutively buys DoubleAsset in another event (with the same .Tx).
-func (e *Swap) DoubleAsset() (asset []byte) {
-	if IsRune(e.ToAsset) {
-		params := bytes.SplitN(e.Memo, []byte{':'}, 3)
-		if len(params) > 1 && !bytes.Equal(params[1], e.Pool) {
-			return params[1]
-		}
-	}
-	return nil
-}
-
-func TestSwap(t *testing.T) {
-	var event Swap
-	err := event.LoadTendermint(toAttrs(map[string]string{
-		"chain":                 "BNB",
-		"coin":                  "500000 BNB.BNB",
-		"emit_asset":            "1 THOR.RUNE",
-		"from":                  "tbnb157dxmw9jz5emuf0apj4d6p3ee42ck0uwksxfff",
-		"id":                    "0F1DE3EC877075636F21AF1E7399AA9B9C710A4989E61A9F5942A78B9FA96621",
-		"liquidity_fee":         "259372",
-		"liquidity_fee_in_rune": "259372",
-		"memo":                  "SWAP:BTC.BTC:bcrt1qqqnde7kqe5sf96j6zf8jpzwr44dh4gkd3ehaqh",
-		"pool":                  "BNB.BNB",
-		"swap_target":           "1",
-		"to":                    "tbnb153nknrl2d2nmvguhhvacd4dfsm4jlv8c87nscv",
-		"swap_slip":             "33",
-	}))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if event.FromE8 != 500000 || string(event.FromAsset) != "BNB.BNB" {
-		t.Errorf(`got from %d %q with "coin": "500000 BNB.BNB"`, event.FromE8, event.FromAsset)
-	}
-	if got := event.DoubleAsset(); string(got) != "BTC.BTC" {
-		t.Errorf("got asset %q, want BitCoin", got)
-	}
-}
-
 func TestRefund(t *testing.T) {
 	var event Refund
 	err := event.LoadTendermint(toAttrs(map[string]string{
@@ -209,23 +146,6 @@ func TestBond(t *testing.T) {
 
 	if event.E8 != 100 || event.AssetE8 != 100 || string(event.Asset) != "THOR.RUNE" {
 		t.Errorf(`got %d / %d / %q when expecting 100 / 100 / THOR.RUNE"`, event.E8, event.AssetE8, event.Asset)
-	}
-}
-
-func TestMintBurn(t *testing.T) {
-	var event MintBurn
-	err := event.LoadTendermint(toAttrs(map[string]string{
-		"supply": "burn",
-		"denom":  "bnb/bnb",
-		"amount": "10",
-		"reason": "failed_refund",
-	}))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if string(event.Supply) != "burn" || string(event.Asset) != "BNB/BNB" || event.AssetE8 != 10 || string(event.Reason) != "failed_refund" {
-		t.Errorf(`got %s / %q / %d / %s when expecting burn / BNB/BNB / 10 / failed_refund"`, event.Supply, event.Asset, event.AssetE8, event.Reason)
 	}
 }
 

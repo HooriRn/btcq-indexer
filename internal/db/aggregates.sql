@@ -263,139 +263,13 @@ CREATE VIEW btcq_indexer_agg.withdraw_actions AS
             ) AS meta
     FROM withdraw_events;
 
--- calculate the latest price of the asset
-CREATE VIEW btcq_indexer_agg.swap_usd_actions AS 
-    SELECT
-        s.*,
-        COALESCE(b.rune_e8::DOUBLE PRECISION / NULLIF(b.asset_e8::DOUBLE PRECISION, 0), 0) * r.rune_price_e8 AS asset_price_usd,
-        r.rune_price_e8 AS rune_price_usd
-    FROM
-        swap_events as s
-    LEFT JOIN
-        rune_price as r ON s.block_timestamp = r.block_timestamp
-    LEFT JOIN LATERAL (
-        SELECT asset_e8, rune_e8
-        FROM block_pool_depths
-        WHERE block_pool_depths.pool = s.pool
-        AND block_pool_depths.block_timestamp <= s.block_timestamp
-        ORDER BY block_timestamp DESC
-        LIMIT 1
-    ) AS b ON true;
-
-
--- TODO(huginn): use _direction for join
+-- swap_events table removed; empty view.
 CREATE VIEW btcq_indexer_agg.swap_actions AS
-    -- Double swap (same txid in different pools)
-        SELECT
-        swap_in.event_id,
-        swap_in.block_timestamp,
-        'swap' AS action_type,
-        swap_in.tx :: text AS main_ref,
-        ARRAY[swap_in.from_addr, swap_in.to_addr] :: text[] AS addresses,
-        ARRAY[swap_in.tx] :: text[] AS transactions,
-        ARRAY[swap_in.from_asset, swap_out.to_asset] :: text[] AS assets,
-        CASE WHEN swap_in.pool <> swap_out.pool THEN ARRAY[swap_in.pool, swap_out.pool]
-            ELSE ARRAY[swap_in.pool] END :: text[] AS pools,
-        jsonb_build_array(mktransaction(swap_in.tx, swap_in.from_addr,
-            (swap_in.from_asset, swap_in.from_e8))) AS ins,
-        jsonb_build_array() AS outs,
-        jsonb_build_array() AS fees,
-        jsonb_build_object(
-            'swapSingle', FALSE,
-            'liquidityFee', swap_in.liq_fee_in_rune_e8 + swap_out.liq_fee_in_rune_e8,
-            'swapTarget', swap_out.to_e8_min,
-            'swapSlip', swap_in.swap_slip_BP + swap_out.swap_slip_BP
-                - swap_in.swap_slip_BP*swap_out.swap_slip_BP/10000,
-            'memo', swap_in.memo,
-            'affiliateFee', CASE
-                WHEN SUBSTRING(swap_in.memo FROM '^(.*?):')::text = ANY('{SWAP,s,=}') THEN
-                    SUBSTRING(swap_in.memo FROM '^(?:=|SWAP|[s]):(?:[^:]*:){4}(\d{1,5}?)(?::|$)')::int
-                WHEN SUBSTRING(swap_in.memo FROM '^(.*?):')::text = ANY('{ADD,a,+}') THEN
-                    SUBSTRING(swap_in.memo FROM '^(?:ADD|[+]|a):(?:[^:]*:){3}(\d{1,5}?)(?::|$)')::int
-                ELSE NULL
-            END,
-            'affiliateAddress', CASE
-                WHEN SUBSTRING(swap_in.memo FROM '^(.*?):')::text = ANY('{SWAP,s,=}') THEN
-                    SUBSTRING(swap_in.memo FROM '^(?:=|SWAP|[s]):(?:[^:]*:){3}([^:]+)')
-                WHEN SUBSTRING(swap_in.memo FROM '^(.*?):')::text = ANY('{ADD,a,+}') THEN
-                    SUBSTRING(swap_in.memo FROM '^(?:ADD|[+]|a):(?:[^:]*:){2}([^:]+)')
-                ELSE NULL
-            END,
-            'outRuneE8', swap_in.to_e8,
-            'txType', swap_in._tx_type,
-            'inPriceUSD', swap_in.asset_price_usd,
-            'outPriceUSD', swap_out.asset_price_usd
-            ) AS meta,
-        jsonb_build_object(
-            'count', swap_in.streaming_count,
-            'quantity', swap_in.streaming_quantity,
-            'out_estimation', swap_out.to_e8 * swap_in.streaming_quantity
-            ) AS streaming_meta
-    FROM btcq_indexer_agg.swap_usd_actions AS swap_in
-    INNER JOIN btcq_indexer_agg.swap_usd_actions AS swap_out
-    ON swap_in.tx = swap_out.tx AND swap_in.block_timestamp = swap_out.block_timestamp
-    WHERE swap_in.from_asset <> swap_out.to_asset AND swap_in.to_e8 = swap_out.from_e8
-        AND swap_in.to_asset = 'THOR.RUNE' AND swap_out.from_asset = 'THOR.RUNE'
-        AND swap_in.memo != 'noop'
-    UNION ALL
-    -- Single swap (unique txid)
-    SELECT
-        event_id,
-        block_timestamp,
-        'swap' AS action_type,
-        tx :: text AS main_ref,
-        ARRAY[from_addr, to_addr] :: text[] AS addresses,
-        ARRAY[tx] :: text[] AS transactions,
-        ARRAY[from_asset, to_asset] :: text[] AS assets,
-        ARRAY[pool] :: text[] AS pools,
-        jsonb_build_array(mktransaction(tx, from_addr, (from_asset, from_e8))) AS ins,
-        jsonb_build_array() AS outs,
-        jsonb_build_array() AS fees,
-        jsonb_build_object(
-            'swapSingle', TRUE,
-            'liquidityFee', liq_fee_in_rune_e8,
-            'swapTarget', to_e8_min,
-            'swapSlip', swap_slip_bp,
-            'memo', memo,
-            'affiliateFee', CASE
-                WHEN SUBSTRING(memo FROM '^(.*?):')::text = ANY('{SWAP,s,=}') THEN
-                    SUBSTRING(memo FROM '^(?:=|SWAP|[s]):(?:[^:]*:){4}(\d{1,5}?)(?::|$)')::int
-                WHEN SUBSTRING(memo FROM '^(.*?):')::text = ANY('{ADD,a,+}') THEN
-                    SUBSTRING(memo FROM '^(?:ADD|[+]|a):(?:[^:]*:){3}(\d{1,5}?)(?::|$)')::int
-                ELSE NULL
-            END,
-            'affiliateAddress', CASE
-                WHEN SUBSTRING(memo FROM '^(.*?):')::text = ANY('{SWAP,s,=}') THEN
-                    SUBSTRING(memo FROM '^(?:=|SWAP|[s]):(?:[^:]*:){3}([^:]+)')
-                WHEN SUBSTRING(memo FROM '^(.*?):')::text = ANY('{ADD,a,+}') THEN
-                    SUBSTRING(memo FROM '^(?:ADD|[+]|a):(?:[^:]*:){2}([^:]+)')
-                ELSE NULL
-            END,
-            'txType', _tx_type,
-            'inPriceUSD', CASE
-                WHEN _direction%2 = 0 THEN
-                    rune_price_usd
-                ELSE
-                    asset_price_usd
-                END,
-            'outPriceUSD', CASE
-                WHEN _direction%2 = 0 THEN
-                    asset_price_usd
-                ELSE
-                    rune_price_usd
-                END
-            ) AS meta,
-        jsonb_build_object(
-            'count', streaming_count,
-            'quantity', streaming_quantity,
-            'out_estimation', to_e8 * streaming_quantity
-            ) AS streaming_meta
-    FROM btcq_indexer_agg.swap_usd_actions AS single_swaps
-    WHERE NOT EXISTS (
-        SELECT tx FROM swap_events
-        WHERE block_timestamp = single_swaps.block_timestamp AND tx = single_swaps.tx
-            AND (from_e8 = single_swaps.to_e8 OR to_e8 = single_swaps.from_e8)
-    );
+    SELECT NULL::bigint AS event_id, NULL::bigint AS block_timestamp, NULL::text AS action_type,
+        NULL::text AS main_ref, NULL::text[] AS addresses, NULL::text[] AS transactions,
+        NULL::text[] AS assets, NULL::text[] AS pools, NULL::jsonb AS ins, NULL::jsonb AS outs,
+        NULL::jsonb AS fees, NULL::jsonb AS meta, NULL::jsonb AS streaming_meta
+    WHERE false;
 
 CREATE VIEW btcq_indexer_agg.addliquidity_actions AS
     SELECT
@@ -495,99 +369,27 @@ CREATE VIEW btcq_indexer_agg.trade_actions AS
         'trade' AS action_type,
         tx_id :: text AS main_ref,
         non_null_array(rune_address, asset_address) AS addresses,
-        non_null_array(tx_id) AS transactions,
-        ARRAY[asset] :: text[] AS assets,
-        NULL :: text[] AS pools,
-        jsonb_build_array(mktransaction(tx_id, asset_address, (REPLACE(asset, '~', '.'), amount_e8 :: bigint))) AS ins,
-        jsonb_build_array() AS outs,
-        jsonb_build_array() AS fees,
-        NULL :: jsonb AS meta
-    FROM trade_account_deposit_events
-    UNION ALL
-    SELECT
-        event_id,
-        block_timestamp,
-        'trade' AS action_type,
-        tx_id :: text AS main_ref,
-        non_null_array(rune_address, asset_address) AS addresses,
-        non_null_array(tx_id) AS transactions,
-        ARRAY[asset] :: text[] AS assets,
-        NULL :: text[] AS pools,
-        transaction_list(mktransaction(tx_id, rune_address, (asset, amount_e8 :: bigint))) AS ins,
-        jsonb_build_array() AS outs,
-        jsonb_build_array() AS fees,
-        NULL :: jsonb AS meta
-    FROM trade_account_withdraw_events;
+-- trade_account_*, secure_asset_*, rune_pool_* events tables removed; empty views.
+CREATE VIEW btcq_indexer_agg.trade_actions AS
+    SELECT NULL::bigint AS event_id, NULL::bigint AS block_timestamp, NULL::text AS action_type,
+        NULL::text AS main_ref, NULL::text[] AS addresses, NULL::text[] AS transactions,
+        NULL::text[] AS assets, NULL::text[] AS pools, NULL::jsonb AS ins, NULL::jsonb AS outs,
+        NULL::jsonb AS fees, NULL::jsonb AS meta
+    WHERE false;
 
 CREATE VIEW btcq_indexer_agg.secure_actions AS
-    SELECT
-        event_id,
-        block_timestamp,
-        'secure' AS action_type,
-        tx_id :: text AS main_ref,
-        non_null_array(rune_address, asset_address) AS addresses,
-        non_null_array(tx_id) AS transactions,
-        ARRAY[asset] :: text[] AS assets,
-        NULL :: text[] AS pools,
-        jsonb_build_array(mktransaction(tx_id, asset_address, (REPLACE(asset, '-', '.'), amount_e8 :: bigint))) AS ins,
-        jsonb_build_array() AS outs,
-        jsonb_build_array() AS fees,
-        NULL :: jsonb AS meta
-    FROM secure_asset_deposit_events
-    UNION ALL
-    SELECT
-        event_id,
-        block_timestamp,
-        'secure' AS action_type,
-        tx_id :: text AS main_ref,
-        non_null_array(rune_address, asset_address) AS addresses,
-        non_null_array(tx_id) AS transactions,
-        ARRAY[asset] :: text[] AS assets,
-        NULL :: text[] AS pools,
-        transaction_list(mktransaction(tx_id, rune_address, (asset, amount_e8 :: bigint))) AS ins,
-        jsonb_build_array() AS outs,
-        jsonb_build_array() AS fees,
-        NULL :: jsonb AS meta
-    FROM secure_asset_withdraw_events;
+    SELECT NULL::bigint AS event_id, NULL::bigint AS block_timestamp, NULL::text AS action_type,
+        NULL::text AS main_ref, NULL::text[] AS addresses, NULL::text[] AS transactions,
+        NULL::text[] AS assets, NULL::text[] AS pools, NULL::jsonb AS ins, NULL::jsonb AS outs,
+        NULL::jsonb AS fees, NULL::jsonb AS meta
+    WHERE false;
 
 CREATE VIEW btcq_indexer_agg.rune_pool_actions AS
-    SELECT
-        event_id,
-        block_timestamp,
-        'runePoolDeposit' AS action_type,
-        tx_id :: text AS main_ref,
-        non_null_array(rune_addr) AS addresses,
-        non_null_array(tx_id) AS transactions,
-        ARRAY['THOR.RUNE'] :: text[] AS assets,
-        NULL :: text[] AS pools,
-        jsonb_build_array(mktransaction(tx_id, rune_addr, ('THOR.RUNE', amount_e8 :: bigint))) AS ins,
-        jsonb_build_array() AS outs,
-        jsonb_build_array(jsonb_build_object('asset', 'THOR.RUNE', 'amount', 20000000)) AS fees,
-        jsonb_build_object(
-            'units', units
-            ) AS meta
-    FROM rune_pool_deposit_events
-    UNION ALL
-    SELECT
-        event_id,
-        block_timestamp,
-        'runePoolWithdraw' AS action_type,
-        tx_id :: text AS main_ref,
-        non_null_array(rune_addr) AS addresses,
-        non_null_array(tx_id) AS transactions,
-        ARRAY['THOR.RUNE'] :: text[] AS assets,
-        NULL :: text[] AS pools,
-        jsonb_build_array() AS ins,
-        jsonb_build_array(mktransaction(tx_id, rune_addr, ('THOR.RUNE', amount_e8 :: bigint))) AS outs,
-        jsonb_build_array(jsonb_build_object('asset', 'THOR.RUNE', 'amount', 20000000)) AS fees,
-        jsonb_build_object(
-            'units', units,
-            'basisPoints', basis_points,
-            'affiliateBasisPts', affiliate_basis_pts,
-            'affiliateAmount', affiliate_amount_e8,
-            'affiliateAddr', affiliate_addr     
-            ) AS meta
-    FROM rune_pool_withdraw_events;
+    SELECT NULL::bigint AS event_id, NULL::bigint AS block_timestamp, NULL::text AS action_type,
+        NULL::text AS main_ref, NULL::text[] AS addresses, NULL::text[] AS transactions,
+        NULL::text[] AS assets, NULL::text[] AS pools, NULL::jsonb AS ins, NULL::jsonb AS outs,
+        NULL::jsonb AS fees, NULL::jsonb AS meta
+    WHERE false;
 
 CREATE VIEW btcq_indexer_agg.bond_actions AS
     SELECT
@@ -678,97 +480,25 @@ CREATE VIEW btcq_indexer_agg.instantiate_actions AS
     FROM instantiate_events;
 
 CREATE VIEW btcq_indexer_agg.tcy_actions AS
-    SELECT
-        event_id,
-        block_timestamp,
-        'tcy_claim' AS action_type,
-        tx_id :: text AS main_ref,
-        non_null_array(l1_address, rune_address) AS addresses,
-        non_null_array(tx_id) AS transactions,
-        ARRAY[asset, 'THOR.TCY'] :: text[] AS assets,
-        NULL :: text[] AS pools,
-        jsonb_build_array(mktransaction(tx_id, l1_address, (asset, 0 :: bigint))) AS ins,
-        jsonb_build_array(mktransaction(tx_id, rune_address, ('THOR.TCY', tcy_amt :: bigint))) AS outs,
-        jsonb_build_array() AS fees,
-        jsonb_build_object(
-            'memo', memo
-            ) AS meta
-    FROM tcy_claim_events
-    UNION ALL
-    SELECT
-        event_id,
-        block_timestamp,
-        'tcy_stake' AS action_type,
-        tx_id :: text AS main_ref,
-        non_null_array(rune_address) AS addresses,
-        non_null_array(tx_id) AS transactions,
-        ARRAY['THOR.TCY'] :: text[] AS assets,
-        NULL :: text[] AS pools,
-        jsonb_build_array(mktransaction(tx_id, rune_address, ('THOR.TCY', amount :: bigint))) AS ins,
-        jsonb_build_array() AS outs,
-        jsonb_build_array() AS fees,
-        jsonb_build_object(
-            'memo', memo
-            ) AS meta
-    FROM tcy_stake_events
-    UNION ALL
-    SELECT
-        event_id,
-        block_timestamp,
-        'tcy_unstake' AS action_type,
-        tx_id :: text AS main_ref,
-        non_null_array(rune_address) AS addresses,
-        non_null_array(tx_id) AS transactions,
-        ARRAY['THOR.TCY'] :: text[] AS assets,
-        NULL :: text[] AS pools,
-        jsonb_build_array() AS ins,
-        jsonb_build_array(mktransaction(tx_id, rune_address, ('THOR.TCY', amount :: bigint))) AS outs,
-        jsonb_build_array() AS fees,
-        jsonb_build_object(
-            'memo', memo
-            ) AS meta
-    FROM tcy_unstake_events;
+    SELECT NULL::bigint AS event_id, NULL::bigint AS block_timestamp, NULL::text AS action_type,
+        NULL::text AS main_ref, NULL::text[] AS addresses, NULL::text[] AS transactions,
+        NULL::text[] AS assets, NULL::text[] AS pools, NULL::jsonb AS ins, NULL::jsonb AS outs,
+        NULL::jsonb AS fees, NULL::jsonb AS meta
+    WHERE false;
 
 CREATE VIEW btcq_indexer_agg.limit_swap_actions AS
-    SELECT
-        event_id,
-        block_timestamp,
-        'limit_swap' AS action_type,
-        tx_id :: text AS main_ref,
-        non_null_array(from_addr, to_addr) AS addresses,
-        non_null_array(tx_id) AS transactions,
-        ARRAY[from_asset, to_asset] :: text[] AS assets,
-        NULL :: text[] AS pools,
-        jsonb_build_array(mktransaction(tx_id, from_addr, (from_asset, from_e8 :: bigint))) AS ins,
-        CASE 
-            WHEN to_e8 > 0 THEN jsonb_build_array(mktransaction(tx_id, to_addr, (to_asset, to_e8 :: bigint)))
-            ELSE jsonb_build_array()
-        END AS outs,
-        jsonb_build_array() AS fees,
-        jsonb_build_object(
-            'memo', memo
-            ) AS meta
-    FROM limit_swap_events;
+    SELECT NULL::bigint AS event_id, NULL::bigint AS block_timestamp, NULL::text AS action_type,
+        NULL::text AS main_ref, NULL::text[] AS addresses, NULL::text[] AS transactions,
+        NULL::text[] AS assets, NULL::text[] AS pools, NULL::jsonb AS ins, NULL::jsonb AS outs,
+        NULL::jsonb AS fees, NULL::jsonb AS meta
+    WHERE false;
 
 CREATE VIEW btcq_indexer_agg.rebond_actions AS
-    SELECT
-        event_id,
-        block_timestamp,
-        'rebond' AS action_type,
-        tx_id :: text AS main_ref,
-        non_null_array(old_bond_address, new_bond_address, node_address) AS addresses,
-        non_null_array(tx_id) AS transactions,
-        ARRAY['THOR.RUNE'] :: text[] AS assets,
-        NULL :: text[] AS pools,
-        jsonb_build_array(mktransaction(tx_id, old_bond_address, ('THOR.RUNE', amount :: bigint))) AS ins,
-        jsonb_build_array(mktransaction(tx_id, to_addr, ('THOR.RUNE', amount :: bigint))) AS outs,
-        jsonb_build_array() AS fees,
-        jsonb_build_object(
-            'newBondAddress', new_bond_address,
-            'nodeAddress', node_address,
-            'memo', memo
-            ) AS meta
-    FROM rebond_events;
+    SELECT NULL::bigint AS event_id, NULL::bigint AS block_timestamp, NULL::text AS action_type,
+        NULL::text AS main_ref, NULL::text[] AS addresses, NULL::text[] AS transactions,
+        NULL::text[] AS assets, NULL::text[] AS pools, NULL::jsonb AS ins, NULL::jsonb AS outs,
+        NULL::jsonb AS fees, NULL::jsonb AS meta
+    WHERE false;
 
 --
 -- Procedures for updating actions
@@ -877,21 +607,7 @@ $BODY$;
 CREATE PROCEDURE btcq_indexer_agg.actions_add_outbounds(t1 bigint, t2 bigint)
 LANGUAGE plpgsql AS $BODY$
 BEGIN
-    UPDATE outbound_events as o
-    SET
-        internal = TRUE
-    FROM (
-        SELECT *
-        FROM swap_events
-        WHERE t1 <= block_timestamp AND block_timestamp < t2
-        ) as a
-    WHERE
-        o.in_tx = a.tx AND
-        o.block_timestamp = a.block_timestamp AND
-        a.from_asset = 'THOR.RUNE' AND
-        o.asset_e8 = a.from_e8 AND
-        o.asset = 'THOR.RUNE'
-    ;
+    -- swap_events table removed; first UPDATE (mark swap-related outbounds internal) omitted.
 
     UPDATE btcq_indexer_agg.actions AS a
     SET
@@ -919,106 +635,21 @@ $BODY$;
 CREATE PROCEDURE btcq_indexer_agg.actions_add_trade_deposit(t1 bigint, t2 bigint)
 LANGUAGE plpgsql AS $BODY$
 BEGIN
-    UPDATE btcq_indexer_agg.actions AS a
-    SET
-        addresses = (with b as (select unnest(a.addresses || o.addresses) b) select array_agg(distinct b) from b),
-        assets = (with b as (select unnest(a.assets || o.assets) b) select array_agg(distinct b) from b), 
-        outs = CASE
-            WHEN o.outs #>> '{0, "coins", 0, "asset"}' = a.outs #>> '{0, "coins", 0, "asset"}' 
-            THEN jsonb_set(a.outs, '{0, "coins", 0, "amount"}',
-                to_jsonb((a.outs #> '{0, "coins", 0, "amount"}')::bigint + 
-                (o.outs #> '{0, "coins", 0, "amount"}')::bigint))
-            ELSE
-                a.outs || o.outs
-            END
-    FROM (
-        SELECT
-            tx_id,
-            rune_address AS addresses,
-            asset AS assets,
-            btcq_indexer_agg.out_tx(tx_id, rune_address, NULL, TRUE, (asset, amount_e8)) AS outs
-        FROM (
-            SELECT DISTINCT ON (tx_id, rune_address, asset) 
-                SUM(amount_e8)::bigint as amount_e8, 
-                tx_id, 
-                rune_address,
-                asset 
-            FROM trade_account_deposit_events 
-            WHERE t1 <= block_timestamp AND block_timestamp < t2
-            GROUP BY tx_id, rune_address, asset
-            ) AS t
-        ) AS o
-    WHERE
-        o.tx_id = a.main_ref;
+    -- trade_account_deposit_events table removed; no-op.
 END
 $BODY$;
 
 CREATE PROCEDURE btcq_indexer_agg.actions_add_secure_deposit(t1 bigint, t2 bigint)
 LANGUAGE plpgsql AS $BODY$
 BEGIN
-    UPDATE btcq_indexer_agg.actions AS a
-    SET
-        addresses = (with b as (select unnest(a.addresses || o.addresses) b) select array_agg(distinct b) from b),
-        assets = (with b as (select unnest(a.assets || o.assets) b) select array_agg(distinct b) from b), 
-        outs = CASE
-            WHEN o.outs #>> '{0, "coins", 0, "asset"}' = a.outs #>> '{0, "coins", 0, "asset"}' 
-            THEN jsonb_set(a.outs, '{0, "coins", 0, "amount"}',
-                to_jsonb((a.outs #> '{0, "coins", 0, "amount"}')::bigint + 
-                (o.outs #> '{0, "coins", 0, "amount"}')::bigint))
-            ELSE
-                a.outs || o.outs
-            END
-    FROM (
-        SELECT
-            tx_id,
-            rune_address AS addresses,
-            asset AS assets,
-            btcq_indexer_agg.out_tx(tx_id, rune_address, NULL, TRUE, (asset, amount_e8)) AS outs
-        FROM (
-            SELECT DISTINCT ON (tx_id, rune_address, asset) 
-                SUM(amount_e8)::bigint as amount_e8, 
-                tx_id, 
-                rune_address,
-                asset 
-            FROM secure_asset_deposit_events 
-            WHERE t1 <= block_timestamp AND block_timestamp < t2
-            GROUP BY tx_id, rune_address, asset
-            ) AS t
-        ) AS o
-    WHERE
-        o.tx_id = a.main_ref;
+    -- secure_asset_deposit_events table removed; no-op.
 END
 $BODY$;
 
--- Add streaming details to swap action delete tx_id and event_id from event
+-- streaming_swap_details_events table removed; no-op.
 CREATE PROCEDURE btcq_indexer_agg.streaming_details(t1 bigint, t2 bigint)
 LANGUAGE plpgsql AS $BODY$
 BEGIN
-    UPDATE btcq_indexer_agg.actions AS a
-    SET
-        streaming_meta = a.streaming_meta || out
-    FROM (
-        SELECT DISTINCT ON (tx_id)
-            tx_id,
-            jsonb_build_object(
-                'interval', interval,
-                'quantity', quantity,
-                'count', count,
-                'last_height', last_height,
-                'deposit_asset', deposit_asset,
-                'deposit_e8', deposit_e8,
-                'in_asset', in_asset,
-                'in_e8', in_e8,
-                'out_asset', out_asset,
-                'out_e8', out_e8,
-                'failed_swaps', failed_swaps,
-                'failed_swap_reasons', failed_swap_reasons
-            ) as out
-        FROM streaming_swap_details_events
-        WHERE t1 <= block_timestamp AND block_timestamp < t2
-        ) AS s
-    WHERE
-        s.tx_id = a.main_ref;
 END
 $BODY$;
 

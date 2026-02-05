@@ -32,7 +32,6 @@ type FakeDemux struct {
 		record.SetVersion
 		record.Slash
 		record.Stake
-		record.Swap
 		record.Transfer
 		record.Withdraw
 		record.UpdateNodeAccountStatus
@@ -41,7 +40,6 @@ type FakeDemux struct {
 		record.Switch
 		record.THORNameChange
 		record.SlashPoints
-		record.SetNodeMimir
 	}
 }
 
@@ -51,11 +49,6 @@ func (d *FakeDemux) processDemux(event abci.Event) int64 {
 	attrs := event.Attributes
 
 	switch event.Type {
-	case "swap":
-		if err := d.reuse.Swap.LoadTendermint(attrs); err != nil {
-			panic(err)
-		}
-		return d.reuse.Swap.LiqFeeInRuneE8
 	case "switch":
 		if err := d.reuse.Switch.LoadTendermint(attrs); err != nil {
 			panic(err)
@@ -78,12 +71,6 @@ func processDirect(event abci.Event) int64 {
 	attrs := event.Attributes
 
 	switch event.Type {
-	case "swap":
-		var x record.Swap
-		if err := x.LoadTendermint(attrs); err != nil {
-			panic(err)
-		}
-		return x.LiqFeeInRuneE8
 	case "switch":
 		var x record.Switch
 		if err := x.LoadTendermint(attrs); err != nil {
@@ -104,14 +91,6 @@ func processDirect(event abci.Event) int64 {
 var total int64
 
 var events = []abci.Event{
-	testdb.Swap{
-		Pool:               "BTC.BTC",
-		Coin:               "1 BTC.BTC",
-		EmitAsset:          "9 THOR.RUNE",
-		LiquidityFeeInRune: 1,
-		LiquidityFee:       1,
-		Slip:               10,
-	}.ToTendermint(),
 	testdb.Switch{
 		FromAddress: "b2",
 		ToAddress:   "thor2",

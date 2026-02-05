@@ -67,7 +67,6 @@ func DeleteTables(t *testing.T) {
 	MustExec(t, "DELETE FROM pending_liquidity_events")
 	MustExec(t, "DELETE FROM withdraw_events")
 	MustExec(t, "DELETE FROM switch_events")
-	MustExec(t, "DELETE FROM swap_events")
 	MustExec(t, "DELETE FROM rewards_events")
 	MustExec(t, "DELETE FROM rewards_event_entries")
 	MustExec(t, "DELETE FROM bond_events")
@@ -75,21 +74,13 @@ func DeleteTables(t *testing.T) {
 	MustExec(t, "DELETE FROM update_node_account_status_events")
 	MustExec(t, "DELETE FROM active_vault_events")
 	MustExec(t, "DELETE FROM set_mimir_events")
-	MustExec(t, "DELETE FROM set_node_mimir_events")
 	MustExec(t, "DELETE FROM thorname_change_events")
 	MustExec(t, "DELETE FROM outbound_events")
 	MustExec(t, "DELETE FROM fee_events")
 	MustExec(t, "DELETE FROM add_events")
 	MustExec(t, "DELETE FROM refund_events")
 	MustExec(t, "DELETE FROM transfer_events")
-	MustExec(t, "DELETE FROM mint_burn_events")
-	MustExec(t, "DELETE FROM network_version_events")
-	MustExec(t, "DELETE FROM loan_open_events")
-	MustExec(t, "DELETE FROM loan_repayment_events")
-	MustExec(t, "DELETE FROM streaming_swap_details_events")
-	MustExec(t, "DELETE FROM scheduled_outbound_events")
 	MustExec(t, "DELETE FROM rune_price")
-	MustExec(t, "DELETE FROM affiliate_fee_events")
 
 	clearAggregates(t)
 }
@@ -348,37 +339,6 @@ func InsertWithdrawEvent(t *testing.T, fake FakeWithdraw) {
 		fake.ImpLossProtectionE8, timestamp)
 }
 
-// TODO(muninn): Remove, migrate remaining tests to FakeBlocks.
-type FakeSwap struct {
-	Tx             string
-	Pool           string
-	FromAsset      string
-	FromE8         int64
-	FromAddr       string
-	ToE8           int64
-	ToAddr         string
-	LiqFeeInRuneE8 int64
-	LiqFeeE8       int64
-	SwapSlipBP     int64
-	ToE8Min        int64
-	BlockTimestamp string
-}
-
-func InsertSwapEvent(t *testing.T, fake FakeSwap) {
-	const insertq = `INSERT INTO swap_events ` +
-		`(tx, chain, from_addr, to_addr, from_asset, from_E8, to_asset, to_E8, memo, pool, to_E8_min,
-			swap_slip_BP, liq_fee_E8, liq_fee_in_rune_E8, _direction, event_id, block_timestamp) ` +
-		`VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 0, $16)`
-
-	timestamp := nanoWithDefault(fake.BlockTimestamp)
-
-	// Hardcoded (probably incorrect) _direction. Use fake blocks and Full E2E for proper direction.
-	MustExec(t, insertq,
-		fake.Tx, "chain", fake.FromAddr, fake.ToAddr, fake.FromAsset, fake.FromE8, "to_asset", fake.ToE8,
-		"memo", fake.Pool, fake.ToE8Min, fake.SwapSlipBP, fake.LiqFeeE8, fake.LiqFeeInRuneE8,
-		db.RuneToAsset, timestamp)
-}
-
 type FakeSwitch struct {
 	FromAddr       string
 	ToAddr         string
@@ -397,31 +357,17 @@ func InsertSwitchEvent(t *testing.T, fake FakeSwitch) {
 		fake.FromAddr, fake.ToAddr, fake.BurnAsset, fake.BurnE8, timestamp)
 }
 
-type FakeMintBurn struct {
-	Asset          string
-	AssetE8        int64
-	Supply         string
-	Reason         string
-	BlockTimestamp string
-}
-
-func InsertMintBurnEvent(t *testing.T, fake FakeMintBurn) {
-	const insertq = `INSERT INTO mint_burn_events ` +
-		`(asset, asset_e8, supply, reason, event_id, block_timestamp) ` +
-		`VALUES ($1, $2, $3, $4, 0, $5)`
-
-	timestamp := nanoWithDefault(fake.BlockTimestamp)
-	MustExec(t, insertq,
-		fake.Asset, fake.AssetE8, fake.Supply, fake.Reason, timestamp)
-}
-
 func InsertRewardsEvent(t *testing.T, bondE8 int64, fakeTimestamp string) {
+	InsertRewardsEventWithValidator(t, bondE8, "", fakeTimestamp)
+}
+
+func InsertRewardsEventWithValidator(t *testing.T, bondE8 int64, validator, fakeTimestamp string) {
 	const insertq = `INSERT INTO rewards_events ` +
-		`(bond_e8, event_id, block_timestamp) ` +
-		`VALUES ($1, 0, $2)`
+		`(bond_e8, validator, event_id, block_timestamp) ` +
+		`VALUES ($1, NULLIF($2, ''), 0, $3)`
 
 	timestamp := nanoWithDefault(fakeTimestamp)
-	MustExec(t, insertq, bondE8, timestamp)
+	MustExec(t, insertq, bondE8, validator, timestamp)
 }
 
 func InsertRewardsEventEntry(t *testing.T, bondE8 int64, pool, fakeTimestamp string) {

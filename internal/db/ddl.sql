@@ -324,29 +324,6 @@ CALL setup_hypertable('outbound_events');
 CREATE INDEX outbound_events_in_tx_idx ON outbound_events (in_tx);
 
 
-CREATE TABLE scheduled_outbound_events (
-    chain            TEXT NOT NULL,
-    to_addr          TEXT NOT NULL,
-    asset            TEXT NOT NULL,
-    asset_e8         BIGINT NOT NULL,
-    asset_decimals   BIGINT NOT NULL,
-    gas_rate         BIGINT,
-    memo             TEXT,
-    in_hash          TEXT NOT NULL,
-    out_hash         TEXT,
-    max_gas_amount   BIGINT [],
-    max_gas_decimals BIGINT [],
-    max_gas_asset    TEXT [],
-    module_name      TEXT,
-    vault_pub_key    TEXT,
-    event_id         BIGINT NOT NULL,
-    block_timestamp  BIGINT NOT NULL
-);
-
-CALL setup_hypertable('scheduled_outbound_events');
-CREATE INDEX scheduled_outbound_events_in_tx_idx ON scheduled_outbound_events (in_hash);
-
-
 CREATE TABLE pool_events (
     asset           TEXT NOT NULL,
     status          TEXT NOT NULL,
@@ -397,6 +374,7 @@ CALL setup_hypertable('reserve_events');
 
 CREATE TABLE rewards_events (
     bond_e8         BIGINT NOT NULL,
+    validator       TEXT,
     event_id        BIGINT NOT NULL,
     block_timestamp BIGINT NOT NULL
 );
@@ -494,33 +472,6 @@ CREATE TABLE pending_liquidity_events (
 );
 
 CALL setup_hypertable('pending_liquidity_events');
-
-CREATE TABLE swap_events (
-    tx                  TEXT NOT NULL,
-    chain               TEXT NOT NULL,
-    from_addr           TEXT NOT NULL,
-    to_addr             TEXT NOT NULL,
-    from_asset          TEXT NOT NULL,
-    from_e8             BIGINT NOT NULL,
-    to_asset            TEXT NOT NULL,
-    to_e8               BIGINT NOT NULL,
-    memo                TEXT NOT NULL,
-    pool                TEXT NOT NULL,
-    to_e8_min           BIGINT NOT NULL,
-    swap_slip_bp        BIGINT NOT NULL,
-    liq_fee_e8          BIGINT NOT NULL,
-    liq_fee_in_rune_e8  BIGINT NOT NULL,
-    _direction          SMALLINT NOT NULL,  -- 0=RuneToAsset 1=AssetToRune 2=RuneToSynth 3=SynthToRune
-    _streaming          BOOLEAN DEFAULT FALSE,
-    _tx_type            TEXT, 
-    streaming_count     BIGINT DEFAULT 1, -- Number of swaps events which already happened
-    streaming_quantity  BIGINT DEFAULT 1, -- Number of swaps which thorchain is planning to execute
-    event_id            BIGINT NOT NULL,
-    block_timestamp     BIGINT NOT NULL
-);
-
-CALL setup_hypertable('swap_events');
-
 
 CREATE TABLE switch_events (
     tx                  TEXT,
@@ -637,133 +588,6 @@ CREATE TABLE slash_points_events (
 CALL setup_hypertable('slash_points_events');
 CREATE INDEX ON slash_points_events (node_address DESC);
 
-CREATE TABLE set_node_mimir_events (
-    address             TEXT NOT NULL,
-    key                 BIGINT NOT NULL,
-    value               TEXT NOT NULL,
-    event_id            BIGINT NOT NULL,
-    block_timestamp     BIGINT NOT NULL
-);
-
-CALL setup_hypertable('set_node_mimir_events');
-
-CREATE TABLE mint_burn_events (
-    asset               TEXT,
-    asset_e8            BIGINT NOT NULL,
-    supply              TEXT,
-    reason              TEXT,
-    event_id            BIGINT NOT NULL,
-    block_timestamp     BIGINT NOT NULL
-);
-
-CALL setup_hypertable('mint_burn_events');
-
-CREATE TABLE network_version_events (
-    version             TEXT NOT NULL,
-    event_id            BIGINT NOT NULL,
-    block_timestamp     BIGINT NOT NULL
-);
-
-CALL setup_hypertable('network_version_events');
-
-CREATE TABLE loan_open_events (
-    owner                   TEXT NOT NULL,
-    collateral_deposited    BIGINT NOT NULL,
-    debt_issued             BIGINT NOT NULL,
-    collateralization_ratio BIGINT NOT NULL,
-    collateral_asset        TEXT NOT NULL,
-    target_asset            TEXT NOT NULL,
-    tx_id                   TEXT,
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CALL setup_hypertable('loan_open_events');
-
-CREATE TABLE loan_repayment_events (
-    owner                   TEXT NOT NULL,
-    collateral_withdrawn    BIGINT NOT NULL,
-    debt_repaid             BIGINT NOT NULL,
-    collateral_asset        TEXT NOT NULL,
-    tx_id                   TEXT,
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CALL setup_hypertable('loan_repayment_events');
-
-CREATE TABLE streaming_swap_details_events (
-    tx_id                   TEXT NOT NULL,
-    interval                BIGINT NOT NULL,
-    quantity                BIGINT NOT NULL,
-    count                   BIGINT NOT NULL,
-    last_height             BIGINT NOT NULL,
-    -- Assets
-    deposit_asset           TEXT NOT NULL,
-    deposit_e8              BIGINT NOT NULL,
-    in_asset                TEXT NOT NULL,
-    in_e8                   BIGINT NOT NULL,
-    out_asset               TEXT NOT NULL,
-    out_e8                  BIGINT NOT NULL,
-    -- Failed swaps
-    failed_swaps            BIGINT [],
-    failed_swap_reasons     TEXT [],
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CALL setup_hypertable('streaming_swap_details_events');
-
-CREATE TABLE tss_keygen_success_events (
-    pub_key                 TEXT,
-    members                 TEXT [],
-    height                  BIGINT,
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CALL setup_hypertable('tss_keygen_success_events');
-CREATE INDEX ON tss_keygen_success_events (height);
-
-CREATE TABLE tss_keygen_failure_events (
-    fail_reason             TEXT,
-    is_unicast              BOOLEAN,
-    blame_nodes             TEXT [],
-    round                   TEXT,
-    height                  BIGINT,  
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CALL setup_hypertable('tss_keygen_failure_events');
-CREATE INDEX ON tss_keygen_failure_events (height);
-
-CREATE TABLE trade_account_deposit_events (
-    amount_e8               BIGINT,
-    asset                   TEXT NOT NULL,
-    asset_address           TEXT,
-    rune_address            TEXT,
-    tx_id                   TEXT NOT NULL,  
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CREATE INDEX ON trade_account_deposit_events (tx_id);
-CALL setup_hypertable('trade_account_deposit_events');
-
-CREATE TABLE trade_account_withdraw_events (
-    amount_e8               BIGINT,
-    asset                   TEXT NOT NULL,
-    asset_address           TEXT,
-    rune_address            TEXT,
-    tx_id                   TEXT NOT NULL,  
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CREATE INDEX ON trade_account_withdraw_events (tx_id);
-CALL setup_hypertable('trade_account_withdraw_events');
-
 CREATE TABLE send_messages (
     amount_e8               BIGINT,
     asset                   TEXT NOT NULL,
@@ -787,34 +611,6 @@ CREATE TABLE rune_price (
 
 CREATE INDEX ON rune_price (block_timestamp);
 
-CREATE TABLE rune_pool_deposit_events (
-    tx_id                   TEXT,  
-    rune_addr               TEXT,
-    amount_e8               BIGINT NOT NULL,
-    units                   BIGINT NOT NULL,
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CREATE INDEX ON rune_pool_deposit_events (tx_id);
-CALL setup_hypertable('rune_pool_deposit_events');
-
-CREATE TABLE rune_pool_withdraw_events (
-    tx_id                   TEXT,  
-    rune_addr               TEXT,
-    amount_e8               BIGINT NOT NULL,
-    units                   BIGINT NOT NULL,
-    basis_points            BIGINT,
-    affiliate_basis_pts     BIGINT,
-    affiliate_amount_e8     BIGINT,
-    affiliate_addr          TEXT,
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CREATE INDEX ON rune_pool_withdraw_events (tx_id);
-CALL setup_hypertable('rune_pool_withdraw_events');
-
 CREATE TABLE failed_deposit_messages (
     tx_id                   TEXT,  
     code                    BIGINT,
@@ -829,49 +625,6 @@ CREATE TABLE failed_deposit_messages (
 
 CREATE INDEX ON failed_deposit_messages (tx_id);
 CALL setup_hypertable('failed_deposit_messages');
-
-CREATE TABLE secure_asset_deposit_events (
-    amount_e8               BIGINT,
-    asset                   TEXT NOT NULL,
-    asset_address           TEXT,
-    rune_address            TEXT,
-    tx_id                   TEXT NOT NULL,  
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CREATE INDEX ON secure_asset_deposit_events (tx_id);
-CALL setup_hypertable('secure_asset_deposit_events');
-
-CREATE TABLE secure_asset_withdraw_events (
-    amount_e8               BIGINT,
-    asset                   TEXT NOT NULL,
-    asset_address           TEXT,
-    rune_address            TEXT,
-    tx_id                   TEXT NOT NULL,  
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CREATE INDEX ON secure_asset_withdraw_events (tx_id);
-CALL setup_hypertable('secure_asset_withdraw_events');
-
-CREATE TABLE affiliate_fee_events (
-    tx_id                   TEXT NOT NULL,  
-    fee_amt                 BIGINT,
-    gross_amt               BIGINT,
-    fee_bps                 BIGINT,
-    memo                    TEXT,
-    asset                   TEXT NOT NULL,
-    rune_address            TEXT NOT NULL,
-    thorname                TEXT NOT NULL,
-    _fee_amt_in_rune        BIGINT,
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CREATE INDEX ON affiliate_fee_events (tx_id);
-CALL setup_hypertable('affiliate_fee_events');
 
 -- CosmWasm Contract events
 
@@ -905,77 +658,3 @@ CREATE TABLE instantiate_events (
 );
 
 CALL setup_hypertable('instantiate_events');
-
-CREATE TABLE tcy_claim_events (
-    tx_id                   TEXT,
-    rune_address            TEXT,
-    l1_address              TEXT,
-    asset                   TEXT,
-    tcy_amt                 BIGINT,
-    memo                    TEXT,
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CALL setup_hypertable('tcy_claim_events');
-
-CREATE TABLE tcy_distribution_events (
-    rune_address            TEXT,
-    rune_amt                BIGINT,
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CREATE INDEX ON tcy_distribution_events (rune_address);
-CALL setup_hypertable('tcy_distribution_events');
-
-CREATE TABLE tcy_stake_events (
-    tx_id                   TEXT,
-    amount                  BIGINT,
-    rune_address            TEXT,
-    memo                    TEXT,
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CALL setup_hypertable('tcy_stake_events');
-
-CREATE TABLE tcy_unstake_events (
-    tx_id                   TEXT,
-    amount                  BIGINT,
-    rune_address            TEXT,
-    memo                    TEXT,
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CALL setup_hypertable('tcy_unstake_events');
-
-CREATE TABLE limit_swap_events (
-    tx_id                  TEXT,
-    from_addr              TEXT,
-    to_addr                TEXT,
-    from_asset             TEXT,
-    from_e8                BIGINT,
-    to_asset               TEXT,
-    to_e8                  BIGINT,
-    memo                   TEXT,
-    event_id               BIGINT NOT NULL,
-    block_timestamp        BIGINT NOT NULL
-);
-
-CALL setup_hypertable('limit_swap_events');
-
-CREATE TABLE rebond_events (
-    tx_id                   TEXT,
-    amount                  BIGINT,
-    new_bond_address        TEXT,
-    old_bond_address        TEXT,
-    node_address            TEXT,
-    memo                    TEXT,
-    to_addr                 TEXT,
-    event_id                BIGINT NOT NULL,
-    block_timestamp         BIGINT NOT NULL
-);
-
-CALL setup_hypertable('rebond_events');

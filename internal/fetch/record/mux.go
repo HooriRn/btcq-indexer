@@ -18,6 +18,7 @@ import (
 	"github.com/btcq/btcq-indexer/internal/util/timer"
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	"github.com/btcq-org/qbtc/x/qbtc/types"
 	btypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stypes "gitlab.com/thorchain/thornode/v3/x/thorchain/types"
 )
@@ -313,12 +314,6 @@ func processEvent(event abci.Event, meta *Metadata) error {
 			return err
 		}
 		Recorder.OnStake(&x, meta)
-	case "swap":
-		var x Swap
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnSwap(&x, meta)
 	case "transfer":
 		var x Transfer
 		if err := x.LoadTendermint(attrs); err != nil {
@@ -375,144 +370,12 @@ func processEvent(event abci.Event, meta *Metadata) error {
 			return err
 		}
 		Recorder.OnSlashPoints(&x, meta)
-	case "set_node_mimir":
-		var x SetNodeMimir
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnSetNodeMimir(&x, meta)
-	case "mint_burn":
-		var x MintBurn
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnMintBurn(&x, meta)
-	case "version":
-		var x Version
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnVersion(&x, meta)
-	case "loan_open":
-		var x LoanOpen
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnLoanOpen(&x, meta)
-	case "loan_repayment":
-		var x LoanRepayment
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnLoanRepayment(&x, meta)
-	case "streaming_swap":
-		var x StreamingSwapDetails
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnStreamingSwapDetails(&x, meta)
-	case "tss_keygen_success":
-		var x TSSKeygenSuccess
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnTSSKeygenSuccess(&x, meta)
-	case "tss_keygen_failure":
-		var x TSSKeygenFailure
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnTSSKeygenFailure(&x, meta)
-	case "scheduled_outbound":
-		var x ScheduledOutbound
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnScheduledOutbound(&x, meta)
-	case "trade_account_deposit":
-		var x TradeAccountDeposit
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnTradeAccountDeposit(&x, meta)
-	case "trade_account_withdraw":
-		var x TradeAccountWithdraw
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnTradeAccountWithdraw(&x, meta)
-	case "secured_asset_deposit":
-		var x SecureAssetDeposit
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnSecureAssetDeposit(&x, meta)
-	case "secured_asset_withdraw":
-		var x SecureAssetWithdraw
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnSecureAssetWithdraw(&x, meta)
-	case "rune_pool_deposit":
-		var x RunePoolDeposit
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnRunePoolDeposit(&x, meta)
-	case "rune_pool_withdraw":
-		var x RunePoolWithdraw
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnRunePoolWithdraw(&x, meta)
-	case "affiliate_fee":
-		var x AffiliateFee
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnAffiliateFee(&x, meta)
 	case "instantiate":
 		var x Instantiate
 		if err := x.LoadTendermint(attrs); err != nil {
 			return err
 		}
 		Recorder.OnInstantiate(&x, meta)
-	case "tcy_claim":
-		var x TcyClaim
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnTcyClaim(&x, meta)
-	case "tcy_distribution":
-		var x TcyDistribution
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnTcyDistribution(&x, meta)
-	case "tcy_stake":
-		var x TcyStake
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnTcyStake(&x, meta)
-	case "tcy_unstake":
-		var x TcyUnstake
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnTcyUnstake(&x, meta)
-	case "limit_swap":
-		var x LimitSwap
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnLimitSwap(&x, meta)
-	case "rebond":
-		var x Rebond
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnRebond(&x, meta)
 	case "tx":
 	case "coin_spent", "coin_received":
 	case "coinbase":
@@ -532,7 +395,6 @@ func processEvent(event abci.Event, meta *Metadata) error {
 	case "limit_swap_close":
 	// BTCQ specific events
 	case "commission":
-	case "reward":
 	default:
 		// Check if the string starts with "wasm-"
 		if strings.HasPrefix(event.Type, "cosmos.epochs.") {
@@ -588,6 +450,10 @@ func processTx(tx DecodedTx, result *abci.ExecTxResult, meta *Metadata) error {
 			// Add the deposit to the state global variable
 			TxState[x.Hash] = x
 			Recorder.OnDeposit(&x, meta)
+		case *types.MsgBtcBlock:
+			// qbtc block submission (qbtc.qbtc.v1.MsgBtcBlock), no indexer action
+		default:
+			fmt.Println("Unknown message type:", m)
 		}
 	}
 

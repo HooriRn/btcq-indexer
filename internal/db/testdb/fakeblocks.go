@@ -91,6 +91,7 @@ func intIfNotZero(i int64) string {
 	}
 }
 
+// Swap is used by test scenarios to build block events. Swap events are no longer recorded by the mux.
 type Swap struct {
 	Pool               string
 	Coin               string
@@ -112,7 +113,6 @@ func (x Swap) ToTendermint() abci.Event {
 	if memo == "" {
 		memo = "doesntmatter"
 	}
-
 	return abci.Event{Type: "swap", Attributes: toAttributes(map[string]string{
 		"pool":                    x.Pool,
 		"memo":                    memo,
@@ -151,47 +151,6 @@ func (x Outbound) ToTendermint() abci.Event {
 		"in_tx_id": withDefaultStr(x.InTxID, "txid"),
 		"memo":     withDefaultStr(x.Memo, "memo"),
 	})}
-}
-
-type ScheduledOutbound struct {
-	Chain         string
-	CoinAmount    string
-	CoinAsset     string
-	CoinDecimals  string
-	GasRate       string
-	MaxGasAmount  []string
-	MaxGasAsset   []string
-	MaxGasDecimal []string
-	ModuleName    string
-	OutHash       string
-	ToAddress     string
-	InHash        string
-	Memo          string
-	VaultPubKey   string
-}
-
-func (x ScheduledOutbound) ToTendermint() abci.Event {
-	attr := map[string]string{
-		"chain":         "chain",
-		"coin_asset":    x.CoinAsset,
-		"coin_amount":   x.CoinAmount,
-		"coin_decimals": x.CoinDecimals,
-		"gas_rate":      x.GasRate,
-		"in_hash":       withDefaultStr(x.InHash, "txid"),
-		"memo":          withDefaultStr(x.Memo, "memo"),
-		"module_name":   x.ModuleName,
-		"out_hash":      x.OutHash,
-		"to_address":    withDefaultStr(x.ToAddress, "addressto"),
-		"vault_pub_key": withDefaultStr(x.VaultPubKey, "thorpub"),
-	}
-
-	for i := range x.MaxGasAsset {
-		attr[fmt.Sprintf("max_gas_asset_%d", i)] = x.MaxGasAsset[i]
-		attr[fmt.Sprintf("max_gas_amount_%d", i)] = x.MaxGasAmount[i]
-		attr[fmt.Sprintf("max_gas_decimals_%d", i)] = x.MaxGasDecimal[i]
-	}
-
-	return abci.Event{Type: "scheduled_outbound", Attributes: toAttributes(attr)}
 }
 
 type AddLiquidity struct {
@@ -398,20 +357,6 @@ func (x SetMimir) ToTendermint() abci.Event {
 	})}
 }
 
-type SetNodeMimir struct {
-	Address string
-	Key     string
-	Value   int64
-}
-
-func (x SetNodeMimir) ToTendermint() abci.Event {
-	return abci.Event{Type: "set_node_mimir", Attributes: toAttributes(map[string]string{
-		"key":     x.Key,
-		"value":   util.IntStr(x.Value),
-		"address": x.Address,
-	})}
-}
-
 type ActiveVault struct {
 	AddVault string
 }
@@ -494,112 +439,6 @@ func (x Transfer) ToTendermint() abci.Event {
 	})}
 }
 
-type Version struct {
-	Version string
-}
-
-func (x Version) ToTendermint() abci.Event {
-	return abci.Event{Type: "version", Attributes: toAttributes(map[string]string{
-		"version": x.Version,
-	})}
-}
-
-type LoanOpen struct {
-	Owner                  string
-	CollateralUp           int64
-	DebtUpTor              int64
-	CollateralAsset        string
-	CollateralizationRatio int64
-	TargetAsset            string
-}
-
-func (x LoanOpen) ToTendermint() abci.Event {
-	return abci.Event{Type: "loan_open", Attributes: toAttributes(map[string]string{
-		"owner":                   x.Owner,
-		"collateral_up":           util.IntStr(x.CollateralUp),
-		"debt_up":                 util.IntStr(x.DebtUpTor),
-		"collateralization_ratio": util.IntStr(x.CollateralizationRatio),
-		"collateral_asset":        x.CollateralAsset,
-		"target_asset":            x.TargetAsset,
-	})}
-}
-
-type LoanRepayment struct {
-	Owner           string
-	CollateralDown  int64
-	DebtDownTor     int64
-	CollateralAsset string
-}
-
-func (x LoanRepayment) ToTendermint() abci.Event {
-	return abci.Event{Type: "loan_repayment", Attributes: toAttributes(map[string]string{
-		"owner":            x.Owner,
-		"collateral_down":  util.IntStr(x.CollateralDown),
-		"debt_down":        util.IntStr(x.DebtDownTor),
-		"collateral_asset": x.CollateralAsset,
-	})}
-}
-
-type LoanOpenV118 struct {
-	Owner                  string
-	CollateralDeposited    int64
-	DebtIssuedTor          int64
-	CollateralAsset        string
-	CollateralizationRatio int64
-	TargetAsset            string
-}
-
-func (x LoanOpenV118) ToTendermint() abci.Event {
-	return abci.Event{Type: "loan_open", Attributes: toAttributes(map[string]string{
-		"owner":                   x.Owner,
-		"collateral_deposited":    util.IntStr(x.CollateralDeposited),
-		"debt_issued":             util.IntStr(x.DebtIssuedTor),
-		"collateralization_ratio": util.IntStr(x.CollateralizationRatio),
-		"collateral_asset":        x.CollateralAsset,
-		"target_asset":            x.TargetAsset,
-	})}
-}
-
-type LoanRepaymentV118 struct {
-	Owner               string
-	CollateralWithdrawn int64
-	DebtRepaidTor       int64
-	CollateralAsset     string
-}
-
-func (x LoanRepaymentV118) ToTendermint() abci.Event {
-	return abci.Event{Type: "loan_repayment", Attributes: toAttributes(map[string]string{
-		"owner":                x.Owner,
-		"collateral_withdrawn": util.IntStr(x.CollateralWithdrawn),
-		"debt_repaid":          util.IntStr(x.DebtRepaidTor),
-		"collateral_asset":     x.CollateralAsset,
-	})}
-}
-
-type StreamingSwapDetails struct {
-	TxID       string
-	Interval   int64
-	Quantity   int64
-	Count      int64
-	LastHeight int64
-	Deposit    string
-	In         string
-	Out        string
-}
-
-func (x StreamingSwapDetails) ToTendermint() abci.Event {
-	return abci.Event{Type: "streaming_swap", Attributes: toAttributes(map[string]string{
-		"tx_id":       withDefaultStr(x.TxID, "txid"),
-		"interval":    util.IntStr(x.Interval),
-		"quantity":    util.IntStr(x.Quantity),
-		"count":       util.IntStr(x.Count),
-		"last_height": util.IntStr(x.LastHeight),
-		"deposit":     withDefaultStr(x.Deposit, "10 BNB.BUSD"),
-		"in":          withDefaultStr(x.In, "10 BNB.BUSD"),
-		"out":         withDefaultStr(x.Out, "1 THOR.RUNE"),
-	})}
-}
-
 type UpdateNodeAccountStatus struct {
 	NodeAddr string
 	Former   string
@@ -620,15 +459,18 @@ type Amount struct {
 }
 
 type Rewards struct {
-	BondE8  int64
-	PerPool []Amount
+	BondE8    int64
+	Validator string // THOR address, optional
+	PerPool   []Amount
 }
 
 func (x Rewards) ToTendermint() abci.Event {
 	attrs := map[string]string{
 		"bond_reward": util.IntStr(x.BondE8),
 	}
-
+	if x.Validator != "" {
+		attrs["validator"] = x.Validator
+	}
 	// Add per pools if available
 	for _, p := range x.PerPool {
 		attrs[p.Asset] = util.IntStr(p.E8)
@@ -661,26 +503,3 @@ func (x Bond) ToTendermint() abci.Event {
 	})}
 }
 
-type AffiliateFee struct {
-	Asset       string
-	FeeAmount   int64
-	FeeBps      int64
-	GrossAmount int64
-	Memo        string
-	RuneAddress string
-	Thorname    string
-	TxID        string
-}
-
-func (x AffiliateFee) ToTendermint() abci.Event {
-	return abci.Event{Type: "affiliate_fee", Attributes: toAttributes(map[string]string{
-		"asset":        x.Asset,
-		"fee_amount":   util.IntStr(x.FeeAmount),
-		"fee_bps":      util.IntStr(x.FeeBps),
-		"gross_amount": util.IntStr(x.GrossAmount),
-		"memo":         x.Memo,
-		"rune_address": withDefaultStr(x.RuneAddress, "thor1"),
-		"thorname":     withDefaultStr(x.Thorname, "thor1"),
-		"tx_id":        withDefaultStr(x.TxID, "tx_id"),
-	})}
-}
