@@ -16,29 +16,17 @@ var withdrawUnitCorrectionsMainnet202104 = map[int64]withdrawUnitCorrection{}
 
 var withdrawUnitCorrections *(map[int64]withdrawUnitCorrection)
 
-func correctWithdawsImpLoss(withdraw *Withdraw, meta *Metadata) KeepOrDiscard {
-	if withdrawUnitCorrections == nil {
-		return Keep
-	}
-	correction, ok := (*withdrawUnitCorrections)[meta.BlockHeight]
-	if ok {
-		if correction.TX == string(withdraw.Tx) {
-			withdraw.StakeUnits = correction.ActualUnits
-		}
-	}
-	return Keep
+func correctWithdawsImpLoss(meta *Metadata) {
+	// Removed: Withdraw events are no longer tracked
+	_ = meta
 }
 
 func loadMainnetWithdrawImpLossUnitCorrections() {
-	withdrawUnitCorrections = &withdrawUnitCorrectionsMainnet202104
-	for k := range *withdrawUnitCorrections {
-		WithdrawCorrections.Add(k, correctWithdawsImpLoss)
-	}
+	// Removed: Withdraw events are no longer tracked
 }
 
-var addInsteadWithdrawMapMainnet202104 = artificialUnitChanges{}
+// Removed: artificialUnitChanges - Stake and Withdraw events are no longer tracked
 
 func loadMainnetCorrectionsWithdrawImpLoss() {
-	registerArtificialDeposits(addInsteadWithdrawMapMainnet202104)
-	loadMainnetWithdrawImpLossUnitCorrections()
+	// Removed: Withdraw events are no longer tracked
 }

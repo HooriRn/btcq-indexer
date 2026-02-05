@@ -19,7 +19,6 @@ import (
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/btcq-org/qbtc/x/qbtc/types"
-	stypes "gitlab.com/thorchain/thornode/v3/x/thorchain/types"
 )
 
 // Package Metrics
@@ -177,44 +176,6 @@ func processEvent(event abci.Event, meta *Metadata) error {
 	attrs = newAttrs
 
 	switch event.Type {
-	case "bond":
-		var x Bond
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnBond(&x, meta)
-	case "errata":
-		var x Errata
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnErrata(&x, meta)
-	case "fee":
-		var x Fee
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		if CorrectionsFeeEventIsOK(&x, meta) {
-			Recorder.OnFee(&x, meta)
-		}
-	case "gas":
-		var x Gas
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnGas(&x, meta)
-	case "pool":
-		var x Pool
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnPool(&x, meta)
-	case "reserve":
-		var x Reserve
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnReserve(&x, meta)
 	case "rewards":
 		var x Rewards
 		if err := x.LoadTendermint(attrs); err != nil {
@@ -222,59 +183,6 @@ func processEvent(event abci.Event, meta *Metadata) error {
 		}
 		PoolRewardsTotal.Add(uint64(len(x.PerPool)))
 		Recorder.OnRewards(&x, meta)
-	case "set_ip_address":
-		var x SetIPAddress
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnSetIPAddress(&x, meta)
-	case "set_node_keys":
-		var x SetNodeKeys
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnSetNodeKeys(&x, meta)
-	case "set_version":
-		var x SetVersion
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnSetVersion(&x, meta)
-	case "slash":
-		var x Slash
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnSlash(&x, meta)
-	case "transfer":
-		var x Transfer
-		if err := x.LoadTendermint(attrs); err != nil {
-			if err.Error() == "empty amount" {
-				// Ignore transfers with null amount.
-				// TODO(huginn): investigate why this happens.
-				return nil
-			}
-			return err
-		}
-		Recorder.OnTransfer(&x, meta)
-	case "validator_request_leave":
-		var x ValidatorRequestLeave
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnValidatorRequestLeave(&x, meta)
-	case "pool_balance_change":
-		var x PoolBalanceChange
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnPoolBalanceChange(&x, meta)
-	case "slash_points":
-		var x SlashPoints
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnSlashPoints(&x, meta)
 	case "instantiate":
 		var x Instantiate
 		if err := x.LoadTendermint(attrs); err != nil {
@@ -377,38 +285,6 @@ func processParentTx(tx DecodedTx, event *abci.Event) error {
 				}, abci.EventAttribute{
 					Key:   "tx_id",
 					Value: tx.Hash,
-				})
-			}
-			break
-		}
-	case "bond":
-		msgIndex := 0
-		for _, v := range event.Attributes {
-			if v.Key == "msg_index" {
-				var err error
-				msgIndex, err = strconv.Atoi(v.Value)
-				if err != nil {
-					return fmt.Errorf("can't parse msg_index: %w", err)
-				}
-				break
-			}
-		}
-
-		for i, msg := range tx.Msgs {
-			if i != msgIndex {
-				continue
-			}
-
-			switch m := msg.(type) {
-			case *stypes.MsgDeposit:
-				event.Attributes = append(event.Attributes, abci.EventAttribute{
-					Key:   "signer",
-					Value: m.Signer.String(),
-				})
-			case *stypes.MsgSetVersion:
-				event.Attributes = append(event.Attributes, abci.EventAttribute{
-					Key:   "signer",
-					Value: m.Signer.String(),
 				})
 			}
 			break

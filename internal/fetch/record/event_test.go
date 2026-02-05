@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/stretchr/testify/require"
 )
 
 var GoldenAssets = []struct {
@@ -58,53 +57,6 @@ func TestGetNativeAsset(t *testing.T) {
 		if coinType != gold.Type {
 			t.Errorf("%q got [%q], want [%q]", gold.Asset, coinType, gold.Type)
 		}
-	}
-}
-
-func TestTransfer(t *testing.T) {
-	var event Transfer
-	err := event.LoadTendermint(toAttrs(map[string]string{
-		"sender":    "tthoraddr1",
-		"recipient": "tthoraddr2",
-		"amount":    "123rune",
-	}))
-	require.NoError(t, err)
-	require.Equal(t, int64(123), event.AmountE8)
-	require.Equal(t, nativeRune, string(event.Asset))
-	require.Equal(t, "tthoraddr1", string(event.FromAddr))
-	require.Equal(t, "tthoraddr2", string(event.ToAddr))
-
-	event = Transfer{}
-	err = event.LoadTendermint(toAttrs(map[string]string{
-		"sender":    "tthoraddr1",
-		"recipient": "tthoraddr2",
-		"amount":    "987bnb/bnb",
-	}))
-	require.NoError(t, err)
-	require.Equal(t, int64(987), event.AmountE8)
-	require.Equal(t, "BNB/BNB", string(event.Asset))
-}
-
-func TestBond(t *testing.T) {
-	var event Bond
-	err := event.LoadTendermint(toAttrs(map[string]string{
-		// "bond_type": "0", // Because of the nature of this test
-		// (and THORNode's EventBond Attributes() using string(m.BondType) rather than m.BondType.String()),
-		// non-string bond_type cannot be represented.
-		"amount": "100",
-		"chain":  "THOR",
-		"coin":   "100 THOR.RUNE",
-		"from":   "tthor1zf3gsk7edzwl9syyefvfhle37cjtql35h6k85m",
-		"id":     "98C1864036571E805BB0E0CCBAFF0F8D80F69BDEA32D5B26E0DDB95301C74D0C",
-		"memo":   "BOND:tthor1zf3gsk7edzwl9syyefvfhle37cjtql35h6k85m",
-		"to":     "tthor17gw75axcnr8747pkanye45pnrwk7p9c3uhzgff",
-	}))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if event.E8 != 100 || event.AssetE8 != 100 || string(event.Asset) != "THOR.RUNE" {
-		t.Errorf(`got %d / %d / %q when expecting 100 / 100 / THOR.RUNE"`, event.E8, event.AssetE8, event.Asset)
 	}
 }
 
