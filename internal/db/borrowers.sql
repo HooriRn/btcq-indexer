@@ -17,37 +17,22 @@ CREATE TABLE btcq_indexer_agg.borrowers_log (
     block_timestamp bigint NOT NULL
 );
 
+-- loan_open_events and loan_repayment_events removed; view returns no rows.
 CREATE VIEW btcq_indexer_agg.borrowers_log_partial AS (
     SELECT * FROM (
         SELECT
-            owner AS borrower_id,
-            'open' AS change_type,
-            collateral_asset,
-            target_asset,
-            debt_issued,
-            NULL::bigint AS debt_repaid,
-            collateral_deposited,
-            NULL::bigint AS collateral_withdrawn,
-            collateralization_ratio,
-            event_id,
-            block_timestamp
-        FROM loan_open_events
-        UNION ALL
-        SELECT
-            owner AS borrower_id,
-            'repayment' AS change_type,
-            collateral_asset,
-            NULL AS target_asset,
+            NULL::text AS borrower_id,
+            NULL::text AS change_type,
+            NULL::text AS collateral_asset,
+            NULL::text AS target_asset,
             NULL::bigint AS debt_issued,
-            debt_repaid,
+            NULL::bigint AS debt_repaid,
             NULL::bigint AS collateral_deposited,
-            collateral_withdrawn,
+            NULL::bigint AS collateral_withdrawn,
             NULL::bigint AS collateralization_ratio,
-            event_id,
-            block_timestamp
-        FROM loan_repayment_events
-    ) AS x
-    ORDER BY block_timestamp, change_type
+            NULL::bigint AS event_id,
+            NULL::bigint AS block_timestamp
+    ) AS x WHERE false
 );
 
 CREATE TABLE btcq_indexer_agg.borrowers (

@@ -120,24 +120,6 @@ func jsonLiquidityHistory(w http.ResponseWriter, r *http.Request, _ httprouter.P
 	respJSON(w, res)
 }
 
-func getRUNEPoolHistories(buckets db.Buckets, ctx context.Context) (
-	beforeUnits int64, units []stat.UnitsBucket, beforeMemberCount int64, memberCounts []stat.CountBucket, err error) {
-
-	beforeUnits, units, err = stat.RUNEPoolUnitsHistory(ctx, buckets)
-	if err != nil {
-		return
-	}
-	beforeMemberCount, memberCounts, err = stat.GetAggMembersCountBucket(ctx, buckets, "btcq_indexer_agg.rune_pool_members_count")
-	if err != nil {
-		return
-	}
-	if len(memberCounts) != len(units) || memberCounts[0].Window != units[0].Window {
-		return
-	}
-
-	return
-}
-
 func getPoolHistories(pool string, buckets db.Buckets, ctx context.Context) (
 	beforeDepth timeseries.PoolDepths, depths []stat.PoolDepthBucket,
 	beforeLPUnits int64, units []stat.UnitsBucket, beforeMemberCount int64, memberCounts []stat.CountBucket, err error) {
@@ -256,60 +238,6 @@ func toOapiDepthResponse(
 	result.Meta.EndLPUnits = util.IntStr(endLPUnits)
 	result.Meta.EndMemberCount = util.IntStr(endMemberCounts)
 	result.Meta.EndSynthUnits = util.IntStr(endSynthUnits)
-	return
-}
-
-func jsonRUNEPool(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	urlParams := r.URL.Query()
-	buckets, merr := db.BucketsFromQuery(r.Context(), &urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	merr = util.CheckUrlEmpty(urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	beforeUnits, units, beforeMemberCount, memberCounts, err := getRUNEPoolHistories(buckets, r.Context())
-	if err != nil {
-		respError(w, err)
-	}
-
-	var result oapigen.RUNEPoolHistoryResponse = toOapiRUNEPoolHistoryResponse(
-		r.Context(), beforeUnits, units, beforeMemberCount, memberCounts)
-	respJSON(w, result)
-}
-
-func toOapiRUNEPoolHistoryResponse(
-	ctx context.Context,
-	beforeUnits int64,
-	units []stat.UnitsBucket,
-	beforeMemberCount int64,
-	memberCounts []stat.CountBucket) (
-	result oapigen.RUNEPoolHistoryResponse) {
-	result.Intervals = make(oapigen.RUNEPoolHistoryIntervals, 0, len(units))
-	for i, bucket := range units {
-		liquidityUnits := units[i].Units
-		membersCount := memberCounts[i].Count
-		result.Intervals = append(result.Intervals, oapigen.RUNEPoolHistoryItem{
-			StartTime: util.IntStr(bucket.Window.From.ToI()),
-			EndTime:   util.IntStr(bucket.Window.Until.ToI()),
-			Units:     util.IntStr(liquidityUnits),
-			Count:     util.IntStr(membersCount),
-		})
-	}
-	endUnits := units[len(units)-1].Units
-	endCount := memberCounts[len(memberCounts)-1].Count
-
-	result.Meta.StartTime = util.IntStr(units[0].Window.From.ToI())
-	result.Meta.EndTime = util.IntStr(units[len(units)-1].Window.Until.ToI())
-	result.Meta.StartUnits = util.IntStr(beforeUnits)
-	result.Meta.StartCount = util.IntStr(beforeMemberCount)
-	result.Meta.EndUnits = util.IntStr(endUnits)
-	result.Meta.EndCount = util.IntStr(endCount)
 	return
 }
 
@@ -1247,31 +1175,6 @@ func jsonSaverDetails(w http.ResponseWriter, r *http.Request, ps httprouter.Para
 	respJSON(w, oapigen.SaverDetailsResponse{
 		Pools: pools.ToSavers(poolRedeemValue),
 	})
-}
-
-func jsonRUNEPoolProviderDetails(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	if merr := util.CheckUrlEmpty(urlParams); merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	addr := strings.Join(withLowered(ps[0].Value), ",")
-
-	addrs := strings.Split(addr, ",")
-	memberships, err := timeseries.GetRUNEPoolProvider(r.Context(), addrs, timeseries.SaverPools)
-	if err != nil {
-		respError(w, err)
-		return
-	}
-
-	if len(memberships) == 0 {
-		http.Error(w, "Not Found", http.StatusNotFound)
-		return
-	}
-
-	respJSON(w, memberships.ToRUNEPool())
 }
 
 func jsonTHORName(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

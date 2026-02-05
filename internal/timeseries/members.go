@@ -123,18 +123,6 @@ func (memberPool MemberPool) toSavers() oapigen.SaverPool {
 	}
 }
 
-func (memberPool MemberPool) toRUNEPool() oapigen.RUNEPoolProvider {
-	return oapigen.RUNEPoolProvider{
-		RuneAddress:    memberPool.RuneAddress,
-		RuneAdded:      util.IntStr(memberPool.RuneAdded),
-		RuneDeposit:    util.IntStr(memberPool.RuneDeposit),
-		Units:          util.IntStr(memberPool.LiquidityUnits),
-		RuneWithdrawn:  util.IntStr(memberPool.RuneWithdrawn),
-		DateFirstAdded: util.IntStr(memberPool.DateFirstAdded),
-		DateLastAdded:  util.IntStr(memberPool.DateLastAdded),
-	}
-}
-
 // Pools data associated with a single member
 type MemberPools []MemberPool
 
@@ -152,15 +140,6 @@ func (memberPools MemberPools) ToSavers(poolRedeemValueMap map[string]int64) []o
 	for i, memberPool := range memberPools {
 		ret[i] = memberPool.toSavers()
 		ret[i].AssetRedeem = util.IntStr(poolRedeemValueMap[memberPool.Pool])
-	}
-
-	return ret
-}
-
-func (memberPools MemberPools) ToRUNEPool() []oapigen.RUNEPoolProvider {
-	ret := make([]oapigen.RUNEPoolProvider, len(memberPools))
-	for i, memberPool := range memberPools {
-		ret[i] = memberPool.toRUNEPool()
 	}
 
 	return ret
@@ -241,46 +220,6 @@ func GetMemberPools(ctx context.Context, address []string, poolType MemberPoolTy
 		if PoolBasedOfType(entry.Pool, poolType) {
 			results = append(results, entry)
 		}
-	}
-	return results, nil
-}
-
-func GetRUNEPoolProvider(ctx context.Context, address []string, poolType MemberPoolType) (MemberPools, error) {
-	q := `
-		SELECT
-			COALESCE(rune_addr, ''),
-			units_total,
-			rune_e8_deposit,
-			added_rune_e8_total,
-			withdrawn_rune_e8_total,
-			COALESCE(first_added_timestamp / 1000000000, 0),
-			COALESCE(last_added_timestamp / 1000000000, 0)
-		FROM btcq_indexer_agg.rune_pool_members
-		WHERE member_id = ANY($1)
-	`
-
-	rows, err := db.Query(ctx, q, pq.Array(address))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var results MemberPools
-	for rows.Next() {
-		var entry MemberPool
-		err := rows.Scan(
-			&entry.RuneAddress,
-			&entry.LiquidityUnits,
-			&entry.RuneDeposit,
-			&entry.RuneAdded,
-			&entry.RuneWithdrawn,
-			&entry.DateFirstAdded,
-			&entry.DateLastAdded,
-		)
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, entry)
 	}
 	return results, nil
 }

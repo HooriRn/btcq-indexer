@@ -1076,81 +1076,6 @@ type PoolStatsDetail struct {
 	WithdrawVolume string `json:"withdrawVolume"`
 }
 
-// List details of all the RUNEPools identified with the given addresses
-type RUNEPoolDetails []RUNEPoolProvider
-
-// RUNEPoolHistory defines model for RUNEPoolHistory.
-type RUNEPoolHistory struct {
-	Intervals RUNEPoolHistoryIntervals `json:"intervals"`
-	Meta      RUNEPoolHistoryMeta      `json:"meta"`
-}
-
-// RUNEPoolHistoryIntervals defines model for RUNEPoolHistoryIntervals.
-type RUNEPoolHistoryIntervals []RUNEPoolHistoryItem
-
-// RUNEPoolHistoryItem defines model for RUNEPoolHistoryItem.
-type RUNEPoolHistoryItem struct {
-	// Int64, Number of RUNEPool members in the pool at the end of the interval
-	Count string `json:"count"`
-
-	// Int64(e8), The depth in the RUNEPool vault at the end of the interval
-	Depth *string `json:"depth,omitempty"`
-
-	// Int64, The end time of bucket in unix timestamp
-	EndTime string `json:"endTime"`
-
-	// Int64, The beginning time of bucket in unix timestamp
-	StartTime string `json:"startTime"`
-
-	// Int64, Units in the RUNEPool vault at the end of the interval
-	Units string `json:"units"`
-}
-
-// RUNEPoolHistoryMeta defines model for RUNEPoolHistoryMeta.
-type RUNEPoolHistoryMeta struct {
-	// Int64, Number of RUNEPool member in the RUNEPool vault at the end of the interval at time endTime
-	EndCount string `json:"endCount"`
-
-	// Int64, The end time of bucket in unix timestamp
-	EndTime string `json:"endTime"`
-
-	// Int64,  Units in the RUNEPool vault at the end of the interval at time endTime
-	EndUnits string `json:"endUnits"`
-
-	// Int64, Number of RUNEPool member in the RUNEPool vault at the start of the interval at time startTime
-	StartCount string `json:"startCount"`
-
-	// Int64, The beginning time of bucket in unix timestamp
-	StartTime string `json:"startTime"`
-
-	// Int64,  Units in the RUNEPool vault at the start of the interval at time startTime
-	StartUnits string `json:"startUnits"`
-}
-
-// RUNEPoolProvider defines model for RUNEPoolProvider.
-type RUNEPoolProvider struct {
-	// Int64, Unix timestamp for the first time member deposited into the RUNEPool
-	DateFirstAdded string `json:"dateFirstAdded"`
-
-	// Int64, Unix timestamp for the last time member deposited into the RUNEPool
-	DateLastAdded string `json:"dateLastAdded"`
-
-	// Int64(e8), total asset added in the RUNEPool by member
-	RuneAdded string `json:"runeAdded"`
-
-	// address used by the member
-	RuneAddress string `json:"runeAddress"`
-
-	// Int64(e8), total asset that is currently deposited by the member
-	RuneDeposit string `json:"runeDeposit"`
-
-	// Int64(e8), total asset withdrawn from the RUNEPool by the member
-	RuneWithdrawn string `json:"runeWithdrawn"`
-
-	// Int64, units that belong the the member
-	Units string `json:"units"`
-}
-
 // RebondMetadata defines model for RebondMetadata.
 type RebondMetadata struct {
 	// Transaction memo of bond event
@@ -1979,12 +1904,6 @@ type PoolStatsResponse PoolStatsDetail
 // PoolsResponse defines model for PoolsResponse.
 type PoolsResponse PoolDetails
 
-// List details of all the RUNEPools identified with the given addresses
-type RUNEPoolDetailsResponse RUNEPoolDetails
-
-// RUNEPoolHistoryResponse defines model for RUNEPoolHistoryResponse.
-type RUNEPoolHistoryResponse RUNEPoolHistory
-
 // ReserveHistoryResponse defines model for ReserveHistoryResponse.
 type ReserveHistoryResponse ReserveHistory
 
@@ -2242,24 +2161,6 @@ type GetRunePriceHistoryParams struct {
 
 // GetRunePriceHistoryParamsInterval defines parameters for GetRunePriceHistory.
 type GetRunePriceHistoryParamsInterval string
-
-// GetRUNEPoolHistoryParams defines parameters for GetRUNEPoolHistory.
-type GetRUNEPoolHistoryParams struct {
-	// Interval of calculations
-	Interval *GetRUNEPoolHistoryParamsInterval `json:"interval,omitempty"`
-
-	// Number of intervals to return. Should be between [1..400].
-	Count *int `json:"count,omitempty"`
-
-	// End time of the query as unix timestamp. If only count is given, defaults to now.
-	To *int64 `json:"to,omitempty"`
-
-	// Start time of the query as unix timestamp
-	From *int64 `json:"from,omitempty"`
-}
-
-// GetRUNEPoolHistoryParamsInterval defines parameters for GetRUNEPoolHistory.
-type GetRUNEPoolHistoryParamsInterval string
 
 // GetSaversHistoryParams defines parameters for GetSaversHistory.
 type GetSaversHistoryParams struct {

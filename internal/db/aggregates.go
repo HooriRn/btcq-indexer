@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rs/zerolog/log"
 	"github.com/btcq/btcq-indexer/internal/util/jobs"
 	"github.com/btcq/btcq-indexer/internal/util/timer"
+	"github.com/rs/zerolog/log"
 )
 
 //go:embed aggregates.sql
@@ -28,9 +28,6 @@ var aggRunePrice string
 
 //go:embed borrowers.sql
 var aggBorrowers string
-
-//go:embed runepool.sql
-var aggRunePool string
 
 const (
 	aggregatesRefreshInterval = 1 * time.Minute
@@ -449,7 +446,7 @@ func WatermarkedMaterializedTables() []string {
 }
 
 func AggregatesDDL() []string {
-	parts := []string{SchemaCleanUp("btcq_indexer_agg"), aggDDLPrefix, aggBalances, aggMembers, aggRunePrice, aggBorrowers, aggRunePool}
+	parts := []string{SchemaCleanUp("btcq_indexer_agg"), aggDDLPrefix, aggBalances, aggMembers, aggRunePrice, aggBorrowers}
 	var b strings.Builder
 
 	// Sort to iterate in deterministic order.
@@ -628,7 +625,6 @@ func refreshAggregates(ctx context.Context, bulk bool, fullTimescaleRefreshForTe
 	updateAggregateSingle(ctx, refreshEnd, "update_actions")
 	updateAggregateSingle(ctx, refreshEnd, "update_rune_price")
 	updateAggregateSingle(ctx, refreshEnd, "update_borrowers")
-	updateAggregateSingle(ctx, refreshEnd, "update_rune_pool_members")
 
 	LastAggregatedBlock.Set(lastAggregated.Height, lastAggregated.Timestamp)
 

@@ -33,9 +33,4 @@ func TestReadGenesis_qbtc(t *testing.T) {
 	if g.AppState.Bank.Balances == nil {
 		t.Error("app_state.bank.balances nil")
 	}
-	// qbtc genesis has no thorchain key; Thorchain should be zero value
-	if len(g.AppState.Thorchain.Pools) != 0 || len(g.AppState.Thorchain.Nodes) != 0 {
-		t.Logf("thorchain section present (optional); pools=%d nodes=%d",
-			len(g.AppState.Thorchain.Pools), len(g.AppState.Thorchain.Nodes))
-	}
 }

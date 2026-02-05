@@ -384,13 +384,6 @@ CREATE VIEW btcq_indexer_agg.secure_actions AS
         NULL::jsonb AS fees, NULL::jsonb AS meta
     WHERE false;
 
-CREATE VIEW btcq_indexer_agg.rune_pool_actions AS
-    SELECT NULL::bigint AS event_id, NULL::bigint AS block_timestamp, NULL::text AS action_type,
-        NULL::text AS main_ref, NULL::text[] AS addresses, NULL::text[] AS transactions,
-        NULL::text[] AS assets, NULL::text[] AS pools, NULL::jsonb AS ins, NULL::jsonb AS outs,
-        NULL::jsonb AS fees, NULL::jsonb AS meta
-    WHERE false;
-
 CREATE VIEW btcq_indexer_agg.bond_actions AS
     SELECT
         event_id,
@@ -542,10 +535,6 @@ BEGIN
 
     EXECUTE $$ INSERT INTO btcq_indexer_agg.actions
     SELECT * FROM btcq_indexer_agg.trade_actions
-        WHERE $1 <= block_timestamp AND block_timestamp < $2 ON CONFLICT DO NOTHING $$ USING t1, t2;
-
-    EXECUTE $$ INSERT INTO btcq_indexer_agg.actions
-    SELECT * FROM btcq_indexer_agg.rune_pool_actions
         WHERE $1 <= block_timestamp AND block_timestamp < $2 ON CONFLICT DO NOTHING $$ USING t1, t2;
 
     EXECUTE $$ INSERT INTO btcq_indexer_agg.actions

@@ -524,85 +524,6 @@ paths:
                 "200":
                     $ref: "#/components/responses/RunePriceHistoryResponse"
 
-    "/v2/history/runepool":
-        get:
-            operationId: GetRUNEPoolHistory
-            summary: RUNEPool total members and units History
-            description: |
-                Returns RUNEPool members and units.
-                The values report the state at the end of each interval.
-
-                History endpoint has two modes:
-                * With Interval parameter it returns a series of time buckets. From and To dates will
-                  be rounded to the Interval boundaries.
-                * Without Interval parameter a single From..To search is performed with exact timestamps.
-
-
-                * Interval: possible values: 5min, hour, day, week, month, quarter, year.
-                * count: [1..400]. Defines number of intervals. Don't provide if Interval is missing.
-                * from/to: optional int, unix second.
-
-                Possible usages with interval.
-                * last 10 days: `?interval=day&count=10`
-                * last 10 days before to: `?interval=day&count=10&to=1608825600`
-                * next 10 days after from: `?interval=day&count=10&from=1606780800`
-                * Days between from and to. From defaults to start of chain, to defaults to now.
-                  Only the first 400 intervals are returned:
-                  `interval=day&from=1606780800&to=1608825600`
-
-                Pagination is possible with from&count and then using the returned meta.endTime as the
-                From parameter of the next query.
-
-                Possible configurations without interval:
-                * exact search for one time frame: `?from=1606780899&to=1608825600`
-                * one time frame until now: `?from=1606780899`
-                * from chain start until now: no query parameters
-            parameters:
-                - name: interval
-                  in: query
-                  description: Interval of calculations
-                  required: false
-                  example: "day"
-                  schema:
-                      type: string
-                      enum:
-                          [
-                              "5min",
-                              "hour",
-                              "day",
-                              "week",
-                              "month",
-                              "quarter",
-                              "year",
-                          ]
-                - name: count
-                  in: query
-                  description: Number of intervals to return. Should be between [1..400].
-                  required: false
-                  example: 30
-                  schema:
-                      type: integer
-                - name: to
-                  in: query
-                  description: |
-                      End time of the query as unix timestamp. If only count is given, defaults to now.
-                  required: false
-                  example: 1608825600
-                  schema:
-                      type: integer
-                      format: int64
-                - name: from
-                  in: query
-                  description: Start time of the query as unix timestamp
-                  required: false
-                  example: 1606780800
-                  schema:
-                      type: integer
-                      format: int64
-            responses:
-                "200":
-                    $ref: "#/components/responses/RUNEPoolHistoryResponse"
-
     "/v2/history/earnings":
         get:
             operationId: GetEarningsHistory
@@ -1458,27 +1379,6 @@ paths:
                 "200":
                     $ref: "#/components/responses/SaverDetailsResponse"
 
-    "/v2/runepool/{address}":
-        get:
-            operationId: GetRUNEPoolDetail
-            summary: RUNEPool Details
-            description: |
-                Returns an array of statistics for all the RUNEPool associated with given
-                member addresses.
-                Query can also be multiple addresses should be separated by comma (',')
-            parameters:
-                - name: address
-                  in: path
-                  description: |
-                      Address to match the RUNEPool. multiple rune addresses can be given.
-                  required: true
-                  schema:
-                      type: string
-                  example: "thor1jxfh2g85q3v0tdq56fnevx6xcxtcnhtsmcu64m,thor2qcxssye4j6730h7ehgega3gyykkuwgdgmmpu62n"
-            responses:
-                "200":
-                    $ref: "#/components/responses/RUNEPoolDetailsResponse"
-
     "/v2/thorname/lookup/{name}":
         get:
             operationId: GetTHORNameDetail
@@ -1692,12 +1592,6 @@ components:
                 application/json:
                     schema:
                         $ref: "#/components/schemas/SaversHistory"
-        RUNEPoolHistoryResponse:
-            description: Members and Units history of RUNEPool
-            content:
-                application/json:
-                    schema:
-                        $ref: "#/components/schemas/RUNEPoolHistory"
         RunePriceHistoryResponse: 
             description: Returns rune price history in USD based on the time bucket given
             content:
@@ -1820,12 +1714,6 @@ components:
                 application/json:
                     schema:
                         $ref: "#/components/schemas/SaverDetails"
-        RUNEPoolDetailsResponse:
-            description: object containing RUNEPool data for a specific members
-            content:
-                application/json:
-                    schema:
-                        $ref: "#/components/schemas/RUNEPoolDetails"
         THORNameDetailsResponse:
             description: object containing THORName data for a specific name
             content:
@@ -2523,74 +2411,6 @@ components:
                     type: string
                     description: |
                         Int64, Savers Units in the saver vault at the end of the interval
-        RUNEPoolHistory:
-            type: object
-            required:
-                - meta
-                - intervals
-            properties:
-                meta:
-                    $ref: "#/components/schemas/RUNEPoolHistoryMeta"
-                intervals:
-                    $ref: "#/components/schemas/RUNEPoolHistoryIntervals"
-        RUNEPoolHistoryMeta:
-            type: object
-            required:
-                - startTime
-                - endTime
-                - startUnits
-                - startCount
-                - endUnits
-                - endCount
-            properties:
-                startTime:
-                    type: string
-                    description: Int64, The beginning time of bucket in unix timestamp
-                endTime:
-                    type: string
-                    description: Int64, The end time of bucket in unix timestamp
-                startUnits:
-                    type: string
-                    description: |
-                        Int64,  Units in the RUNEPool vault at the start of the interval at time startTime
-                startCount:
-                    type: string
-                    description: |
-                        Int64, Number of RUNEPool member in the RUNEPool vault at the start of the interval at time startTime
-                endUnits:
-                    type: string
-                    description: Int64,  Units in the RUNEPool vault at the end of the interval at time endTime
-                endCount:
-                    type: string
-                    description: Int64, Number of RUNEPool member in the RUNEPool vault at the end of the interval at time endTime
-        RUNEPoolHistoryIntervals:
-            type: array
-            items:
-                $ref: "#/components/schemas/RUNEPoolHistoryItem"
-        RUNEPoolHistoryItem:
-            type: object
-            required:
-                - startTime
-                - endTime
-                - count
-                - units
-            properties:
-                startTime:
-                    type: string
-                    description: Int64, The beginning time of bucket in unix timestamp
-                endTime:
-                    type: string
-                    description: Int64, The end time of bucket in unix timestamp
-                depth:
-                    type: string
-                    description: Int64(e8), The depth in the RUNEPool vault at the end of the interval
-                count:
-                    type: string
-                    description: Int64, Number of RUNEPool members in the pool at the end of the interval
-                units:
-                    type: string
-                    description: |
-                        Int64, Units in the RUNEPool vault at the end of the interval
         RunePriceHistory:
             type: object
             required:
@@ -4354,44 +4174,6 @@ components:
                 dateLastAdded:
                     type: string
                     description: Int64, Unix timestamp for the last time member deposited into the saver pool
-
-        RUNEPoolDetails:
-            type: array
-            items:
-                $ref: "#/components/schemas/RUNEPoolProvider"
-            description: List details of all the RUNEPools identified with the given addresses
-        RUNEPoolProvider:
-            type: object
-            required:
-                - runeAddress
-                - units
-                - runeAdded
-                - runeWithdrawn
-                - runeDeposit
-                - dateFirstAdded
-                - dateLastAdded
-            properties:
-                runeAddress:
-                    type: string
-                    description: address used by the member
-                units:
-                    type: string
-                    description: Int64, units that belong the the member
-                runeAdded:
-                    type: string
-                    description: Int64(e8), total asset added in the RUNEPool by member
-                runeDeposit:
-                    type: string
-                    description: Int64(e8), total asset that is currently deposited by the member
-                runeWithdrawn:
-                    type: string
-                    description: Int64(e8), total asset withdrawn from the RUNEPool by the member
-                dateFirstAdded:
-                    type: string
-                    description: Int64, Unix timestamp for the first time member deposited into the RUNEPool
-                dateLastAdded:
-                    type: string
-                    description: Int64, Unix timestamp for the last time member deposited into the RUNEPool
 
         StatsData:
             type: object
