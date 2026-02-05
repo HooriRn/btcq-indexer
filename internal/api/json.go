@@ -686,7 +686,6 @@ type poolAggregates struct {
 	liquidityUnits       map[string]int64
 	annualPercentageRate map[string]float64
 	saverDataMap         map[string]SaverData
-	lendingDataMap       map[string]timeseries.LendingInfo
 	earningsDataMap      map[string]EarningsInfo
 	lpLuvi               map[string]float64
 }
@@ -725,11 +724,6 @@ func getPoolAggregates(ctx context.Context, pools []string, apyBucket db.Buckets
 		return nil, err
 	}
 
-	mapLendingInfo, err := timeseries.GetLendingData(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	// Get earnings data for the pools
 	poolEarningsMapStat, err := stat.GetPoolsEarnings(ctx, apyBucket)
 	if err != nil {
@@ -756,7 +750,6 @@ func getPoolAggregates(ctx context.Context, pools []string, apyBucket db.Buckets
 		liquidityUnits:       liquidityUnitsNow,
 		annualPercentageRate: earningsApy,
 		saverDataMap:         saverData,
-		lendingDataMap:       mapLendingInfo,
 		earningsDataMap:      mapEarningsInfo,
 		lpLuvi:               mapLpLuvi,
 	}
@@ -848,8 +841,6 @@ func buildPoolDetail(
 	priceUSD := price * runePriceUsd
 	saversUnit := aggregates.saverDataMap[pool].SaversUnits
 	saversDepth := aggregates.saverDataMap[pool].SaversDepth
-	totalCollateral := aggregates.lendingDataMap[pool].TotalCollateral
-	totalDebtTor := aggregates.lendingDataMap[pool].TotalDebtTor
 	earnings := aggregates.earningsDataMap[pool].Earnings
 	annualEarningsPerDepth := aggregates.earningsDataMap[pool].AnnualEarningsAsPercentage
 	poolApy := aggregates.annualPercentageRate[pool]
@@ -889,8 +880,6 @@ func buildPoolDetail(
 		SaversUnits:                    util.IntStr(saversUnit),
 		SaversDepth:                    util.IntStr(saversDepth),
 		SaversAPR:                      floatStr(saversAPR),
-		TotalCollateral:                util.IntStr(totalCollateral),
-		TotalDebtTor:                   util.IntStr(totalDebtTor),
 		Earnings:                       util.IntStr(earnings),
 		EarningsAnnualAsPercentOfDepth: floatStr(annualEarningsPerDepth),
 		AnnualPercentageRate:           floatStr(poolApy),
@@ -1062,60 +1051,6 @@ func jsonMemberDetails(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	}
 
 	respJSON(w, oapigen.MemberDetailsResponse{
-		Pools: pools.ToOapigen(),
-	})
-}
-
-func jsonBorrowers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	var asset *string
-	assetParam := util.ConsumeUrlParam(&urlParams, "asset")
-	if assetParam != "" {
-		asset = &assetParam
-		if !timeseries.PoolExists(*asset) {
-			btcqerr.BadRequestF("Unknown asset: %s", *asset).ReportHTTP(w)
-			return
-		}
-	}
-	merr := util.CheckUrlEmpty(urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	addrs, err := timeseries.GetBorrowerIds(r.Context(), asset)
-	if err != nil {
-		respError(w, err)
-		return
-	}
-	result := oapigen.Borrowers(addrs)
-	respJSON(w, result)
-}
-
-func jsonBorrowerDetails(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	if merr := util.CheckUrlEmpty(urlParams); merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	addr := strings.Join(withLowered(ps[0].Value), ",")
-
-	addrs := strings.Split(addr, ",")
-	pools, err := timeseries.GetBorrower(r.Context(), addrs)
-	if err != nil {
-		respError(w, err)
-		return
-	}
-
-	if len(pools) == 0 {
-		http.Error(w, "Not Found", http.StatusNotFound)
-		return
-	}
-
-	respJSON(w, oapigen.BorrowerDetailsResponse{
 		Pools: pools.ToOapigen(),
 	})
 }

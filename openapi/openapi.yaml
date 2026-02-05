@@ -1319,45 +1319,6 @@ paths:
                 "200":
                     $ref: "#/components/responses/MemberDetailsResponse"
 
-    "/v2/borrowers":
-        get:
-            operationId: GetBorrowersAddresses
-            summary: Borrowers List
-            description: |
-                Returns an array containing the addresses for all borrowers.
-                Addresses are only shown once.
-            parameters:
-                - name: asset
-                  in: query
-                  description: Return only borrowers getting loan against this asset as collateral.
-                  required: false
-                  schema:
-                      type: string
-            responses:
-                "200":
-                    "$ref": "#/components/responses/BorrowersResponse"
-
-    "/v2/borrower/{address}":
-        get:
-            operationId: GetBorrowerDetail
-            summary: Borrower Details
-            description: |
-                Returns an array of statistics for all the open loans associated with a given
-                borrower address.
-            parameters:
-                - name: address
-                  in: path
-                  description: |
-                      Address to match borrower, an asset address is given.
-                      Query can also be multiple addresses should be separated by comma (',')
-                  required: true
-                  schema:
-                      type: string
-                  example: "bnb1jxfh2g85q3v0tdq56fnevx6xcxtcnhtsmcu64m,bc1qcxssye4j6730h7ehgega3gyykkuwgdgmmpu62n"
-            responses:
-                "200":
-                    $ref: "#/components/responses/BorrowerDetailsResponse"
-
     "/v2/saver/{address}":
         get:
             operationId: GetSaverDetail
@@ -1696,18 +1657,6 @@ components:
                 application/json:
                     schema:
                         $ref: "#/components/schemas/MemberDetails"
-        BorrowersResponse:
-            description: array of all the borrowers
-            content:
-                application/json:
-                    schema:
-                        $ref: "#/components/schemas/Borrowers"
-        BorrowerDetailsResponse:
-            description: object containing loan data for a specific borrower
-            content:
-                application/json:
-                    schema:
-                        $ref: "#/components/schemas/BorrowerDetails"
         SaverDetailsResponse:
             description: object containing saver data for a specific member
             content:
@@ -1904,8 +1853,6 @@ components:
                 - saversUnits
                 - saversDepth
                 - saversAPR
-                - totalCollateral
-                - totalDebtTor
                 - lpLuvi
             properties:
                 asset:
@@ -1989,12 +1936,6 @@ components:
                 saversDepth:
                     type: string
                     description: Int64, Total synth locked in saver vault.
-                totalCollateral:
-                    type: string
-                    description: Int64, Total collateral of the pool created by the borrowers.
-                totalDebtTor:
-                    type: string
-                    description: Int64, Total debt of the pool by the borrowers.
                 saversYieldShare:
                     type: string
                     description: |
@@ -4063,61 +4004,6 @@ components:
                 dateLastAdded:
                     type: string
                     description: Int64, Unix timestamp for the last time member deposited into the pool
-        Borrowers:
-            type: array
-            items:
-                type: string
-                description: Borrower address
-                example: tbnb1fj2lqj8dvr5pumfchc7ntlfqd2v6zdxqwjewf5
-        BorrowerDetails:
-            type: object
-            required:
-                - pools
-            properties:
-                pools:
-                    type: array
-                    items:
-                        $ref: "#/components/schemas/BorrowerPool"
-                    description: List details of all the loans identified with the given address
-        BorrowerPool:
-            type: object
-            required:
-                - collateral_asset
-                - target_assets
-                - debt_issued_tor
-                - debt_repaid_tor
-                - collateral_deposited
-                - collateral_withdrawn
-                - last_open_loan_timestamp
-                - last_repay_loan_timestamp
-            properties:
-                collateral_asset:
-                    type: string
-                    description: The asset that the borrower used as collateral
-                target_assets:
-                    type: array
-                    items:
-                        type: string
-                        description: All target assets that the user used as debt target
-                        example: "ETH.ETH"
-                debt_issued_tor:
-                    type: string
-                    description: Int64(e8), The total amount of debt issued as debt for user. denominated in TOR.
-                debt_repaid_tor:
-                    type: string
-                    description: Int64(e8), The total amount of debt that the user paid back. denominated in TOR.
-                collateral_deposited:
-                    type: string
-                    description: Int64(e8), The total amount of collateral that user deposited
-                collateral_withdrawn:
-                    type: string
-                    description: Int64(e8), The total amount of collateral the system paid back to the user
-                last_open_loan_timestamp:
-                    type: string
-                    description: Int64, Unix timestamp for the last time borrower opened a loan
-                last_repay_loan_timestamp:
-                    type: string
-                    description: Int64, Unix timestamp for the last time borrower repayment occurred
         Savers:
             type: array
             items:

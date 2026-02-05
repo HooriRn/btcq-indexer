@@ -96,9 +96,6 @@ func clearAggregates(t *testing.T) {
 	MustExec(t, "DELETE FROM btcq_indexer_agg.members_log")
 	MustExec(t, "DELETE FROM btcq_indexer_agg.members")
 	MustExec(t, "DELETE FROM btcq_indexer_agg.members_count")
-	MustExec(t, "DELETE FROM btcq_indexer_agg.borrowers_log")
-	MustExec(t, "DELETE FROM btcq_indexer_agg.borrowers")
-	MustExec(t, "DELETE FROM btcq_indexer_agg.borrowers_count")
 }
 
 func InitTest(t *testing.T) {

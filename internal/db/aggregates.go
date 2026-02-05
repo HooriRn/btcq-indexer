@@ -26,9 +26,6 @@ var aggMembers string
 //go:embed rune_price.sql
 var aggRunePrice string
 
-//go:embed borrowers.sql
-var aggBorrowers string
-
 const (
 	aggregatesRefreshInterval = 1 * time.Minute
 	aggregatesMaxStepNano     = Nano(20 * 24 * 60 * 60 * 1e9)
@@ -446,7 +443,7 @@ func WatermarkedMaterializedTables() []string {
 }
 
 func AggregatesDDL() []string {
-	parts := []string{SchemaCleanUp("btcq_indexer_agg"), aggDDLPrefix, aggBalances, aggMembers, aggRunePrice, aggBorrowers}
+	parts := []string{SchemaCleanUp("btcq_indexer_agg"), aggDDLPrefix, aggBalances, aggMembers, aggRunePrice}
 	var b strings.Builder
 
 	// Sort to iterate in deterministic order.
@@ -624,7 +621,6 @@ func refreshAggregates(ctx context.Context, bulk bool, fullTimescaleRefreshForTe
 	updateAggregateSingle(ctx, refreshEnd, "update_members")
 	updateAggregateSingle(ctx, refreshEnd, "update_actions")
 	updateAggregateSingle(ctx, refreshEnd, "update_rune_price")
-	updateAggregateSingle(ctx, refreshEnd, "update_borrowers")
 
 	LastAggregatedBlock.Set(lastAggregated.Height, lastAggregated.Timestamp)
 
