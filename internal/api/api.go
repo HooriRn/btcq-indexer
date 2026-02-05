@@ -5,20 +5,16 @@ import (
 	"io"
 	"net/http"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/pascaldekloe/metrics"
 	"github.com/rs/zerolog/hlog"
-	"github.com/rs/zerolog/log"
 
-	"github.com/btcq/btcq-indexer/config"
 	"github.com/btcq/btcq-indexer/internal/decimal"
 	"github.com/btcq/btcq-indexer/internal/timeseries/stat"
 	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 	"github.com/btcq/btcq-indexer/internal/util/timer"
-	"github.com/btcq/btcq-indexer/internal/websockets"
 )
 
 // Handler serves the entire API.
@@ -41,8 +37,6 @@ func addMeasured(router *httprouter.Router, url string, handler httprouter.Handl
 		})
 }
 
-const proxiedPrefix = "/v2/thorchain/"
-
 // InitHandler inits API main handler
 func InitHandler(nodeURL string) {
 	router := httprouter.New()
@@ -54,64 +48,28 @@ func InitHandler(nodeURL string) {
 	router.HandleOPTIONS = true
 	router.HandlerFunc(http.MethodGet, "/", serveRoot)
 
+	// Debug endpoints
 	router.HandlerFunc(http.MethodGet, "/v2/debug/metrics", metrics.ServeHTTP)
 	router.HandlerFunc(http.MethodGet, "/v2/debug/timers", timer.ServeHTTP)
 	router.HandlerFunc(http.MethodGet, "/v2/debug/usd", stat.ServeUSDDebug)
 	router.HandlerFunc(http.MethodGet, "/v2/debug/decimals", decimal.ServeDecimalsDebug)
 	router.Handle(http.MethodGet, "/v2/debug/block/:id", debugBlock)
 
-	router.HandlerFunc(http.MethodGet, "/v2/doc", serveDoc)
-
-	// version 1
-	addMeasured(router, "/v2/actions", jsonActions)
+	// Keep only health and pools endpoints
 	addMeasured(router, "/v2/health", jsonHealth)
-	addMeasured(router, "/v2/history/swaps", jsonSwapHistory)
-	addMeasured(router, "/v2/history/depths/:pool", jsonDepths)
-	addMeasured(router, "/v2/history/savers/:pool", jsonSaversDepths)
-	addMeasured(router, "/v2/history/earnings", jsonEarningsHistory)
-	addMeasured(router, "/v2/history/liquidity_changes", jsonLiquidityHistory)
-	addMeasured(router, "/v2/history/tvl", jsonTVLHistory)
-	addMeasured(router, "/v2/history/reserve", jsonReserveHistory)
-	addMeasured(router, "/v2/history/rune", jsonRunePriceHistory)
-	addMeasured(router, "/v2/history/affiliate", jsonAffiliateHistory)
-	addMeasured(router, "/v2/history/affiliate/stats", jsonAffiliateStats)
-	addMeasured(router, "/v2/history/affiliate/earnings", jsonAffiliateEarning)
-	addMeasured(router, "/v2/network", jsonNetwork)
-	addMeasured(router, "/v2/nodes", jsonNodes)
-	addMeasured(router, "/v2/members", jsonMembers)
-	addMeasured(router, "/v2/member/:addr", jsonMemberDetails)
-	addMeasured(router, "/v2/saver/:addr", jsonSaverDetails)
 	addMeasured(router, "/v2/pools", jsonPools)
-	addMeasured(router, "/v2/knownpools", jsonKnownPools)
-	addMeasured(router, "/v2/pool/:pool", jsonPool)
-	addMeasured(router, "/v2/pool/:pool/stats", jsonPoolStats)
-	router.Handle(http.MethodGet, "/v2/stats", cachedJsonStats())
-	addMeasured(router, "/v2/swagger.json", jsonSwagger)
-	addMeasured(router, "/v2/thorname/lookup/:name", jsonTHORName)
-	addMeasured(router, "/v2/thorname/rlookup/:address", jsonTHORNameAddress)
-	addMeasured(router, "/v2/thorname/owner/:address", jsonTHORNameOwner)
-	addMeasured(router, "/v2/churns", jsonChurns)
-	addMeasured(router, "/v2/websocket", websockets.WsHandler)
-	addMeasured(router, "/v2/swaps", jsonSwaps)
-	addMeasured(router, "/v2/ruji/merge", jsonRUJIMerge)
-	addMeasured(router, "/v2/votes", jsonVotes)
-	addMeasured(router, "/v2/tcy/distribution/:address", jsonTCYDistribution)
-	addMeasured(router, "/v2/bonds/:address", wrapBonderDetails(nodeURL))
-	if config.Global.EventRecorder.OnTransferEnabled {
-		addMeasured(router, "/v2/balance/:address", jsonBalance)
-		addMeasured(router, "/v2/holders", jsonHolders)
-	}
 
 	router.PanicHandler = panicHandler
 }
 
 func panicHandler(w http.ResponseWriter, r *http.Request, err interface{}) {
-	log.Error().Interface("error", err).Str("path", r.URL.Path).Msg("panic http handler")
+	logger := btcqlog.LoggerForModule("http")
+	zlog := logger.GetZeroLogger()
+	zlog.Error().
+		Interface("error", err).
+		Str("path", r.URL.Path).
+		Msg("panic http handler")
 	w.WriteHeader(http.StatusInternalServerError)
-}
-
-func serveDoc(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./openapi/generated/doc.html")
 }
 
 func serveRoot(w http.ResponseWriter, r *http.Request) {
@@ -126,9 +84,7 @@ Welcome to the HTTP interface.
 
 func corsHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !strings.HasPrefix(r.URL.Path, proxiedPrefix) {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-		}
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		h.ServeHTTP(w, r)
 	})
 }
