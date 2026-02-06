@@ -153,12 +153,12 @@ func PoolStatus(ctx context.Context, pool string) (string, error) {
 var RewardEntriesAggregate = db.RegisterAggregate(
 	db.NewAggregate("rewards_event_entries", "rewards_event_entries").
 		AddGroupColumn("pool").
-		AddBigintSumColumn("rune_e8").
+		AddBigintSumColumn("qbtc_e8").
 		AddBigintSumColumn("saver_e8"))
 
-// TotalLiquidityFeesRune gets sum of liquidity fees in Rune for a given time interval
-func TotalLiquidityFeesRune(ctx context.Context, from time.Time, to time.Time) (int64, error) {
-	liquidityFeeQ := `SELECT COALESCE(SUM(liq_fee_in_rune_E8), 0)
+// TotalLiquidityFeesQbtc gets sum of liquidity fees in QBTC for a given time interval
+func TotalLiquidityFeesQbtc(ctx context.Context, from time.Time, to time.Time) (int64, error) {
+	liquidityFeeQ := `SELECT COALESCE(SUM(liq_fee_in_qbtc_E8), 0)
 	FROM swap_events
 	WHERE block_timestamp >= $1 AND block_timestamp <= $2
 	`
@@ -171,7 +171,7 @@ func TotalLiquidityFeesRune(ctx context.Context, from time.Time, to time.Time) (
 	return liquidityFees, nil
 }
 
-func TotalLiquidityFeesRuneAtBlock(ctx context.Context, timestamp time.Time) (int64, error) {
+func TotalLiquidityFeesQbtcAtBlock(ctx context.Context, timestamp time.Time) (int64, error) {
 	liquidityFeeQ := `SELECT COALESCE(SUM(liq_fee_in_rune_E8), 0)
 	FROM swap_events
 	WHERE block_timestamp = $1
@@ -378,21 +378,21 @@ func GetNetworkData(ctx context.Context) (oapigen.Network, error) {
 	// in memory lookups
 	var result oapigen.Network
 
-	assetE8DepthPerPool, runeE8DepthPerPool, timestamp := AssetAndRuneDepths()
+	assetE8DepthPerPool, qbtcE8DepthPerPool, timestamp := AssetAndRuneDepths()
 	statusMap, err := GetPoolsStatuses(ctx, db.TimeToNano(timestamp))
 	if err != nil {
 		return result, err
 	}
 
-	var runeDepth int64
-	var availablePoolsRune int64
-	for poolName, depth := range runeE8DepthPerPool {
+	var qbtcDepth int64
+	var availablePoolsQbtc int64
+	for poolName, depth := range qbtcE8DepthPerPool {
 		if record.GetCoinType([]byte(poolName)) != record.AssetDerived {
-			runeDepth += depth
+			qbtcDepth += depth
 		}
 		if statusMap[poolName] == "available" &&
 			record.GetCoinType([]byte(poolName)) == record.AssetNative {
-			availablePoolsRune += depth
+			availablePoolsQbtc += depth
 		}
 	}
 	currentHeight, _, _ := LastBlock()
@@ -403,12 +403,12 @@ func GetNetworkData(ctx context.Context) (oapigen.Network, error) {
 		return result, err
 	}
 
-	weeklyLiquidityFeesRune, err := TotalLiquidityFeesRune(ctx, timestamp.Add(-1*time.Hour*24*7), timestamp)
+	weeklyLiquidityFeesQbtc, err := TotalLiquidityFeesQbtc(ctx, timestamp.Add(-1*time.Hour*24*7), timestamp)
 	if err != nil {
 		return result, err
 	}
 
-	blockHeightLiquidityFees, err := TotalLiquidityFeesRuneAtBlock(ctx, timestamp)
+	blockHeightLiquidityFees, err := TotalLiquidityFeesQbtcAtBlock(ctx, timestamp)
 	if err != nil {
 		return result, err
 	}
@@ -479,15 +479,15 @@ func GetNetworkData(ctx context.Context) (oapigen.Network, error) {
 		}
 	}
 
-	// Get vaults liquidity in RUNE
-	var vaultsLiquidityInRune int64
+	// Get vaults liquidity in QBTC
+	var vaultsLiquidityInQbtc int64
 	for _, v := range *aVaults {
 		for _, coin := range v.Coins {
 			if v.Status == "ActiveVault" {
 				aDepth := assetE8DepthPerPool[coin.Asset]
-				rDepth := runeE8DepthPerPool[coin.Asset]
+				rDepth := qbtcE8DepthPerPool[coin.Asset]
 				amt := util.MustParseInt64(coin.Amount)
-				vaultsLiquidityInRune += int64(AssetPrice(aDepth, rDepth) * float64(amt))
+				vaultsLiquidityInQbtc += int64(AssetPrice(aDepth, rDepth) * float64(amt))
 			}
 		}
 	}
@@ -525,13 +525,13 @@ func GetNetworkData(ctx context.Context) (oapigen.Network, error) {
 	totalRewards := float64(blockHeightLiquidityFees) + blockReward
 
 	securing := float64(securityBond)
-	secured := float64(vaultsLiquidityInRune)
+	secured := float64(vaultsLiquidityInQbtc)
 
 	if useEffectiveSecurity <= 0 {
 		securing = float64(bondMetrics.TotalEffectiveBond)
 	}
 	if useVaultAssets <= 0 {
-		secured = float64(availablePoolsRune)
+		secured = float64(availablePoolsQbtc)
 	}
 	secured = (float64(assetsBps) / float64(10_000)) * float64(secured)
 
@@ -543,7 +543,7 @@ func GetNetworkData(ctx context.Context) (oapigen.Network, error) {
 		basePoolShare := totalRewards - baseNodeShare
 
 		adjustmentNodeShare := (float64(bondMetrics.TotalEffectiveBond) / float64(securityBond)) * baseNodeShare
-		adjustmentPoolShare := (float64(availablePoolsRune) / float64(vaultsLiquidityInRune)) * basePoolShare
+		adjustmentPoolShare := (float64(availablePoolsQbtc) / float64(vaultsLiquidityInQbtc)) * basePoolShare
 		if useEffectiveSecurity <= 0 {
 			adjustmentNodeShare = baseNodeShare
 		}
@@ -562,7 +562,7 @@ func GetNetworkData(ctx context.Context) (oapigen.Network, error) {
 	yearlyBlockRewards := float64(blockRewards.BlockReward * blocksPerYear)
 	weeklyBlockRewards := yearlyBlockRewards / WeeksInYear
 
-	weeklyTotalIncome := weeklyBlockRewards + float64(weeklyLiquidityFeesRune)
+	weeklyTotalIncome := weeklyBlockRewards + float64(weeklyLiquidityFeesQbtc)
 	weeklyBondIncome := weeklyTotalIncome * (1 - poolShareFactor)
 	weeklyPoolIncome := weeklyTotalIncome * poolShareFactor
 
@@ -573,9 +573,9 @@ func GetNetworkData(ctx context.Context) (oapigen.Network, error) {
 	}
 
 	var liquidityAPY float64
-	if runeDepth > 0 {
-		poolDepthInRune := float64(2 * runeDepth)
-		weeklyPoolRate := weeklyPoolIncome / poolDepthInRune
+	if qbtcDepth > 0 {
+		poolDepthInQbtc := float64(2 * qbtcDepth)
+		weeklyPoolRate := weeklyPoolIncome / poolDepthInQbtc
 		liquidityAPY = CalculateAPYInterest(weeklyPoolRate, WeeksInYear)
 	}
 
@@ -611,7 +611,7 @@ func GetNetworkData(ctx context.Context) (oapigen.Network, error) {
 		StandbyBonds:            intArrayStrs(standbyBonds),
 		StandbyNodeCount:        util.IntStr(int64(len(standbyNodes))),
 		TotalReserve:            util.IntStr(networkData.TotalReserve),
-		TotalPooledRune:         util.IntStr(runeDepth),
+		TotalPooledQbtc:         util.IntStr(qbtcDepth),
 	}, nil
 }
 

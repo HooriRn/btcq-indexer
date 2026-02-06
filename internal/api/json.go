@@ -103,50 +103,50 @@ func toSwapHistoryItem(bucket stat.SwapBucket) oapigen.SwapHistoryItem {
 	return oapigen.SwapHistoryItem{
 		StartTime:              util.IntStr(bucket.StartTime.ToI()),
 		EndTime:                util.IntStr(bucket.EndTime.ToI()),
-		ToAssetVolume:          util.IntStr(bucket.RuneToAssetVolume),
-		ToRuneVolume:           util.IntStr(bucket.AssetToRuneVolume),
-		ToTradeVolume:          util.IntStr(bucket.RuneToTradeVolume),
-		FromTradeVolume:        util.IntStr(bucket.TradeToRuneVolume),
-		ToSecuredVolume:        util.IntStr(bucket.SecuredToRuneVolume),
-		FromSecuredVolume:      util.IntStr(bucket.RuneToSecuredVolume),
-		SynthMintVolume:        util.IntStr(bucket.RuneToSynthVolume),
-		SynthRedeemVolume:      util.IntStr(bucket.SynthToRuneVolume),
+		ToAssetVolume:          util.IntStr(bucket.QbtcToAssetVolume),
+		ToRuneVolume:           util.IntStr(bucket.AssetToQbtcVolume),
+		ToTradeVolume:          util.IntStr(bucket.QbtcToTradeVolume),
+		FromTradeVolume:        util.IntStr(bucket.TradeToQbtcVolume),
+		ToSecuredVolume:        util.IntStr(bucket.SecuredToQbtcVolume),
+		FromSecuredVolume:      util.IntStr(bucket.QbtcToSecuredVolume),
+		SynthMintVolume:        util.IntStr(bucket.QbtcToSynthVolume),
+		SynthRedeemVolume:      util.IntStr(bucket.SynthToQbtcVolume),
 		TotalVolume:            util.IntStr(bucket.TotalVolume),
-		ToAssetVolumeUSD:       util.IntStr(bucket.RuneToAssetVolumeUSD),
-		ToRuneVolumeUSD:        util.IntStr(bucket.AssetToRuneVolumeUSD),
-		ToTradeVolumeUSD:       util.IntStr(bucket.RuneToTradeVolumeUSD),
-		FromTradeVolumeUSD:     util.IntStr(bucket.TradeToRuneVolumeUSD),
-		ToSecuredVolumeUSD:     util.IntStr(bucket.RuneToSecuredVolumeUSD),
-		FromSecuredVolumeUSD:   util.IntStr(bucket.SecuredToRuneVolumeUSD),
-		SynthMintVolumeUSD:     util.IntStr(bucket.RuneToSynthVolumeUSD),
-		SynthRedeemVolumeUSD:   util.IntStr(bucket.SynthToRuneVolumeUSD),
+		ToAssetVolumeUSD:       util.IntStr(bucket.QbtcToAssetVolumeUSD),
+		ToRuneVolumeUSD:        util.IntStr(bucket.AssetToQbtcVolumeUSD),
+		ToTradeVolumeUSD:       util.IntStr(bucket.QbtcToTradeVolumeUSD),
+		FromTradeVolumeUSD:     util.IntStr(bucket.TradeToQbtcVolumeUSD),
+		ToSecuredVolumeUSD:     util.IntStr(bucket.QbtcToSecuredVolumeUSD),
+		FromSecuredVolumeUSD:   util.IntStr(bucket.SecuredToQbtcVolumeUSD),
+		SynthMintVolumeUSD:     util.IntStr(bucket.QbtcToSynthVolumeUSD),
+		SynthRedeemVolumeUSD:   util.IntStr(bucket.SynthToQbtcVolumeUSD),
 		TotalVolumeUSD:         util.IntStr(bucket.TotalVolumeUSD),
-		ToAssetCount:           util.IntStr(bucket.RuneToAssetCount),
-		ToRuneCount:            util.IntStr(bucket.AssetToRuneCount),
-		ToTradeCount:           util.IntStr(bucket.RuneToTradeCount),
-		FromTradeCount:         util.IntStr(bucket.TradeToRuneCount),
-		ToSecuredCount:         util.IntStr(bucket.SecuredToRuneCount),
-		FromSecuredCount:       util.IntStr(bucket.RuneToSecuredCount),
-		SynthMintCount:         util.IntStr(bucket.RuneToSynthCount),
-		SynthRedeemCount:       util.IntStr(bucket.SynthToRuneCount),
+		ToAssetCount:           util.IntStr(bucket.QbtcToAssetCount),
+		ToRuneCount:            util.IntStr(bucket.AssetToQbtcCount),
+		ToTradeCount:           util.IntStr(bucket.QbtcToTradeCount),
+		FromTradeCount:         util.IntStr(bucket.TradeToQbtcCount),
+		ToSecuredCount:         util.IntStr(bucket.SecuredToQbtcCount),
+		FromSecuredCount:       util.IntStr(bucket.QbtcToSecuredCount),
+		SynthMintCount:         util.IntStr(bucket.QbtcToSynthCount),
+		SynthRedeemCount:       util.IntStr(bucket.SynthToQbtcCount),
 		TotalCount:             util.IntStr(bucket.TotalCount),
-		ToAssetFees:            util.IntStr(bucket.RuneToAssetFees),
-		ToRuneFees:             util.IntStr(bucket.AssetToRuneFees),
-		ToTradeFees:            util.IntStr(bucket.RuneToTradeFees),
-		FromTradeFees:          util.IntStr(bucket.TradeToRuneFees),
-		ToSecuredFees:          util.IntStr(bucket.RuneToSecuredFees),
-		FromSecuredFees:        util.IntStr(bucket.SecuredToRuneFees),
-		SynthMintFees:          util.IntStr(bucket.RuneToSynthFees),
-		SynthRedeemFees:        util.IntStr(bucket.SynthToRuneFees),
+		ToAssetFees:            util.IntStr(bucket.QbtcToAssetFees),
+		ToRuneFees:             util.IntStr(bucket.AssetToQbtcFees),
+		ToTradeFees:            util.IntStr(bucket.QbtcToTradeFees),
+		FromTradeFees:          util.IntStr(bucket.TradeToQbtcFees),
+		ToSecuredFees:          util.IntStr(bucket.QbtcToSecuredFees),
+		FromSecuredFees:        util.IntStr(bucket.SecuredToQbtcFees),
+		SynthMintFees:          util.IntStr(bucket.QbtcToSynthFees),
+		SynthRedeemFees:        util.IntStr(bucket.SynthToQbtcFees),
 		TotalFees:              util.IntStr(bucket.TotalFees),
-		ToAssetAverageSlip:     ratioStr(bucket.RuneToAssetSlip, bucket.RuneToAssetCount),
-		ToRuneAverageSlip:      ratioStr(bucket.AssetToRuneSlip, bucket.AssetToRuneCount),
-		ToTradeAverageSlip:     ratioStr(bucket.RuneToTradeSlip, bucket.RuneToTradeCount),
-		FromTradeAverageSlip:   ratioStr(bucket.TradeToRuneSlip, bucket.TradeToRuneCount),
-		ToSecuredAverageSlip:   ratioStr(bucket.SecuredToRuneSlip, bucket.RuneToSecuredCount),
-		FromSecuredAverageSlip: ratioStr(bucket.SecuredToRuneSlip, bucket.SecuredToRuneCount),
-		SynthMintAverageSlip:   ratioStr(bucket.RuneToSynthSlip, bucket.RuneToSynthCount),
-		SynthRedeemAverageSlip: ratioStr(bucket.SynthToRuneSlip, bucket.SynthToRuneCount),
+		ToAssetAverageSlip:     ratioStr(bucket.QbtcToAssetSlip, bucket.QbtcToAssetCount),
+		ToRuneAverageSlip:      ratioStr(bucket.AssetToQbtcSlip, bucket.AssetToQbtcCount),
+		ToTradeAverageSlip:     ratioStr(bucket.QbtcToTradeSlip, bucket.QbtcToTradeCount),
+		FromTradeAverageSlip:   ratioStr(bucket.TradeToQbtcSlip, bucket.TradeToQbtcCount),
+		ToSecuredAverageSlip:   ratioStr(bucket.SecuredToQbtcSlip, bucket.QbtcToSecuredCount),
+		FromSecuredAverageSlip: ratioStr(bucket.SecuredToQbtcSlip, bucket.SecuredToQbtcCount),
+		SynthMintAverageSlip:   ratioStr(bucket.QbtcToSynthSlip, bucket.QbtcToSynthCount),
+		SynthRedeemAverageSlip: ratioStr(bucket.SynthToQbtcSlip, bucket.SynthToQbtcCount),
 		AverageSlip:            ratioStr(bucket.TotalSlip, bucket.TotalCount),
 		QbtcPriceUSD:           floatStr(bucket.QbtcPriceUSD),
 	}
@@ -164,7 +164,7 @@ func createVolumeIntervals(buckets []stat.SwapBucket) (result oapigen.SwapHistor
 	result.Meta = toSwapHistoryItem(metaBucket)
 	result.Meta.StartTime = result.Intervals[0].StartTime
 	result.Meta.EndTime = result.Intervals[len(result.Intervals)-1].EndTime
-	result.Meta.RunePriceUSD = result.Intervals[len(result.Intervals)-1].RunePriceUSD
+	result.Meta.QbtcPriceUSD = result.Intervals[len(result.Intervals)-1].QbtcPriceUSD
 	return
 }
 
@@ -221,14 +221,14 @@ func toTVLHistoryResponse(depths []stat.TVLDepthBucket, bonds []stat.BondBucket)
 	for i, bucket := range depths {
 		pools := 2 * bucket.TotalPoolDepth
 		bonds := bonds[i].Bonds
-		poolsDepth := toOapiPoolsDepth(bucket.PoolsMapRuneDepth)
+		poolsDepth := toOapiPoolsDepth(bucket.PoolsMapQbtcDepth)
 		result.Intervals = append(result.Intervals, oapigen.TVLHistoryItem{
 			StartTime:        util.IntStr(bucket.Window.From.ToI()),
 			EndTime:          util.IntStr(bucket.Window.Until.ToI()),
 			TotalValuePooled: util.IntStr(pools),
 			TotalValueBonded: showBonds(util.IntStr(bonds)),
 			TotalValueLocked: showBonds(util.IntStr(pools + bonds)),
-			RunePriceUSD:     floatStr(bucket.RunePriceUSD),
+			RunePriceUSD:     floatStr(bucket.QbtcPriceUSD),
 			PoolsDepth:       poolsDepth,
 		})
 	}
@@ -467,7 +467,7 @@ func getPoolAggregates(ctx context.Context, pools []string, apyBucket db.Buckets
 	earningsApy := make(map[string]float64)
 	periodsPerYear := db.GetPPYFromBuckets(apyBucket)
 	for pool, earnings := range poolEarningsMapStat {
-		er := earnings.TotalLiquidityFeesRune + earnings.Rewards
+		er := earnings.TotalLiquidityFeesQbtc + earnings.Rewards
 		pr := float64(er) / float64(latestState.Pools[pool].QbtcDepth)
 		mapEarningsInfo[pool] = EarningsInfo{
 			Earnings:                   er,
@@ -592,17 +592,17 @@ func buildPoolDetail(
 		saversAPR = aggregates.lpLuvi[util.ConvertNativePoolToSynth(pool)]
 	}
 
-	depthPlus2Percent, depthMinus2Percent := calculateDepthsPercentage(assetDepth, runeDepth)
+	depthPlus2Percent, depthMinus2Percent := calculateDepthsPercentage(assetDepth, qbtcDepth)
 	depthPlus2PercentStr := util.IntStr(depthPlus2Percent)
 	depthMinus2PercentStr := util.IntStr(depthMinus2Percent)
 
 	return oapigen.PoolDetail{
 		Asset:                          pool,
 		AssetDepth:                     util.IntStr(assetDepth),
-		RuneDepth:                      util.IntStr(runeDepth),
+		RuneDepth:                      util.IntStr(qbtcDepth),
 		AssetPrice:                     floatStr(price),
 		AssetPriceUSD:                  floatStr(priceUSD),
-		LiquidityInUSD:                 floatStr(runePriceUsd * 2 * float64(runeDepth/1e8)),
+		LiquidityInUSD:                 floatStr(qbtcPriceUsd * 2 * float64(qbtcDepth/1e8)),
 		Status:                         status,
 		Units:                          util.IntStr(poolUnits),
 		LiquidityUnits:                 util.IntStr(liquidityUnits),
@@ -663,16 +663,16 @@ func jsonPools(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	poolsResponse := oapigen.PoolsResponse{}
 	for _, pool := range pools {
-		runeDepth := aggregates.depths[pool].RuneDepth
+		qbtcDepth := aggregates.depths[pool].QbtcDepth
 		assetDepth := aggregates.depths[pool].AssetDepth
 		poolDecimal, ok := poolsDecimal[pool]
 		if !ok {
 			poolDecimal.NativeDecimals = -1
 		}
-		if 0 < runeDepth && 0 < assetDepth {
+		if 0 < qbtcDepth && 0 < assetDepth {
 			status := poolStatusFromMap(pool, statusMap)
 			poolsResponse = append(poolsResponse, buildPoolDetail(r.Context(), pool, status,
-				*aggregates, runePriceUsd, poolDecimal.NativeDecimals))
+				*aggregates, qbtcPriceUsd, poolDecimal.NativeDecimals))
 		}
 	}
 
@@ -1112,7 +1112,7 @@ func jsonHolders(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	// Default values
 	if asset == "" {
-		asset = "THOR.RUNE"
+		asset = "QBTC.QBTC"
 	}
 	var limit int64 = 100
 	if limitStr != "" {

@@ -16,50 +16,50 @@ type Swaps struct {
 type SwapBucket struct {
 	StartTime              db.Second
 	EndTime                db.Second
-	RuneToAssetCount       int64
-	AssetToRuneCount       int64
-	RuneToSynthCount       int64
-	SynthToRuneCount       int64
-	RuneToTradeCount       int64
-	TradeToRuneCount       int64
-	RuneToSecuredCount     int64
-	SecuredToRuneCount     int64
+	QbtcToAssetCount       int64
+	AssetToQbtcCount       int64
+	QbtcToSynthCount       int64
+	SynthToQbtcCount       int64
+	QbtcToTradeCount       int64
+	TradeToQbtcCount       int64
+	QbtcToSecuredCount     int64
+	SecuredToQbtcCount     int64
 	TotalCount             int64
-	RuneToAssetVolume      int64
-	AssetToRuneVolume      int64
-	RuneToSynthVolume      int64
-	SynthToRuneVolume      int64
-	RuneToTradeVolume      int64
-	TradeToRuneVolume      int64
-	SecuredToRuneVolume    int64
-	RuneToSecuredVolume    int64
+	QbtcToAssetVolume      int64
+	AssetToQbtcVolume      int64
+	QbtcToSynthVolume      int64
+	SynthToQbtcVolume      int64
+	QbtcToTradeVolume      int64
+	TradeToQbtcVolume      int64
+	SecuredToQbtcVolume    int64
+	QbtcToSecuredVolume    int64
 	TotalVolume            int64
-	RuneToAssetVolumeUSD   int64
-	AssetToRuneVolumeUSD   int64
-	RuneToSynthVolumeUSD   int64
-	SynthToRuneVolumeUSD   int64
-	RuneToTradeVolumeUSD   int64
-	TradeToRuneVolumeUSD   int64
-	SecuredToRuneVolumeUSD int64
-	RuneToSecuredVolumeUSD int64
+	QbtcToAssetVolumeUSD   int64
+	AssetToQbtcVolumeUSD   int64
+	QbtcToSynthVolumeUSD   int64
+	SynthToQbtcVolumeUSD   int64
+	QbtcToTradeVolumeUSD   int64
+	TradeToQbtcVolumeUSD   int64
+	SecuredToQbtcVolumeUSD int64
+	QbtcToSecuredVolumeUSD int64
 	TotalVolumeUSD         int64
-	RuneToAssetFees        int64
-	AssetToRuneFees        int64
-	RuneToSynthFees        int64
-	SynthToRuneFees        int64
-	RuneToTradeFees        int64
-	TradeToRuneFees        int64
-	SecuredToRuneFees      int64
-	RuneToSecuredFees      int64
+	QbtcToAssetFees        int64
+	AssetToQbtcFees        int64
+	QbtcToSynthFees        int64
+	SynthToQbtcFees        int64
+	QbtcToTradeFees        int64
+	TradeToQbtcFees        int64
+	SecuredToQbtcFees      int64
+	QbtcToSecuredFees      int64
 	TotalFees              int64
-	RuneToAssetSlip        int64
-	AssetToRuneSlip        int64
-	RuneToSynthSlip        int64
-	SynthToRuneSlip        int64
-	RuneToTradeSlip        int64
-	TradeToRuneSlip        int64
-	SecuredToRuneSlip      int64
-	RuneToSecuredSlip      int64
+	QbtcToAssetSlip        int64
+	AssetToQbtcSlip        int64
+	QbtcToSynthSlip        int64
+	SynthToQbtcSlip        int64
+	QbtcToTradeSlip        int64
+	TradeToQbtcSlip        int64
+	SecuredToQbtcSlip      int64
+	QbtcToSecuredSlip      int64
 	TotalSlip              int64
 	QbtcPriceUSD           float64
 }
@@ -67,127 +67,127 @@ type SwapBucket struct {
 func (sb *SwapBucket) writeOneDirection(oneDirection *OneDirectionSwapBucket) {
 	switch oneDirection.Direction {
 	case db.RuneToAsset:
-		sb.RuneToAssetCount += oneDirection.Count
-		sb.RuneToAssetVolume += oneDirection.VolumeInRune
-		sb.RuneToAssetVolumeUSD += oneDirection.VolumeInUSD
-		sb.RuneToAssetFees += oneDirection.TotalFees
-		sb.RuneToAssetSlip += oneDirection.TotalSlip
+		sb.QbtcToAssetCount += oneDirection.Count
+		sb.QbtcToAssetVolume += oneDirection.VolumeInQbtc
+		sb.QbtcToAssetVolumeUSD += oneDirection.VolumeInUSD
+		sb.QbtcToAssetFees += oneDirection.TotalFees
+		sb.QbtcToAssetSlip += oneDirection.TotalSlip
 	case db.AssetToRune:
-		sb.AssetToRuneCount += oneDirection.Count
-		sb.AssetToRuneVolume += oneDirection.VolumeInRune
-		sb.AssetToRuneVolumeUSD += oneDirection.VolumeInUSD
-		sb.AssetToRuneFees += oneDirection.TotalFees
-		sb.AssetToRuneSlip += oneDirection.TotalSlip
+		sb.AssetToQbtcCount += oneDirection.Count
+		sb.AssetToQbtcVolume += oneDirection.VolumeInQbtc
+		sb.AssetToQbtcVolumeUSD += oneDirection.VolumeInUSD
+		sb.AssetToQbtcFees += oneDirection.TotalFees
+		sb.AssetToQbtcSlip += oneDirection.TotalSlip
 	case db.RuneToSynth:
-		sb.RuneToSynthCount += oneDirection.Count
-		sb.RuneToSynthVolume += oneDirection.VolumeInRune
-		sb.RuneToSynthVolumeUSD += oneDirection.VolumeInUSD
-		sb.RuneToSynthFees += oneDirection.TotalFees
-		sb.RuneToSynthSlip += oneDirection.TotalSlip
+		sb.QbtcToSynthCount += oneDirection.Count
+		sb.QbtcToSynthVolume += oneDirection.VolumeInQbtc
+		sb.QbtcToSynthVolumeUSD += oneDirection.VolumeInUSD
+		sb.QbtcToSynthFees += oneDirection.TotalFees
+		sb.QbtcToSynthSlip += oneDirection.TotalSlip
 	case db.SynthToRune:
-		sb.SynthToRuneCount += oneDirection.Count
-		sb.SynthToRuneVolume += oneDirection.VolumeInRune
-		sb.SynthToRuneVolumeUSD += oneDirection.VolumeInUSD
-		sb.SynthToRuneFees += oneDirection.TotalFees
-		sb.SynthToRuneSlip += oneDirection.TotalSlip
+		sb.SynthToQbtcCount += oneDirection.Count
+		sb.SynthToQbtcVolume += oneDirection.VolumeInQbtc
+		sb.SynthToQbtcVolumeUSD += oneDirection.VolumeInUSD
+		sb.SynthToQbtcFees += oneDirection.TotalFees
+		sb.SynthToQbtcSlip += oneDirection.TotalSlip
 	case db.RuneToTrade:
-		sb.RuneToTradeCount += oneDirection.Count
-		sb.RuneToTradeVolume += oneDirection.VolumeInRune
-		sb.RuneToTradeVolumeUSD += oneDirection.VolumeInUSD
-		sb.RuneToTradeFees += oneDirection.TotalFees
-		sb.RuneToTradeSlip += oneDirection.TotalSlip
+		sb.QbtcToTradeCount += oneDirection.Count
+		sb.QbtcToTradeVolume += oneDirection.VolumeInQbtc
+		sb.QbtcToTradeVolumeUSD += oneDirection.VolumeInUSD
+		sb.QbtcToTradeFees += oneDirection.TotalFees
+		sb.QbtcToTradeSlip += oneDirection.TotalSlip
 	case db.TradeToRune:
-		sb.TradeToRuneCount += oneDirection.Count
-		sb.TradeToRuneVolume += oneDirection.VolumeInRune
-		sb.TradeToRuneVolumeUSD += oneDirection.VolumeInUSD
-		sb.TradeToRuneFees += oneDirection.TotalFees
-		sb.TradeToRuneSlip += oneDirection.TotalSlip
+		sb.TradeToQbtcCount += oneDirection.Count
+		sb.TradeToQbtcVolume += oneDirection.VolumeInQbtc
+		sb.TradeToQbtcVolumeUSD += oneDirection.VolumeInUSD
+		sb.TradeToQbtcFees += oneDirection.TotalFees
+		sb.TradeToQbtcSlip += oneDirection.TotalSlip
 	case db.RuneToSecure:
-		sb.RuneToSecuredCount += oneDirection.Count
-		sb.RuneToSecuredVolume += oneDirection.VolumeInRune
-		sb.RuneToSecuredVolumeUSD += oneDirection.VolumeInUSD
-		sb.RuneToSecuredFees += oneDirection.TotalFees
-		sb.RuneToSecuredSlip += oneDirection.TotalSlip
+		sb.QbtcToSecuredCount += oneDirection.Count
+		sb.QbtcToSecuredVolume += oneDirection.VolumeInQbtc
+		sb.QbtcToSecuredVolumeUSD += oneDirection.VolumeInUSD
+		sb.QbtcToSecuredFees += oneDirection.TotalFees
+		sb.QbtcToSecuredSlip += oneDirection.TotalSlip
 	case db.SecureToRune:
-		sb.SecuredToRuneCount += oneDirection.Count
-		sb.SecuredToRuneVolume += oneDirection.VolumeInRune
-		sb.SecuredToRuneVolumeUSD += oneDirection.VolumeInUSD
-		sb.SecuredToRuneFees += oneDirection.TotalFees
-		sb.SecuredToRuneSlip += oneDirection.TotalSlip
+		sb.SecuredToQbtcCount += oneDirection.Count
+		sb.SecuredToQbtcVolume += oneDirection.VolumeInQbtc
+		sb.SecuredToQbtcVolumeUSD += oneDirection.VolumeInUSD
+		sb.SecuredToQbtcFees += oneDirection.TotalFees
+		sb.SecuredToQbtcSlip += oneDirection.TotalSlip
 	}
 }
 
 func (sb *SwapBucket) calculateTotals() {
-	sb.TotalCount = (sb.RuneToAssetCount + sb.AssetToRuneCount +
-		sb.RuneToSynthCount + sb.SynthToRuneCount + sb.TradeToRuneCount +
-		sb.RuneToTradeCount + sb.SecuredToRuneCount + sb.RuneToSecuredCount)
-	sb.TotalVolume = (sb.RuneToAssetVolume + sb.AssetToRuneVolume +
-		sb.RuneToSynthVolume + sb.SynthToRuneVolume + sb.RuneToTradeVolume +
-		sb.TradeToRuneVolume + sb.SecuredToRuneVolume + sb.RuneToSecuredVolume)
-	sb.TotalVolumeUSD = (sb.RuneToAssetVolumeUSD + sb.AssetToRuneVolumeUSD +
-		sb.RuneToSynthVolumeUSD + sb.SynthToRuneVolumeUSD + sb.RuneToTradeVolumeUSD +
-		sb.TradeToRuneVolumeUSD + sb.SecuredToRuneVolumeUSD + sb.RuneToSecuredVolumeUSD)
-	sb.TotalFees = (sb.RuneToAssetFees + sb.AssetToRuneFees +
-		sb.RuneToSynthFees + sb.SynthToRuneFees + sb.RuneToTradeFees + sb.TradeToRuneFees +
-		sb.SecuredToRuneFees + sb.RuneToSecuredFees)
-	sb.TotalSlip = (sb.RuneToAssetSlip + sb.AssetToRuneSlip +
-		sb.RuneToSynthSlip + sb.SynthToRuneSlip + sb.RuneToTradeSlip + sb.TradeToRuneSlip +
-		sb.SecuredToRuneSlip + sb.RuneToSecuredSlip)
+	sb.TotalCount = (sb.QbtcToAssetCount + sb.AssetToQbtcCount +
+		sb.QbtcToSynthCount + sb.SynthToQbtcCount + sb.TradeToQbtcCount +
+		sb.QbtcToTradeCount + sb.SecuredToQbtcCount + sb.QbtcToSecuredCount)
+	sb.TotalVolume = (sb.QbtcToAssetVolume + sb.AssetToQbtcVolume +
+		sb.QbtcToSynthVolume + sb.SynthToQbtcVolume + sb.QbtcToTradeVolume +
+		sb.TradeToQbtcVolume + sb.SecuredToQbtcVolume + sb.QbtcToSecuredVolume)
+	sb.TotalVolumeUSD = (sb.QbtcToAssetVolumeUSD + sb.AssetToQbtcVolumeUSD +
+		sb.QbtcToSynthVolumeUSD + sb.SynthToQbtcVolumeUSD + sb.QbtcToTradeVolumeUSD +
+		sb.TradeToQbtcVolumeUSD + sb.SecuredToQbtcVolumeUSD + sb.QbtcToSecuredVolumeUSD)
+	sb.TotalFees = (sb.QbtcToAssetFees + sb.AssetToQbtcFees +
+		sb.QbtcToSynthFees + sb.SynthToQbtcFees + sb.QbtcToTradeFees + sb.TradeToQbtcFees +
+		sb.SecuredToQbtcFees + sb.QbtcToSecuredFees)
+	sb.TotalSlip = (sb.QbtcToAssetSlip + sb.AssetToQbtcSlip +
+		sb.QbtcToSynthSlip + sb.SynthToQbtcSlip + sb.QbtcToTradeSlip + sb.TradeToQbtcSlip +
+		sb.SecuredToQbtcSlip + sb.QbtcToSecuredSlip)
 }
 
 // Used to sum up the buckets in the meta
 func (meta *SwapBucket) AddBucket(bucket SwapBucket) {
-	meta.RuneToAssetCount += bucket.RuneToAssetCount
-	meta.AssetToRuneCount += bucket.AssetToRuneCount
-	meta.RuneToSynthCount += bucket.RuneToSynthCount
-	meta.SynthToRuneCount += bucket.SynthToRuneCount
-	meta.RuneToTradeCount += bucket.RuneToTradeCount
-	meta.TradeToRuneCount += bucket.TradeToRuneCount
-	meta.SecuredToRuneCount += bucket.SecuredToRuneCount
-	meta.RuneToSecuredCount += bucket.RuneToSecuredCount
+	meta.QbtcToAssetCount += bucket.QbtcToAssetCount
+	meta.AssetToQbtcCount += bucket.AssetToQbtcCount
+	meta.QbtcToSynthCount += bucket.QbtcToSynthCount
+	meta.SynthToQbtcCount += bucket.SynthToQbtcCount
+	meta.QbtcToTradeCount += bucket.QbtcToTradeCount
+	meta.TradeToQbtcCount += bucket.TradeToQbtcCount
+	meta.SecuredToQbtcCount += bucket.SecuredToQbtcCount
+	meta.QbtcToSecuredCount += bucket.QbtcToSecuredCount
 	meta.TotalCount += bucket.TotalCount
-	meta.RuneToAssetVolume += bucket.RuneToAssetVolume
-	meta.AssetToRuneVolume += bucket.AssetToRuneVolume
-	meta.RuneToSynthVolume += bucket.RuneToSynthVolume
-	meta.SynthToRuneVolume += bucket.SynthToRuneVolume
-	meta.RuneToTradeVolume += bucket.RuneToTradeVolume
-	meta.TradeToRuneVolume += bucket.TradeToRuneVolume
-	meta.SecuredToRuneVolume += bucket.SecuredToRuneVolume
-	meta.RuneToSecuredVolume += bucket.RuneToSecuredVolume
+	meta.QbtcToAssetVolume += bucket.QbtcToAssetVolume
+	meta.AssetToQbtcVolume += bucket.AssetToQbtcVolume
+	meta.QbtcToSynthVolume += bucket.QbtcToSynthVolume
+	meta.SynthToQbtcVolume += bucket.SynthToQbtcVolume
+	meta.QbtcToTradeVolume += bucket.QbtcToTradeVolume
+	meta.TradeToQbtcVolume += bucket.TradeToQbtcVolume
+	meta.SecuredToQbtcVolume += bucket.SecuredToQbtcVolume
+	meta.QbtcToSecuredVolume += bucket.QbtcToSecuredVolume
 	meta.TotalVolume += bucket.TotalVolume
-	meta.RuneToAssetVolumeUSD += bucket.RuneToAssetVolumeUSD
-	meta.AssetToRuneVolumeUSD += bucket.AssetToRuneVolumeUSD
-	meta.RuneToSynthVolumeUSD += bucket.RuneToSynthVolumeUSD
-	meta.SynthToRuneVolumeUSD += bucket.SynthToRuneVolumeUSD
-	meta.RuneToTradeVolumeUSD += bucket.RuneToTradeVolumeUSD
-	meta.TradeToRuneVolumeUSD += bucket.TradeToRuneVolumeUSD
-	meta.SecuredToRuneVolumeUSD += bucket.SecuredToRuneVolumeUSD
-	meta.RuneToSecuredVolumeUSD += bucket.RuneToSecuredVolumeUSD
+	meta.QbtcToAssetVolumeUSD += bucket.QbtcToAssetVolumeUSD
+	meta.AssetToQbtcVolumeUSD += bucket.AssetToQbtcVolumeUSD
+	meta.QbtcToSynthVolumeUSD += bucket.QbtcToSynthVolumeUSD
+	meta.SynthToQbtcVolumeUSD += bucket.SynthToQbtcVolumeUSD
+	meta.QbtcToTradeVolumeUSD += bucket.QbtcToTradeVolumeUSD
+	meta.TradeToQbtcVolumeUSD += bucket.TradeToQbtcVolumeUSD
+	meta.SecuredToQbtcVolumeUSD += bucket.SecuredToQbtcVolumeUSD
+	meta.QbtcToSecuredVolumeUSD += bucket.QbtcToSecuredVolumeUSD
 	meta.TotalVolumeUSD += bucket.TotalVolumeUSD
-	meta.RuneToAssetFees += bucket.RuneToAssetFees
-	meta.AssetToRuneFees += bucket.AssetToRuneFees
-	meta.RuneToSynthFees += bucket.RuneToSynthFees
-	meta.SynthToRuneFees += bucket.SynthToRuneFees
-	meta.RuneToTradeFees += bucket.RuneToTradeFees
-	meta.TradeToRuneFees += bucket.TradeToRuneFees
-	meta.SecuredToRuneFees += bucket.SecuredToRuneFees
-	meta.RuneToSecuredFees += bucket.RuneToSecuredFees
+	meta.QbtcToAssetFees += bucket.QbtcToAssetFees
+	meta.AssetToQbtcFees += bucket.AssetToQbtcFees
+	meta.QbtcToSynthFees += bucket.QbtcToSynthFees
+	meta.SynthToQbtcFees += bucket.SynthToQbtcFees
+	meta.QbtcToTradeFees += bucket.QbtcToTradeFees
+	meta.TradeToQbtcFees += bucket.TradeToQbtcFees
+	meta.SecuredToQbtcFees += bucket.SecuredToQbtcFees
+	meta.QbtcToSecuredFees += bucket.QbtcToSecuredFees
 	meta.TotalFees += bucket.TotalFees
-	meta.RuneToAssetSlip += bucket.RuneToAssetSlip
-	meta.AssetToRuneSlip += bucket.AssetToRuneSlip
-	meta.RuneToSynthSlip += bucket.RuneToSynthSlip
-	meta.SynthToRuneSlip += bucket.SynthToRuneSlip
-	meta.RuneToTradeSlip += bucket.RuneToTradeSlip
-	meta.TradeToRuneSlip += bucket.TradeToRuneSlip
-	meta.SecuredToRuneSlip += bucket.SecuredToRuneSlip
-	meta.RuneToSecuredSlip += bucket.RuneToSecuredSlip
+	meta.QbtcToAssetSlip += bucket.QbtcToAssetSlip
+	meta.AssetToQbtcSlip += bucket.AssetToQbtcSlip
+	meta.QbtcToSynthSlip += bucket.QbtcToSynthSlip
+	meta.SynthToQbtcSlip += bucket.SynthToQbtcSlip
+	meta.QbtcToTradeSlip += bucket.QbtcToTradeSlip
+	meta.TradeToQbtcSlip += bucket.TradeToQbtcSlip
+	meta.SecuredToQbtcSlip += bucket.SecuredToQbtcSlip
+	meta.QbtcToSecuredSlip += bucket.QbtcToSecuredSlip
 	meta.TotalSlip += bucket.TotalSlip
 }
 
 type OneDirectionSwapBucket struct {
 	Time         db.Second
 	Count        int64
-	VolumeInRune int64
+	VolumeInQbtc int64
 	VolumeInUSD  int64
 	TotalFees    int64
 	TotalSlip    int64
@@ -236,7 +236,7 @@ func GetSwapBuckets(ctx context.Context, pool *string, buckets db.Buckets) (
 			SUM(swap_count) AS count,
 			SUM(volume_e8) AS volume,
 			SUM(volume_usd_e8) AS volume_usd,
-			SUM(liq_fee_in_rune_e8) AS fee,
+			SUM(liq_fee_in_qbtc_e8) AS fee,
 			SUM(swap_slip_bp) AS slip
 		FROM %s
 		GROUP BY _direction, time
@@ -252,7 +252,7 @@ func GetSwapBuckets(ctx context.Context, pool *string, buckets db.Buckets) (
 	ret := []OneDirectionSwapBucket{}
 	for rows.Next() {
 		var bucket OneDirectionSwapBucket
-		err := rows.Scan(&bucket.Time, &bucket.Direction, &bucket.Count, &bucket.VolumeInRune, &bucket.VolumeInUSD, &bucket.TotalFees, &bucket.TotalSlip)
+		err := rows.Scan(&bucket.Time, &bucket.Direction, &bucket.Count, &bucket.VolumeInQbtc, &bucket.VolumeInUSD, &bucket.TotalFees, &bucket.TotalSlip)
 		if err != nil {
 			return []OneDirectionSwapBucket{}, err
 		}

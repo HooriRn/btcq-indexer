@@ -32,12 +32,12 @@ type AffiliateMeta struct {
 }
 
 var AffiliateAggregate = db.RegisterAggregate(db.NewAggregate("affiliates", "affiliate_fee_events").
-	AddJoinQuery("rune_price", "r").
+	AddJoinQuery("qbtc_price", "r").
 	AddGroupColumn("thorname").
-	AddSumlikeExpression("affiliate_volume_in_rune_e8",
-		`SUM(_fee_amt_in_rune)::BIGINT`).
+	AddSumlikeExpression("affiliate_volume_in_qbtc_e8",
+		`SUM(_fee_amt_in_qbtc)::BIGINT`).
 	AddSumlikeExpression("affiliate_volume_usd_e8",
-		`SUM(_fee_amt_in_rune * r.rune_price_e8 / 1e6)::BIGINT`).
+		`SUM(_fee_amt_in_qbtc * r.qbtc_price_e8 / 1e6)::BIGINT`).
 	AddSumlikeExpression("affiliate_count", "COUNT(1)"))
 
 func GetAffiliateFeeBuckets(ctx context.Context, thorname *string, buckets db.Buckets) (
@@ -54,7 +54,7 @@ func GetAffiliateFeeBuckets(ctx context.Context, thorname *string, buckets db.Bu
 				aggregate_timestamp/1000000000 as time,
 				thorname,
 				SUM(affiliate_count) AS count,
-				SUM(affiliate_volume_in_rune_e8) AS volume,
+				SUM(affiliate_volume_in_qbtc_e8) AS volume,
 				SUM(affiliate_volume_usd_e8) AS volume_usd
 			FROM %s
 			GROUP BY time, thorname

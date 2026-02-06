@@ -13,9 +13,9 @@ import (
 
 type PoolEarnings struct {
 	Pool                   string
-	RuneLiquidityFees      int64 // fees charged in RUNE
+	QbtcLiquidityFees      int64 // fees charged in QBTC
 	AssetLiquidityFees     int64 // fees charged in asset
-	TotalLiquidityFeesRune int64 // asset + RUNE fees in RUNE
+	TotalLiquidityFeesQbtc int64 // asset + QBTC fees in QBTC
 	SaverRewards           int64 // saver reward
 	Rewards                int64 // rewards sent to / extracted from pool each block
 }
@@ -23,12 +23,12 @@ type PoolEarnings struct {
 func (pe *PoolEarnings) toOapigen() oapigen.EarningsHistoryItemPool {
 	return oapigen.EarningsHistoryItemPool{
 		Pool:                   pe.Pool,
-		RuneLiquidityFees:      util.IntStr(pe.RuneLiquidityFees),
+		QbtcLiquidityFees:      util.IntStr(pe.QbtcLiquidityFees),
 		AssetLiquidityFees:     util.IntStr(pe.AssetLiquidityFees),
-		TotalLiquidityFeesRune: util.IntStr(pe.TotalLiquidityFeesRune),
+		TotalLiquidityFeesQbtc: util.IntStr(pe.TotalLiquidityFeesQbtc),
 		Rewards:                util.IntStr(pe.Rewards),
 		SaverEarning:           util.IntStr(pe.SaverRewards),
-		Earnings:               util.IntStr(pe.TotalLiquidityFeesRune + pe.Rewards),
+		Earnings:               util.IntStr(pe.TotalLiquidityFeesQbtc + pe.Rewards),
 	}
 }
 
@@ -88,7 +88,7 @@ func GetEarningsHistory(ctx context.Context, buckets db.Buckets) (oapigen.Earnin
 	// TODO(huginn): just use the basic bucketed query with nano timestamp and reorder columns
 	poolRewardsQ, params := timeseries.RewardEntriesAggregate.BucketedQuery(`
 		SELECT
-			rune_e8,
+			qbtc_e8,
 			saver_e8,
 			aggregate_timestamp/1000000000 AS start_time,
 			pool
@@ -147,13 +147,13 @@ func GetEarningsHistory(ctx context.Context, buckets db.Buckets) (oapigen.Earnin
 
 	// Store query results into aggregate variables
 	for liquidityFeesByPoolRows.Next() {
-		var runeLiquidityFees, assetLiquidityFees, totalLiquidityFeesRune int64
+		var qbtcLiquidityFees, assetLiquidityFees, totalLiquidityFeesQbtc int64
 		var startTime db.Second
 		var pool string
 		err := liquidityFeesByPoolRows.Scan(
-			&runeLiquidityFees,
+			&qbtcLiquidityFees,
 			&assetLiquidityFees,
-			&totalLiquidityFeesRune,
+			&totalLiquidityFeesQbtc,
 			&startTime,
 			&pool)
 		if err != nil {
@@ -168,18 +168,18 @@ func GetEarningsHistory(ctx context.Context, buckets db.Buckets) (oapigen.Earnin
 		intervalPoolEarnings := intervalPoolEarningsMaps[startTime].getPoolEarnings(pool)
 		metaPoolEarnings := metaPoolEarningsMap.getPoolEarnings(pool)
 
-		intervalPoolEarnings.RuneLiquidityFees += runeLiquidityFees
-		metaPoolEarnings.RuneLiquidityFees += runeLiquidityFees
+		intervalPoolEarnings.QbtcLiquidityFees += qbtcLiquidityFees
+		metaPoolEarnings.QbtcLiquidityFees += qbtcLiquidityFees
 
 		intervalPoolEarnings.AssetLiquidityFees += assetLiquidityFees
 		metaPoolEarnings.AssetLiquidityFees += assetLiquidityFees
 
-		intervalPoolEarnings.TotalLiquidityFeesRune += totalLiquidityFeesRune
-		metaPoolEarnings.TotalLiquidityFeesRune += totalLiquidityFeesRune
+		intervalPoolEarnings.TotalLiquidityFeesQbtc += totalLiquidityFeesQbtc
+		metaPoolEarnings.TotalLiquidityFeesQbtc += totalLiquidityFeesQbtc
 
 		// Add fees to total fees aggregate
-		intervalTotalLiquidityFees[startTime] += totalLiquidityFeesRune
-		metaTotalLiquidityFees += totalLiquidityFeesRune
+		intervalTotalLiquidityFees[startTime] += totalLiquidityFeesQbtc
+		metaTotalLiquidityFees += totalLiquidityFeesQbtc
 	}
 
 	for bondingRewardsRows.Next() {
@@ -315,7 +315,7 @@ func GetEarningsHistory(ctx context.Context, buckets db.Buckets) (oapigen.Earnin
 		Meta: buildEarningsItem(
 			timestamps[0], window.Until, metaTotalLiquidityFees, metaTotalPoolRewards,
 			metaTotalBondingRewards, metaNodeCountWeightedSum,
-			usdPrices[len(usdPrices)-1].RunePriceUSD,
+			usdPrices[len(usdPrices)-1].QbtcPriceUSD,
 			metaEarningsItemPools),
 		Intervals: make([]oapigen.EarningsHistoryItem, 0, len(timestamps)),
 	}
@@ -344,7 +344,7 @@ func GetEarningsHistory(ctx context.Context, buckets db.Buckets) (oapigen.Earnin
 			intervalTotalLiquidityFees[timestamp], intervalTotalPoolRewards[timestamp],
 			intervalTotalBondingRewards[timestamp],
 			intervalNodeCountWeightedSum[timestamp],
-			usdPrices[i].RunePriceUSD, earningsItemPools)
+			usdPrices[i].QbtcPriceUSD, earningsItemPools)
 
 		earnings.Intervals = append(earnings.Intervals, earningsItem)
 	}
@@ -354,7 +354,7 @@ func GetEarningsHistory(ctx context.Context, buckets db.Buckets) (oapigen.Earnin
 
 func buildEarningsItem(startTime, endTime db.Second,
 	totalLiquidityFees, totalPoolRewards, totalBondingRewards, nodeCountWeightedSum int64,
-	runePriceUSD float64,
+	qbtcPriceUSD float64,
 	earningsItemPools []oapigen.EarningsHistoryItemPool) oapigen.EarningsHistoryItem {
 	liquidityEarnings := totalPoolRewards + totalLiquidityFees
 	earnings := liquidityEarnings + totalBondingRewards
@@ -371,7 +371,7 @@ func buildEarningsItem(startTime, endTime db.Second,
 		LiquidityEarnings: util.IntStr(liquidityEarnings),
 		Earnings:          util.IntStr(earnings),
 		AvgNodeCount:      strconv.FormatFloat(avgNodeCount, 'f', 2, 64),
-		RunePriceUSD:      floatStr(runePriceUSD),
+		QbtcPriceUSD:      floatStr(qbtcPriceUSD),
 		Pools:             earningsItemPools,
 	}
 }
@@ -382,7 +382,7 @@ func GetPoolsEarnings(ctx context.Context, buckets db.Buckets) (poolEarningsMap,
 	// Pools rewards
 	poolRewardsQ, params := timeseries.RewardEntriesAggregate.BucketedQuery(`
 		SELECT
-			rune_e8,
+			qbtc_e8,
 			saver_e8,
 			aggregate_timestamp/1000000000 AS start_time,
 			pool
@@ -417,13 +417,13 @@ func GetPoolsEarnings(ctx context.Context, buckets db.Buckets) (poolEarningsMap,
 	// TODO (HooriRn): check if we also calculate the synth pool as earning or Reward entries already
 	// does it.
 	for liquidityFeesByPoolRows.Next() {
-		var runeLiquidityFees, assetLiquidityFees, totalLiquidityFeesRune int64
+		var qbtcLiquidityFees, assetLiquidityFees, totalLiquidityFeesQbtc int64
 		var startTime db.Second
 		var pool string
 		err := liquidityFeesByPoolRows.Scan(
-			&runeLiquidityFees,
+			&qbtcLiquidityFees,
 			&assetLiquidityFees,
-			&totalLiquidityFeesRune,
+			&totalLiquidityFeesQbtc,
 			&startTime,
 			&pool)
 		if err != nil {
@@ -432,9 +432,9 @@ func GetPoolsEarnings(ctx context.Context, buckets db.Buckets) (poolEarningsMap,
 
 		// Add fees to earnings by pool
 		metaPoolEarnings := mapPoolEarningStat.getPoolEarnings(pool)
-		metaPoolEarnings.RuneLiquidityFees += runeLiquidityFees
+		metaPoolEarnings.QbtcLiquidityFees += qbtcLiquidityFees
 		metaPoolEarnings.AssetLiquidityFees += assetLiquidityFees
-		metaPoolEarnings.TotalLiquidityFeesRune += totalLiquidityFeesRune
+		metaPoolEarnings.TotalLiquidityFeesQbtc += totalLiquidityFeesQbtc
 	}
 
 	for poolRewardsRows.Next() {

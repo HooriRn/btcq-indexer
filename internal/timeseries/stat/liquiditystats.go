@@ -15,12 +15,12 @@ type CountAndTotal struct {
 }
 
 func liquidityChange(ctx context.Context,
-	w db.Window, table, assetColumn, runeColumn, impLossProtColumn string) (
+	w db.Window, table, assetColumn, qbtcColumn, impLossProtColumn string) (
 	ret CountAndTotal, err error) {
 	buckets := db.OneIntervalBuckets(w.From, w.Until)
 
 	withdraws, err := liquidityChangesFromTable(ctx, buckets, "*",
-		table, assetColumn, runeColumn, impLossProtColumn)
+		table, assetColumn, qbtcColumn, impLossProtColumn)
 	if err != nil {
 		return
 	}
@@ -32,15 +32,15 @@ func liquidityChange(ctx context.Context,
 		return ret, nil
 	}
 	ret.Count = bucket.count
-	ret.TotalVolume = bucket.runeVolume + bucket.assetVolume
+	ret.TotalVolume = bucket.qbtcVolume + bucket.assetVolume
 	return
 }
 
 func WithdrawsLookup(ctx context.Context, w db.Window) (ret CountAndTotal, err error) {
 	return liquidityChange(ctx, w,
-		"withdraw_events", "_emit_asset_in_rune_e8", "emit_rune_e8", "imp_loss_protection_e8")
+		"withdraw_events", "_emit_asset_in_qbtc_e8", "emit_qbtc_e8", "imp_loss_protection_e8")
 }
 
 func StakesLookup(ctx context.Context, w db.Window) (ret CountAndTotal, err error) {
-	return liquidityChange(ctx, w, "stake_events", "_asset_in_rune_e8", "rune_e8", "")
+	return liquidityChange(ctx, w, "stake_events", "_asset_in_qbtc_e8", "qbtc_e8", "")
 }

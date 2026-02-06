@@ -139,7 +139,7 @@ type actionMeta struct {
 	ImpLossProt    int64   `json:"impermanentLossProtection"`
 	LiquidityUnits int64   `json:"liquidityUnits"`
 	EmitAssetE8    int64   `json:"emitAssetE8"`
-	EmitRuneE8     int64   `json:"emitRuneE8"`
+	EmitQbtcE8     int64   `json:"emitQbtcE8"`
 	// swap:
 	SwapSingle       bool   `json:"swapSingle"`
 	LiquidityFee     int64  `json:"liquidityFee"`
@@ -658,28 +658,28 @@ func (a *action) completeFromDBRead(meta *actionMeta, fees coinList, streamingMe
 			}
 		}
 	case "withdraw":
-		var runeOut, assetOut, runeFee, assetFee int64
+		var qbtcOut, assetOut, qbtcFee, assetFee int64
 		for _, tx := range a.out {
 			for _, coin := range tx.Coins {
 				if coin.Asset != "QBTC.QBTC" {
 					assetOut = coin.Amount
 				} else {
-					runeOut = coin.Amount
+					qbtcOut = coin.Amount
 				}
 			}
 		}
 		for _, coin := range fees {
-			if coin.Asset != "THOR.RUNE" {
+			if coin.Asset != "QBTC.QBTC" {
 				assetFee = coin.Amount
 			} else {
-				runeFee = coin.Amount
+				qbtcFee = coin.Amount
 			}
 		}
-		runeOk := meta.EmitRuneE8 <= runeFee || runeOut != 0
+		qbtcOk := meta.EmitQbtcE8 <= qbtcFee || qbtcOut != 0
 		assetOk := meta.EmitAssetE8 <= assetFee || assetOut != 0
 
 		a.status = "pending"
-		if runeOk && assetOk {
+		if qbtcOk && assetOk {
 			a.status = "success"
 		}
 	case "send":
