@@ -5,24 +5,24 @@ type runningTotals struct {
 	// running totals
 	// TODO(muninn): get rid of the pointers
 	assetE8DepthPerPool map[string]*int64
-	runeE8DepthPerPool  map[string]*int64
+	qbtcE8DepthPerPool  map[string]*int64
 	synthE8DepthPerPool map[string]*int64
 }
 
 func newRunningTotals() *runningTotals {
 	return &runningTotals{
 		assetE8DepthPerPool: make(map[string]*int64),
-		runeE8DepthPerPool:  make(map[string]*int64),
+		qbtcE8DepthPerPool:  make(map[string]*int64),
 		synthE8DepthPerPool: make(map[string]*int64),
 	}
 }
 
-func (t *runningTotals) CurrentDepths(pool []byte) (assetE8, runeE8, synthE8 int64) {
+func (t *runningTotals) CurrentDepths(pool []byte) (assetE8, qbtcE8, synthE8 int64) {
 	if p, ok := t.assetE8DepthPerPool[string(pool)]; ok {
 		assetE8 = *p
 	}
-	if p, ok := t.runeE8DepthPerPool[string(pool)]; ok {
-		runeE8 = *p
+	if p, ok := t.qbtcE8DepthPerPool[string(pool)]; ok {
+		qbtcE8 = *p
 	}
 	if p, ok := t.synthE8DepthPerPool[string(pool)]; ok {
 		synthE8 = *p
@@ -39,12 +39,12 @@ func (t *runningTotals) AddPoolAssetE8Depth(pool []byte, assetE8 int64) {
 	}
 }
 
-// AddPoolRuneE8Depth adjusts the quantity. Use a negative value to deduct.
-func (t *runningTotals) AddPoolRuneE8Depth(pool []byte, runeE8 int64) {
-	if p, ok := t.runeE8DepthPerPool[string(pool)]; ok {
-		*p += runeE8
+// AddPoolQbtcE8Depth adjusts the quantity. Use a negative value to deduct.
+func (t *runningTotals) AddPoolQbtcE8Depth(pool []byte, qbtcE8 int64) {
+	if p, ok := t.qbtcE8DepthPerPool[string(pool)]; ok {
+		*p += qbtcE8
 	} else {
-		t.runeE8DepthPerPool[string(pool)] = &runeE8
+		t.qbtcE8DepthPerPool[string(pool)] = &qbtcE8
 	}
 }
 
@@ -62,9 +62,9 @@ func (t *runningTotals) SetAssetDepth(pool string, assetE8 int64) {
 	t.assetE8DepthPerPool[pool] = &v
 }
 
-func (t *runningTotals) SetRuneDepth(pool string, runeE8 int64) {
-	v := runeE8
-	t.runeE8DepthPerPool[pool] = &v
+func (t *runningTotals) SetQbtcDepth(pool string, qbtcE8 int64) {
+	v := qbtcE8
+	t.qbtcE8DepthPerPool[pool] = &v
 }
 
 func (t *runningTotals) SetSynthDepth(pool string, synthE8 int64) {
@@ -81,10 +81,10 @@ func (t *runningTotals) AssetE8DepthPerPool() map[string]int64 {
 	return m
 }
 
-// RuneE8DepthPerPool returns a snapshot copy.
-func (t *runningTotals) RuneE8DepthPerPool() map[string]int64 {
-	m := make(map[string]int64, len(t.runeE8DepthPerPool))
-	for asset, p := range t.runeE8DepthPerPool {
+// QbtcE8DepthPerPool returns a snapshot copy.
+func (t *runningTotals) QbtcE8DepthPerPool() map[string]int64 {
+	m := make(map[string]int64, len(t.qbtcE8DepthPerPool))
+	for asset, p := range t.qbtcE8DepthPerPool {
 		m[asset] = *p
 	}
 	return m

@@ -8,7 +8,7 @@
 //
 //	9 223 372 036 854 775 807  64-bit signed integer maximum
 //	               00 000 000  decimals for fractions
-//	   50 000 000 0·· ··· ···  500 M Rune total
+//	   50 000 000 0·· ··· ···  500 M QBTC total
 //	    2 100 000 0·· ··· ···  21 M BitCoin total
 //	   20 000 000 0·· ··· ···  200 M Ether total
 package record
@@ -30,12 +30,8 @@ import (
 
 // Asset Labels
 const (
-	// Native asset on THORChain.
-	nativeRune = "THOR.RUNE"
-	// Asset on Binance test net.
-	rune67C = "BNB.RUNE-67C"
-	// Asset on Binance main net.
-	runeB1A = "BNB.RUNE-B1A"
+	// Native asset on QBTC chain.
+	nativeQbtc = "QBTC.QBTC"
 	// TCY asset on THORChain.
 	nativeTCY = "THOR.TCY"
 	// RUJI asset on THORChain.
@@ -44,13 +40,9 @@ const (
 	nativeNAMI = "THOR.NAMI"
 )
 
-// IsRune returns whether asset matches any of the supported $RUNE assets.
-func IsRune(asset []byte) bool {
-	switch string(asset) {
-	case nativeRune, rune67C, runeB1A:
-		return true
-	}
-	return false
+// IsQbtc returns whether asset matches the QBTC asset.
+func IsQbtc(asset []byte) bool {
+	return string(asset) == nativeQbtc
 }
 
 // IsTcy returns whether asset matches any of the $TCY asset.
@@ -82,8 +74,8 @@ func IsNami(asset []byte) bool {
 type CoinType int
 
 const (
-	// Rune rune coin type
-	Rune CoinType = iota
+	// Qbtc qbtc coin type
+	Qbtc CoinType = iota
 	// AssetNative coin native to a chain
 	AssetNative
 	// AssetSynth synth coin
@@ -108,8 +100,8 @@ var (
 )
 
 func GetCoinType(asset []byte) CoinType {
-	if IsRune(asset) {
-		return Rune
+	if IsQbtc(asset) {
+		return Qbtc
 	}
 	if IsTcy(asset) {
 		return AssetNative
@@ -141,10 +133,10 @@ func GetCoinType(asset []byte) CoinType {
 	return UnknownCoin
 }
 
-// RuneAsset returns a matching RUNE asset given a running environment
+// QbtcAsset returns the QBTC asset
 // (Logic is copied from THORnode code)
-func RuneAsset() string {
-	return nativeRune
+func QbtcAsset() string {
+	return nativeQbtc
 }
 
 // ParseAsset decomposes the notation.
@@ -228,9 +220,9 @@ func sanitizeBytes(v []byte) []byte {
 
 // Rewards defines the "rewards" event type.
 type Rewards struct {
-	BondE8    int64  // rune amount times 100 M
+	BondE8    int64  // qbtc amount times 100 M
 	Validator []byte // validator address (THOR address), optional
-	// PerPool has the RUNE amounts specified per pool (in .Asset).
+	// PerPool has the QBTC amounts specified per pool (in .Asset).
 	PerPool []Amount
 }
 
@@ -315,8 +307,8 @@ func parseCosmosCoin(b []byte) (asset []byte, amountE8 int64, err error) {
 	case "":
 		err = fmt.Errorf("no units given in amount %q", b)
 		return
-	case "rune":
-		asset = []byte(nativeRune)
+	case "rune", "qbtc":
+		asset = []byte(nativeQbtc)
 	default:
 		asset = []byte(strings.ToUpper(unit))
 	}

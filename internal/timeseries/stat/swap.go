@@ -10,7 +10,7 @@ import (
 // Swaps are generic swap statistics.
 type Swaps struct {
 	TxCount     int64
-	RuneE8Total int64
+	QbtcE8Total int64
 }
 
 type SwapBucket struct {
@@ -61,7 +61,7 @@ type SwapBucket struct {
 	SecuredToRuneSlip      int64
 	RuneToSecuredSlip      int64
 	TotalSlip              int64
-	RunePriceUSD           float64
+	QbtcPriceUSD           float64
 }
 
 func (sb *SwapBucket) writeOneDirection(oneDirection *OneDirectionSwapBucket) {
@@ -195,27 +195,27 @@ type OneDirectionSwapBucket struct {
 }
 
 var SwapsAggregate = db.RegisterAggregate(db.NewAggregate("swaps", "swap_events").
-	AddJoinQuery("rune_price", "r").
+	AddJoinQuery("qbtc_price", "r").
 	AddGroupColumn("pool").
 	AddGroupColumn("_direction").
 	AddSumlikeExpression("volume_e8",
 		`SUM(CASE
 			WHEN _direction%2 = 0 THEN from_e8
-			WHEN _direction%2 = 1 THEN to_e8 + liq_fee_in_rune_e8
+			WHEN _direction%2 = 1 THEN to_e8 + liq_fee_in_qbtc_e8
 			ELSE 0 END)::BIGINT`).
 	AddSumlikeExpression("volume_usd_e8",
 		`SUM(CASE
-				WHEN _direction%2 = 0 THEN (from_e8 * r.rune_price_e8) / 1e6
-				WHEN _direction%2 = 1 THEN ((to_e8 + liq_fee_in_rune_e8) * r.rune_price_e8) / 1e6
+				WHEN _direction%2 = 0 THEN (from_e8 * r.qbtc_price_e8) / 1e6
+				WHEN _direction%2 = 1 THEN ((to_e8 + liq_fee_in_qbtc_e8) * r.qbtc_price_e8) / 1e6
 				ELSE 0 END)::BIGINT`).
 	AddSumlikeExpression("swap_count", "COUNT(1)").
-	// On swapping from asset to rune fees are collected in rune.
-	AddSumlikeExpression("rune_fees_e8",
+	// On swapping from asset to qbtc fees are collected in qbtc.
+	AddSumlikeExpression("qbtc_fees_e8",
 		"SUM(CASE WHEN _direction%2 = 1 THEN liq_fee_e8 ELSE 0 END)::BIGINT").
-	// On swapping from rune to asset fees are collected in asset.
+	// On swapping from qbtc to asset fees are collected in asset.
 	AddSumlikeExpression("asset_fees_e8",
 		"SUM(CASE WHEN _direction%2 = 0 THEN liq_fee_e8 ELSE 0 END)::BIGINT").
-	AddBigintSumColumn("liq_fee_in_rune_e8").
+	AddBigintSumColumn("liq_fee_in_qbtc_e8").
 	AddBigintSumColumn("swap_slip_bp"))
 
 // Returns sparse buckets, when there are no swaps in the bucket, the bucket is missing.
@@ -322,7 +322,7 @@ func mergeSwapsGapfill(swaps []OneDirectionSwapBucket,
 		}
 
 		current.calculateTotals()
-		current.RunePriceUSD = usdPrice.RunePriceUSD
+		current.QbtcPriceUSD = usdPrice.QbtcPriceUSD
 	}
 
 	return ret

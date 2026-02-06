@@ -8,7 +8,7 @@ import (
 
 type PoolDepths struct {
 	AssetDepth int64
-	RuneDepth  int64
+	QbtcDepth  int64
 	SynthDepth int64
 	OpenPrice  float64
 	HighPrice  float64
@@ -16,21 +16,21 @@ type PoolDepths struct {
 	ClosePrice float64
 }
 
-func AssetPrice(assetDepth, runeDepth int64) float64 {
+func AssetPrice(assetDepth, qbtcDepth int64) float64 {
 	if assetDepth == 0 {
 		return 0
 	}
-	return float64(runeDepth) / float64(assetDepth)
+	return float64(qbtcDepth) / float64(assetDepth)
 }
 
 func (p PoolDepths) AssetPrice() float64 {
-	return AssetPrice(p.AssetDepth, p.RuneDepth)
+	return AssetPrice(p.AssetDepth, p.QbtcDepth)
 }
 
 // When a pool becomes suspended all the funds are burned.
 // We use this as a detection of pools which no longer exist.
 func (p PoolDepths) ExistsNow() bool {
-	return 0 < p.AssetDepth && 0 < p.RuneDepth
+	return 0 < p.AssetDepth && 0 < p.QbtcDepth
 }
 
 type DepthMap map[string]PoolDepths
@@ -77,10 +77,10 @@ func (latest *LatestState) setLatestStates(track *blockTrack) {
 		Pools:     DepthMap{},
 	}
 
-	runeDepths := track.RuneE8DepthPerPool
+	qbtcDepths := track.QbtcE8DepthPerPool
 	synthDepths := track.SynthE8DepthPerPool
 	for pool, assetDepth := range track.AssetE8DepthPerPool {
-		runeDepth, ok := runeDepths[pool]
+		qbtcDepth, ok := qbtcDepths[pool]
 		if !ok {
 			continue
 		}
@@ -88,7 +88,7 @@ func (latest *LatestState) setLatestStates(track *blockTrack) {
 		if !ok {
 			synthDepth = 0
 		}
-		newState.Pools[pool] = PoolDepths{AssetDepth: assetDepth, RuneDepth: runeDepth, SynthDepth: synthDepth}
+		newState.Pools[pool] = PoolDepths{AssetDepth: assetDepth, QbtcDepth: qbtcDepth, SynthDepth: synthDepth}
 	}
 	latest.Lock()
 	latest.state = newState

@@ -22,7 +22,7 @@ func copyOfLastTrack() (ret *blockTrack) {
 	t := time.Unix(0, 0)
 	hash := []byte("hash0")
 	assetDepth := map[string]int64{}
-	runeDepth := map[string]int64{}
+	qbtcDepth := map[string]int64{}
 	synthDepth := map[string]int64{}
 	interfacePtr := lastBlockTrack.Load()
 	if interfacePtr != nil {
@@ -31,7 +31,7 @@ func copyOfLastTrack() (ret *blockTrack) {
 		t = oldTrack.Timestamp
 		hash = oldTrack.Hash
 		assetDepth = copyMap(oldTrack.aggTrack.AssetE8DepthPerPool)
-		runeDepth = copyMap(oldTrack.aggTrack.RuneE8DepthPerPool)
+		qbtcDepth = copyMap(oldTrack.aggTrack.QbtcE8DepthPerPool)
 		synthDepth = copyMap(oldTrack.aggTrack.SynthE8DepthPerPool)
 	}
 	return &blockTrack{
@@ -40,7 +40,7 @@ func copyOfLastTrack() (ret *blockTrack) {
 		Hash:      hash,
 		aggTrack: aggTrack{
 			AssetE8DepthPerPool: assetDepth,
-			RuneE8DepthPerPool:  runeDepth,
+			QbtcE8DepthPerPool:  qbtcDepth,
 			SynthE8DepthPerPool: synthDepth,
 		},
 	}
@@ -63,7 +63,7 @@ func SetLastHeightForTest(height int64) {
 type Depth struct {
 	Pool       string
 	AssetDepth int64
-	RuneDepth  int64
+	QbtcDepth  int64
 	SynthDepth int64
 }
 
@@ -72,7 +72,7 @@ func SetDepthsForTest(depths []Depth) {
 	trackPtr := copyOfLastTrack()
 	for _, depth := range depths {
 		trackPtr.aggTrack.AssetE8DepthPerPool[depth.Pool] = depth.AssetDepth
-		trackPtr.aggTrack.RuneE8DepthPerPool[depth.Pool] = depth.RuneDepth
+		trackPtr.aggTrack.QbtcE8DepthPerPool[depth.Pool] = depth.QbtcDepth
 		trackPtr.aggTrack.SynthE8DepthPerPool[depth.Pool] = depth.SynthDepth
 	}
 	setLastBlock(trackPtr)
@@ -82,7 +82,7 @@ func resetAggTrack() {
 	trackPtr := copyOfLastTrack()
 	trackPtr.aggTrack = aggTrack{
 		AssetE8DepthPerPool: make(map[string]int64),
-		RuneE8DepthPerPool:  make(map[string]int64),
+		QbtcE8DepthPerPool:  make(map[string]int64),
 		SynthE8DepthPerPool: make(map[string]int64),
 	}
 	setLastBlock(trackPtr)

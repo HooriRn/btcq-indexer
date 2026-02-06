@@ -12,7 +12,7 @@ import (
 
 // GetMemberIds returns the ids of all known members.
 //
-// The id of a member is defined as their rune address if they are participating with their rune
+// The id of a member is defined as their qbtc address if they are participating with their qbtc
 // address, or as their asset address otherwise (for members with asset address only.)
 //
 // Member ids present in multiple pools will be only returned once.
@@ -48,34 +48,34 @@ func GetMemberIds(ctx context.Context, pool *string) (addrs []string, err error)
 // Info of a member in a specific pool.
 type MemberPool struct {
 	Pool           string
-	RuneAddress    string
+	QbtcAddress    string
 	AssetAddress   string
 	LiquidityUnits int64
 	AssetDeposit   int64
-	RuneDeposit    int64
-	RuneAdded      int64
+	QbtcDeposit    int64
+	QbtcAdded      int64
 	AssetAdded     int64
-	RunePending    int64
+	QbtcPending    int64
 	AssetPending   int64
 	DateFirstAdded int64
 	DateLastAdded  int64
-	RuneWithdrawn  int64
+	QbtcWithdrawn  int64
 	AssetWithdrawn int64
 }
 
 func (memberPool MemberPool) toOapigen() oapigen.MemberPool {
 	return oapigen.MemberPool{
 		Pool:           memberPool.Pool,
-		RuneAddress:    memberPool.RuneAddress,
+		QbtcAddress:    memberPool.QbtcAddress,
 		AssetAddress:   memberPool.AssetAddress,
 		LiquidityUnits: util.IntStr(memberPool.LiquidityUnits),
-		RuneDeposit:    util.IntStr(memberPool.RuneDeposit),
+		QbtcDeposit:    util.IntStr(memberPool.QbtcDeposit),
 		AssetDeposit:   util.IntStr(memberPool.AssetDeposit),
-		RuneAdded:      util.IntStr(memberPool.RuneAdded),
+		QbtcAdded:      util.IntStr(memberPool.QbtcAdded),
 		AssetAdded:     util.IntStr(memberPool.AssetAdded),
-		RuneWithdrawn:  util.IntStr(memberPool.RuneWithdrawn),
+		QbtcWithdrawn:  util.IntStr(memberPool.QbtcWithdrawn),
 		AssetWithdrawn: util.IntStr(memberPool.AssetWithdrawn),
-		RunePending:    util.IntStr(memberPool.RunePending),
+		QbtcPending:    util.IntStr(memberPool.QbtcPending),
 		AssetPending:   util.IntStr(memberPool.AssetPending),
 		DateFirstAdded: util.IntStr(memberPool.DateFirstAdded),
 		DateLastAdded:  util.IntStr(memberPool.DateLastAdded),
@@ -143,16 +143,16 @@ func GetMemberPools(ctx context.Context, address []string, poolType MemberPoolTy
 	q := `
 		SELECT
 			pool,
-			COALESCE(rune_addr, ''),
+			COALESCE(qbtc_addr, ''),
 			COALESCE(asset_addr, ''),
 			lp_units_total,
 			asset_e8_deposit,
-			rune_e8_deposit,
-			added_rune_e8_total,
+			qbtc_e8_deposit,
+			added_qbtc_e8_total,
 			added_asset_e8_total,
-			withdrawn_rune_e8_total,
+			withdrawn_qbtc_e8_total,
 			withdrawn_asset_e8_total,
-			pending_rune_e8_total,
+			pending_qbtc_e8_total,
 			pending_asset_e8_total,
 			COALESCE(first_added_timestamp / 1000000000, 0),
 			COALESCE(last_added_timestamp / 1000000000, 0)
@@ -172,16 +172,16 @@ func GetMemberPools(ctx context.Context, address []string, poolType MemberPoolTy
 		var entry MemberPool
 		err := rows.Scan(
 			&entry.Pool,
-			&entry.RuneAddress,
+			&entry.QbtcAddress,
 			&entry.AssetAddress,
 			&entry.LiquidityUnits,
 			&entry.AssetDeposit,
-			&entry.RuneDeposit,
-			&entry.RuneAdded,
+			&entry.QbtcDeposit,
+			&entry.QbtcAdded,
 			&entry.AssetAdded,
-			&entry.RuneWithdrawn,
+			&entry.QbtcWithdrawn,
 			&entry.AssetWithdrawn,
-			&entry.RunePending,
+			&entry.QbtcPending,
 			&entry.AssetPending,
 			&entry.DateFirstAdded,
 			&entry.DateLastAdded,

@@ -254,7 +254,7 @@ paths:
             operationId: GetDepthHistory
             summary: Depth and Price History
             description: |
-                Returns the asset and rune depths and price.
+                Returns the asset and qbtc depths and price.
                 The values report the state at the end of each interval.
 
                 History endpoint has two modes:
@@ -472,12 +472,12 @@ paths:
                 "200":
                     $ref: "#/components/responses/ReserveHistoryResponse"
 
-    "/v2/history/rune":
+    "/v2/history/qbtc":
         get:
-            operationId: GetRunePriceHistory
-            summary: Rune price history in USD
+            operationId: GetQbtcPriceHistory
+            summary: QBTC price history in USD
             description: |
-                Returns rune price history in USD based on the time bucket given
+                Returns qbtc price history in USD based on the time bucket given
             parameters:
                 - name: interval
                   in: query
@@ -522,7 +522,7 @@ paths:
                       format: int64
             responses:
                 "200":
-                    $ref: "#/components/responses/RunePriceHistoryResponse"
+                    $ref: "#/components/responses/QbtcPriceHistoryResponse"
 
     "/v2/history/earnings":
         get:
@@ -1154,22 +1154,22 @@ paths:
                   in: query
                   description: |
                       Comma separated list. Any asset that is part of the action (CHAIN.SYMBOL)
-                      Additionally, synth, nosynth, and norune filters can be used for swap, add/withdraw actions.
+                      Additionally, synth, nosynth, and noqbtc filters can be used for swap, add/withdraw actions.
                   required: false
                   schema:
                       type: string
                   examples:
                       regularAsset:
-                          value: BTC.BTC,THOR.RUNE
+                          value: BTC.BTC,QBTC.QBTC
                           summary: Regular multiple asset query. (having at least either one of them)
                       filterAsset:
-                          value: nosynth,norune
-                          summary: Query action that are neither synth nor rune asset
+                          value: nosynth,noqbtc
+                          summary: Query action that are neither synth nor qbtc asset
                 - name: type
                   in: query
                   description: |
                       One or more comma separated unique types of action
-                      (swap, addLiquidity, withdraw, donate, refund, switch, thorname, runePoolDeposit, runePoolWithdraw)
+                      (swap, addLiquidity, withdraw, donate, refund, switch, thorname, qbtcPoolDeposit, qbtcPoolWithdraw)
                   required: false
                   schema:
                       type: string
@@ -1276,8 +1276,8 @@ paths:
             summary: Members List
             description: |
                 Returns an array containing the addresses for all pool members.
-                Addresses are only shown once. If there's both a RUNE address and an asset address
-                for a member, only the RUNE address will be shown.
+                Addresses are only shown once. If there's both a QBTC address and an asset address
+                for a member, only the QBTC address will be shown.
             parameters:
                 - name: pool
                   in: query
@@ -1300,7 +1300,7 @@ paths:
                 - name: address
                   in: path
                   description: |
-                      Address to match liquidity providers. Either a rune or an asset address may be given.
+                      Address to match liquidity providers. Either a qbtc or an asset address may be given.
                       Query can also be multiple addresses should be separated by comma (',')
                   required: true
                   schema:
@@ -1455,7 +1455,7 @@ paths:
             parameters:
                 - name: address
                   in: path
-                  description: Rune address.
+                  description: QBTC address.
                   required: true
                   schema:
                       type: string
@@ -1553,12 +1553,12 @@ components:
                 application/json:
                     schema:
                         $ref: "#/components/schemas/SaversHistory"
-        RunePriceHistoryResponse: 
-            description: Returns rune price history in USD based on the time bucket given
+        QbtcPriceHistoryResponse: 
+            description: Returns qbtc price history in USD based on the time bucket given
             content:
                 application/json:
                     schema:
-                        $ref: "#/components/schemas/RunePriceHistory"
+                        $ref: "#/components/schemas/QbtcPriceHistory"
         ReserveHistoryResponse:
             description: Reserve
             content:
@@ -1836,7 +1836,7 @@ components:
                 - asset
                 - volume24h
                 - assetDepth
-                - runeDepth
+                - qbtcDepth
                 - assetPrice
                 - assetPriceUSD
                 - liquidityInUSD
@@ -1860,17 +1860,17 @@ components:
                 volume24h:
                     type: string
                     description: |
-                        Int64(e8), the total volume of swaps in the last 24h to and from Rune denoted in Rune.
+                        Int64(e8), the total volume of swaps in the last 24h to and from QBTC denoted in QBTC.
                         It includes synth mint or burn.
                 assetDepth:
                     type: string
                     description: Int64(e8), the amount of Asset in the pool.
-                runeDepth:
+                qbtcDepth:
                     type: string
-                    description: Int64(e8), the amount of Rune in the pool.
+                    description: Int64(e8), the amount of QBTC in the pool.
                 assetPrice:
                     type: string
-                    description: Float, price of asset in rune. I.e. rune amount / asset amount.
+                    description: Float, price of asset in qbtc. I.e. qbtc amount / asset amount.
                 assetPriceUSD:
                     type: string
                     description: Float, the price of asset in USD (based on the deepest USD pool).
@@ -1963,23 +1963,23 @@ components:
                 - assetPrice
                 - assetPriceUSD
                 - assetDepth
-                - runeDepth
+                - qbtcDepth
                 - liquidityUnits
                 - synthUnits
                 - synthSupply
                 - units
                 - toAssetVolume
-                - toRuneVolume
+                - toQbtcVolume
                 - swapVolume
                 - toAssetCount
-                - toRuneCount
+                - toQbtcCount
                 - swapCount
                 - uniqueSwapperCount
                 - toAssetAverageSlip
-                - toRuneAverageSlip
+                - toQbtcAverageSlip
                 - averageSlip
                 - toAssetFees
-                - toRuneFees
+                - toQbtcFees
                 - totalFees
                 - poolAPY
                 - annualPercentageRate
@@ -1987,11 +1987,11 @@ components:
                 - earningsAnnualAsPercentOfDepth
                 - saversAPR
                 - addAssetLiquidityVolume
-                - addRuneLiquidityVolume
+                - addQbtcLiquidityVolume
                 - addLiquidityVolume
                 - addLiquidityCount
                 - withdrawAssetVolume
-                - withdrawRuneVolume
+                - withdrawQbtcVolume
                 - withdrawVolume
                 - withdrawCount
                 - uniqueMemberCount
@@ -2003,14 +2003,14 @@ components:
                     description: The state of the pool, e.g. Available, Staged
                 assetPrice:
                     type: string
-                    description: Float, price of asset in rune. I.e. rune amount / asset amount
+                    description: Float, price of asset in qbtc. I.e. qbtc amount / asset amount
                 assetPriceUSD:
                     type: string
                     description: Float, the price of asset in USD (based on the deepest USD pool).
                 assetDepth:
                     type: string
                     description: Int64(e8), the amount of Asset in the pool
-                runeDepth:
+                qbtcDepth:
                     type: string
                     description: Int64(e8), the amount of Rune in the pool
                 synthUnits:
@@ -2028,18 +2028,18 @@ components:
                 toAssetVolume:
                     type: string
                     description: Int64(e8), same as history/swaps:toAssetVolume
-                toRuneVolume:
+                toQbtcVolume:
                     type: string
-                    description: Int64(e8), same as history/swaps:toRuneVolume
+                    description: Int64(e8), same as history/swaps:toQbtcVolume
                 swapVolume:
                     type: string
                     description: Int64(e8), same as history/swaps:totalVolume
                 toAssetCount:
                     type: string
                     description: Int64, same as history/swaps:toAssetCount
-                toRuneCount:
+                toQbtcCount:
                     type: string
-                    description: Int64, same as history/swaps:toRuneCount
+                    description: Int64, same as history/swaps:toQbtcCount
                 swapCount:
                     type: string
                     description: Int64, same as history/swaps:totalCount
@@ -2051,11 +2051,11 @@ components:
                     description: |
                         Float64 (Basis points, 0-10000, where 10000=100%), same as
                         history/swaps:toAssetAverageSlip
-                toRuneAverageSlip:
+                toQbtcAverageSlip:
                     type: string
                     description: |
                         Float64 (Basis points, 0-10000, where 10000=100%), same as
-                        history/swaps:toRuneAverageSlip
+                        history/swaps:toQbtcAverageSlip
                 averageSlip:
                     type: string
                     description: |
@@ -2063,9 +2063,9 @@ components:
                 toAssetFees:
                     type: string
                     description: Int64(e8), same as history/swaps:toAssetFees
-                toRuneFees:
+                toQbtcFees:
                     type: string
-                    description: Int64(e8), same as history/swaps:toRuneFees
+                    description: Int64(e8), same as history/swaps:toQbtcFees
                 totalFees:
                     type: string
                     description: Int64(e8), same as history/swaps:totalFees
@@ -2097,7 +2097,7 @@ components:
                 addAssetLiquidityVolume:
                     type: string
                     description: Int64(e8), same as history/liquidity_changes:addAssetLiquidityVolume
-                addRuneLiquidityVolume:
+                addQbtcLiquidityVolume:
                     type: string
                     description: Int64(e8), same as history/liquidity_changes:addRuneLiquidityVolume
                 addLiquidityVolume:
@@ -2109,9 +2109,9 @@ components:
                 withdrawAssetVolume:
                     type: string
                     description: Int64(e8), same as history/liquidity_changes:withdrawAssetVolume
-                withdrawRuneVolume:
+                withdrawQbtcVolume:
                     type: string
-                    description: Int64(e8), same as history/liquidity_changes:withdrawRuneVolume
+                    description: Int64(e8), same as history/liquidity_changes:withdrawQbtcVolume
                 withdrawVolume:
                     type: string
                     description: Int64(e8), same as history/liquidity_changes:withdrawVolume
@@ -2140,12 +2140,12 @@ components:
                 - priceShiftLoss
                 - luviIncrease
                 - startAssetDepth
-                - startRuneDepth
+                - startQbtcDepth
                 - startLPUnits
                 - startMemberCount
                 - startSynthUnits
                 - endAssetDepth
-                - endRuneDepth
+                - endQbtcDepth
                 - endLPUnits
                 - endMemberCount
                 - endSynthUnits
@@ -2168,10 +2168,10 @@ components:
                     description: |
                         Int64(e8), the amount of Asset in the pool at the start of the interval at time
                         startTime
-                startRuneDepth:
+                startQbtcDepth:
                     type: string
                     description: |
-                        Int64(e8), the amount of Rune in the pool at the start of the interval at time startTime
+                        Int64(e8), the amount of QBTC in the pool at the start of the interval at time startTime
                 startLPUnits:
                     type: string
                     description: |
@@ -2188,10 +2188,10 @@ components:
                     type: string
                     description: |
                         Int64(e8), the amount of Asset in the pool at the end of the interval at time endTime
-                endRuneDepth:
+                endQbtcDepth:
                     type: string
                     description: |
-                        Int64(e8), the amount of Rune in the pool at the end of the interval at time endTime
+                        Int64(e8), the amount of QBTC in the pool at the end of the interval at time endTime
                 endLPUnits:
                     type: string
                     description: Int64, Liquidity Units in the pool at the end of the interval at time endTime
@@ -2211,7 +2211,7 @@ components:
                 - startTime
                 - endTime
                 - assetDepth
-                - runeDepth
+                - qbtcDepth
                 - assetPrice
                 - assetPriceUSD
                 - liquidityUnits
@@ -2230,12 +2230,12 @@ components:
                 assetDepth:
                     type: string
                     description: Int64(e8), the amount of Asset in the pool at the end of the interval
-                runeDepth:
+                qbtcDepth:
                     type: string
-                    description: Int64(e8), the amount of Rune in the pool at the end of the interval
+                    description: Int64(e8), the amount of QBTC in the pool at the end of the interval
                 assetPrice:
                     type: string
-                    description: Float, price of asset in rune. I.e. rune amount / asset amount
+                    description: Float, price of asset in qbtc. I.e. qbtc amount / asset amount
                 assetPriceUSD:
                     type: string
                     description: Float, the price of asset in USD (based on the deepest USD pool).
@@ -2270,7 +2270,7 @@ components:
                 luvi:
                     type: string
                     description: |
-                        Float, The liquidity unit value index. Sqrt(assetDepth * runeDepth)/liquidity units
+                        Float, The liquidity unit value index. Sqrt(assetDepth * qbtcDepth)/liquidity units
         SaversHistory:
             type: object
             required:
@@ -2352,23 +2352,23 @@ components:
                     type: string
                     description: |
                         Int64, Savers Units in the saver vault at the end of the interval
-        RunePriceHistory:
+        QbtcPriceHistory:
             type: object
             required:
                 - meta
                 - intervals
             properties:
                 meta:
-                    $ref: "#/components/schemas/RunePriceMeta"
+                    $ref: "#/components/schemas/QbtcPriceMeta"
                 intervals:
-                    $ref: "#/components/schemas/RunePriceIntervals"
-        RunePriceMeta:
+                    $ref: "#/components/schemas/QbtcPriceIntervals"
+        QbtcPriceMeta:
             type: object
             required:
                 - startTime
                 - endTime
-                - startRunePriceUSD
-                - endRunePriceUSD
+                - startQbtcPriceUSD
+                - endQbtcPriceUSD
             properties:
                 startTime:
                     type: string
@@ -2376,24 +2376,24 @@ components:
                 endTime:
                     type: string
                     description: Int64, The end time of bucket in unix timestamp
-                startRunePriceUSD:
+                startQbtcPriceUSD:
                     type: string
                     description: |
-                        Int64(e8), The price of Rune based on the USD pools at the start of the interval
-                endRunePriceUSD:
+                        Int64(e8), The price of QBTC based on the USD pools at the start of the interval
+                endQbtcPriceUSD:
                     type: string
                     description: |
-                        Int64(e8), The price of Rune based on the USD pools at the end of the interval
-        RunePriceIntervals:
+                        Int64(e8), The price of QBTC based on the USD pools at the end of the interval
+        QbtcPriceIntervals:
             type: array
             items:
-                $ref: "#/components/schemas/RunePriceItem"
-        RunePriceItem:
+                $ref: "#/components/schemas/QbtcPriceItem"
+        QbtcPriceItem:
             type: object
             required:
                 - startTime
                 - endTime
-                - runePriceUSD
+                - qbtcPriceUSD
             properties:
                 startTime:
                     type: string
@@ -2401,10 +2401,10 @@ components:
                 endTime:
                     type: string
                     description: Int64, The end time of bucket in unix timestamp
-                runePriceUSD:
+                qbtcPriceUSD:
                     type: string
                     description: |
-                        Int64(e8), The price of Rune based on the USD pools at the the interval
+                        Int64(e8), The price of QBTC based on the USD pools at the the interval
         ReserveHistory:
             type: object
             required:
@@ -2496,7 +2496,7 @@ components:
                 - bondingEarnings
                 - liquidityEarnings
                 - avgNodeCount
-                - runePriceUSD
+                - qbtcPriceUSD
                 - pools
             properties:
                 startTime:
@@ -2508,7 +2508,7 @@ components:
                 liquidityFees:
                     type: string
                     description: |
-                        Int64(e8), Total liquidity fees, converted to RUNE, collected during the time interval
+                        Int64(e8), Total liquidity fees, converted to QBTC, collected during the time interval
                 blockRewards:
                     type: string
                     description: Int64(e8), Total block rewards emitted during the time interval
@@ -2526,10 +2526,10 @@ components:
                 avgNodeCount:
                     type: string
                     description: float64, Average amount of active nodes during the time interval
-                runePriceUSD:
+                qbtcPriceUSD:
                     type: string
                     description: |
-                        Float, the price of Rune based on the deepest USD pool at the end of the interval.
+                        Float, the price of QBTC based on the deepest USD pool at the end of the interval.
                 pools:
                     type: array
                     description: Earnings data for each pool for the time interval
@@ -2540,8 +2540,8 @@ components:
             required:
                 - pool
                 - assetLiquidityFees
-                - runeLiquidityFees
-                - totalLiquidityFeesRune
+                - qbtcLiquidityFees
+                - totalLiquidityFeesQbtc
                 - saverEarning
                 - rewards
                 - earnings
@@ -2553,13 +2553,13 @@ components:
                 assetLiquidityFees:
                     type: string
                     description: Int64(e8), liquidity fees collected in the pool's asset
-                runeLiquidityFees:
+                qbtcLiquidityFees:
                     type: string
-                    description: Int64(e8), liquidity fees collected in RUNE
-                totalLiquidityFeesRune:
+                    description: Int64(e8), liquidity fees collected in QBTC
+                totalLiquidityFeesQbtc:
                     type: string
                     description: |
-                        Int64(e8), total liquidity fees (assetFees + runeFees) collected, shown in RUNE
+                        Int64(e8), total liquidity fees (assetFees + qbtcFees) collected, shown in QBTC
                 saverEarning:
                     type: string
                     description: |
@@ -2567,7 +2567,7 @@ components:
                 rewards:
                     type: string
                     description: |
-                        Int64(e8), RUNE amount sent to (positive) or taken from (negative) the pool as
+                        Int64(e8), QBTC amount sent to (positive) or taken from (negative) the pool as
                         a result of balancing it's share of system income each block
                 earnings:
                     type: string
@@ -2593,7 +2593,7 @@ components:
                 - startTime
                 - endTime
                 - toAssetCount
-                - toRuneCount
+                - toQbtcCount
                 - toTradeCount
                 - fromTradeCount
                 - toSecuredCount
@@ -2602,7 +2602,7 @@ components:
                 - synthRedeemCount
                 - totalCount
                 - toAssetVolume
-                - toRuneVolume
+                - toQbtcVolume
                 - toTradeVolume
                 - fromTradeVolume
                 - toSecuredVolume
@@ -2611,7 +2611,7 @@ components:
                 - synthRedeemVolume
                 - totalVolume
                 - toAssetVolumeUSD
-                - toRuneVolumeUSD
+                - toQbtcVolumeUSD
                 - toTradeVolumeUSD
                 - fromTradeVolumeUSD
                 - toSecuredVolumeUSD
@@ -2620,7 +2620,7 @@ components:
                 - synthRedeemVolumeUSD
                 - totalVolumeUSD
                 - toAssetFees
-                - toRuneFees
+                - toQbtcFees
                 - toTradeFees
                 - fromTradeFees
                 - toSecuredFees
@@ -2629,7 +2629,7 @@ components:
                 - synthRedeemFees
                 - totalFees
                 - toAssetAverageSlip
-                - toRuneAverageSlip
+                - toQbtcAverageSlip
                 - synthMintAverageSlip
                 - toTradeAverageSlip
                 - fromTradeAverageSlip
@@ -2637,7 +2637,7 @@ components:
                 - fromSecuredAverageSlip
                 - synthRedeemAverageSlip
                 - averageSlip
-                - runePriceUSD
+                - qbtcPriceUSD
             properties:
                 startTime:
                     type: string
@@ -2647,135 +2647,135 @@ components:
                     description: Int64, The end time of bucket in unix timestamp
                 toAssetCount:
                     type: string
-                    description: Int64, count of swaps from rune to asset
-                toRuneCount:
+                    description: Int64, count of swaps from qbtc to asset
+                toQbtcCount:
                     type: string
-                    description: Int64, count of swaps from asset to rune
+                    description: Int64, count of swaps from asset to qbtc
                 toTradeCount:
                     type: string
-                    description: Int64, count of swaps from rune to trade asset
+                    description: Int64, count of swaps from qbtc to trade asset
                 fromTradeCount:
                     type: string
-                    description: Int64, count of swaps from trade asset to rune
+                    description: Int64, count of swaps from trade asset to qbtc
                 toSecuredCount:
                     type: string
-                    description: Int64, count of swaps from rune to secured asset
+                    description: Int64, count of swaps from qbtc to secured asset
                 fromSecuredCount:
                     type: string
-                    description: Int64, count of swaps from secured asset to rune
+                    description: Int64, count of swaps from secured asset to qbtc
                 synthMintCount:
                     type: string
-                    description: Int64, count of rune to synthetic asset swaps
+                    description: Int64, count of qbtc to synthetic asset swaps
                 synthRedeemCount:
                     type: string
-                    description: Int64, count of synthetic asset to rune swaps
+                    description: Int64, count of synthetic asset to qbtc swaps
                 totalCount:
                     type: string
-                    description: Int64, toAssetCount + toRuneCount + synthMintCount + synthRedeemCount
+                    description: Int64, toAssetCount + toQbtcCount + synthMintCount + synthRedeemCount
                 toAssetVolume:
                     type: string
-                    description: Int64(e8), volume of swaps from rune to asset denoted in rune
-                toRuneVolume:
+                    description: Int64(e8), volume of swaps from qbtc to asset denoted in qbtc
+                toQbtcVolume:
                     type: string
-                    description: Int64(e8), volume of swaps from asset to rune denoted in rune
+                    description: Int64(e8), volume of swaps from asset to qbtc denoted in qbtc
                 toTradeVolume:
                     type: string
-                    description: Int64(e8), volume of swaps from trade asset to rune denoted in rune
+                    description: Int64(e8), volume of swaps from trade asset to qbtc denoted in qbtc
                 fromTradeVolume:
                     type: string
-                    description: Int64(e8), volume of swaps from rune to trade asset denoted in rune
+                    description: Int64(e8), volume of swaps from qbtc to trade asset denoted in qbtc
                 toSecuredVolume:
                     type: string
-                    description: Int64(e8), volume of swaps from secured asset to rune denoted in rune
+                    description: Int64(e8), volume of swaps from secured asset to qbtc denoted in qbtc
                 fromSecuredVolume:
                     type: string
-                    description: Int64(e8), volume of swaps from rune to secured asset denoted in rune
+                    description: Int64(e8), volume of swaps from qbtc to secured asset denoted in qbtc
                 synthMintVolume:
                     type: string
-                    description: Int64(e8), volume of swaps from rune to synthetic asset denoted in rune
+                    description: Int64(e8), volume of swaps from qbtc to synthetic asset denoted in qbtc
                 synthRedeemVolume:
                     type: string
-                    description: Int64(e8), volume of swaps from synthetic asset to rune denoted in rune
+                    description: Int64(e8), volume of swaps from synthetic asset to qbtc denoted in qbtc
                 totalVolume:
                     type: string
                     description: |
                         Int64(e8),
-                        toAssetVolume + toRuneVolume + synthMintVolume + synthRedeemVolume (denoted in rune)
+                        toAssetVolume + toQbtcVolume + synthMintVolume + synthRedeemVolume (denoted in qbtc)
                 toAssetVolumeUSD:
                     type: string
-                    description: Int64(e2), volume of swaps from rune to asset denoted in USD price of the rune in each swap
-                toRuneVolumeUSD:
+                    description: Int64(e2), volume of swaps from qbtc to asset denoted in USD price of the qbtc in each swap
+                toQbtcVolumeUSD:
                     type: string
-                    description: Int64(e2), volume of swaps from asset to rune denoted in USD price of the rune in each swap
+                    description: Int64(e2), volume of swaps from asset to qbtc denoted in USD price of the qbtc in each swap
                 toTradeVolumeUSD:
                     type: string
-                    description: Int64(e2), volume of swaps from rune to trade asset denoted in USD price of the rune in each swap
+                    description: Int64(e2), volume of swaps from qbtc to trade asset denoted in USD price of the qbtc in each swap
                 fromTradeVolumeUSD:
                     type: string
-                    description: Int64(e2), volume of swaps from trade asset to rune denoted in USD price of the rune in each swap
+                    description: Int64(e2), volume of swaps from trade asset to qbtc denoted in USD price of the qbtc in each swap
                 toSecuredVolumeUSD:
                     type: string
-                    description: Int64(e2), volume of swaps from rune to secured asset denoted in USD price of the rune in each swap
+                    description: Int64(e2), volume of swaps from qbtc to secured asset denoted in USD price of the qbtc in each swap
                 fromSecuredVolumeUSD:
                     type: string
-                    description: Int64(e2), volume of swaps from secured asset to rune denoted in USD price of the rune in each swap
+                    description: Int64(e2), volume of swaps from secured asset to qbtc denoted in USD price of the qbtc in each swap
                 synthMintVolumeUSD:
                     type: string
-                    description: Int64(e2), volume of swaps from rune to synthetic asset denoted in USD price of the rune in each swap
+                    description: Int64(e2), volume of swaps from qbtc to synthetic asset denoted in USD price of the qbtc in each swap
                 synthRedeemVolumeUSD:
                     type: string
-                    description: Int64(e2), volume of swaps from synthetic asset to rune denoted in USD price of the rune in each swap
+                    description: Int64(e2), volume of swaps from synthetic asset to qbtc denoted in USD price of the qbtc in each swap
                 totalVolumeUSD:
                     type: string
                     description: |
                         Int64(e2),
-                        toAssetVolume + toRuneVolume + synthMintVolume + synthRedeemVolume (denoted in USD price of the rune in each swap)
+                        toAssetVolume + toQbtcVolume + synthMintVolume + synthRedeemVolume (denoted in USD price of the qbtc in each swap)
                 toAssetFees:
                     type: string
-                    description: Int64(e8), the fees collected from swaps from rune to asset (in rune)
-                toRuneFees:
+                    description: Int64(e8), the fees collected from swaps from qbtc to asset (in qbtc)
+                toQbtcFees:
                     type: string
-                    description: Int64(e8), the fees collected from swaps from asset to rune (in rune)
+                    description: Int64(e8), the fees collected from swaps from asset to qbtc (in qbtc)
                 toTradeFees:
                     type: string
-                    description: Int64(e8), the fees collected from swaps from rune to trade asset (in rune)
+                    description: Int64(e8), the fees collected from swaps from qbtc to trade asset (in qbtc)
                 fromTradeFees:
                     type: string
-                    description: Int64(e8), the fees collected from swaps from rune to trade asset (in rune)
+                    description: Int64(e8), the fees collected from swaps from trade asset to qbtc (in qbtc)
                 toSecuredFees:
                     type: string
-                    description: Int64(e8), the fees collected from swaps from rune to secured asset (in rune)
+                    description: Int64(e8), the fees collected from swaps from qbtc to secured asset (in qbtc)
                 fromSecuredFees:
                     type: string
-                    description: Int64(e8), the fees collected from swaps from rune to secured asset (in rune)
+                    description: Int64(e8), the fees collected from swaps from secured asset to qbtc (in qbtc)
                 synthMintFees:
                     type: string
                     description: |
-                        Int64(e8), the fees collected from swaps from rune to synthetic asset (in rune)
+                        Int64(e8), the fees collected from swaps from qbtc to synthetic asset (in qbtc)
                 synthRedeemFees:
                     type: string
                     description: |
-                        Int64(e8), the fees collected from swaps from synthetic asset to rune (in rune)
+                        Int64(e8), the fees collected from swaps from synthetic asset to qbtc (in qbtc)
                 totalFees:
                     type: string
-                    description: Int64(e8), toAssetFees + toRuneFees + synthMintFees + synthRedeemFees
+                    description: Int64(e8), toAssetFees + toQbtcFees + synthMintFees + synthRedeemFees
                 toAssetAverageSlip:
                     type: string
                     description: |
                         Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-                        from rune to asset.
+                        from qbtc to asset.
                         Big swaps have the same weight as small swaps
-                toRuneAverageSlip:
+                toQbtcAverageSlip:
                     type: string
                     description: |
                         Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-                        from asset to rune.
+                        from asset to qbtc.
                         Big swaps have the same weight as small swaps
                 toTradeAverageSlip:
                     type: string
                     description: |
                         Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-                        from rune to trade asset.
+                        from qbtc to trade asset.
                         Big swaps have the same weight as small swaps
                 fromTradeAverageSlip:
                     type: string
@@ -2787,36 +2787,36 @@ components:
                     type: string
                     description: |
                         Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-                        from rune to secured asset.
+                        from qbtc to secured asset.
                         Big swaps have the same weight as small swaps
                 fromSecuredAverageSlip:
                     type: string
                     description: |
                         Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-                        from asset to secured asset.
+                        from secured asset to qbtc.
                         Big swaps have the same weight as small swaps
                 synthMintAverageSlip:
                     type: string
                     description: |
                         Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-                        from rune to synthetic asset.
+                        from qbtc to synthetic asset.
                         Big swaps have the same weight as small swaps
                 synthRedeemAverageSlip:
                     type: string
                     description: |
                         Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-                        from synthetic asset to rune.
+                        from synthetic asset to qbtc.
                         Big swaps have the same weight as small swaps
                 averageSlip:
                     type: string
                     description: |
                         Float64 (Basis points, 0-10000, where 10000=100%), the weighted average (by count)
-                        of toAssetAverageSlip, toRuneAverageSlip, synthMintAverageSlip, synthRedeemAverageSlip.
+                        of toAssetAverageSlip, toQbtcAverageSlip, synthMintAverageSlip, synthRedeemAverageSlip.
                         Big swaps have the same weight as small swaps.
-                runePriceUSD:
+                qbtcPriceUSD:
                     type: string
                     description: |
-                        Float, the price of Rune based on the deepest USD pool at the end of the interval.
+                        Float, the price of QBTC based on the deepest USD pool at the end of the interval.
 
         LiquidityHistory:
             type: object
@@ -2838,15 +2838,15 @@ components:
                 - startTime
                 - endTime
                 - addAssetLiquidityVolume
-                - addRuneLiquidityVolume
+                - addQbtcLiquidityVolume
                 - addLiquidityVolume
                 - addLiquidityCount
                 - withdrawAssetVolume
-                - withdrawRuneVolume
+                - withdrawQbtcVolume
                 - withdrawVolume
                 - withdrawCount
                 - net
-                - runePriceUSD
+                - qbtcPriceUSD
             properties:
                 startTime:
                     type: string
@@ -2858,16 +2858,16 @@ components:
                     type: string
                     description: |
                         Int64(e8), total assets deposited during the time interval.
-                        Denoted in Rune using the price at deposit time.
-                addRuneLiquidityVolume:
+                        Denoted in QBTC using the price at deposit time.
+                addQbtcLiquidityVolume:
                     type: string
                     description: |
-                        Int64(e8), total Rune deposited during the time interval.
+                        Int64(e8), total QBTC deposited during the time interval.
                 addLiquidityVolume:
                     type: string
                     description: |
-                        Int64(e8), total of rune and asset deposits.
-                        Denoted in Rune (using the price at deposit time).
+                        Int64(e8), total of qbtc and asset deposits.
+                        Denoted in QBTC (using the price at deposit time).
                 addLiquidityCount:
                     type: string
                     description: |
@@ -2876,16 +2876,16 @@ components:
                     type: string
                     description: |
                         Int64(e8), total assets withdrawn during the time interval.
-                        Denoted in Rune using the price at withdraw time.
-                withdrawRuneVolume:
+                        Denoted in QBTC using the price at withdraw time.
+                withdrawQbtcVolume:
                     type: string
                     description: |
-                        Int64(e8), total Rune withdrawn during the time interval.
+                        Int64(e8), total QBTC withdrawn during the time interval.
                 withdrawVolume:
                     type: string
                     description: |
-                        Int64(e8), total of rune and asset withdrawals.
-                        Denoted in Rune (using the price at withdraw time).
+                        Int64(e8), total of qbtc and asset withdrawals.
+                        Denoted in QBTC (using the price at withdraw time).
                 withdrawCount:
                     type: string
                     description: |
@@ -2894,10 +2894,10 @@ components:
                     type: string
                     description: |
                         Int64(e8), net liquidity changes (withdrawals - deposits) during the time interval
-                runePriceUSD:
+                qbtcPriceUSD:
                     type: string
                     description: |
-                        Float, the price of Rune based on the deepest USD pool at the end of the interval.
+                        Float, the price of QBTC based on the deepest USD pool at the end of the interval.
 
         AffiliateHistory:
             type: object
@@ -3130,7 +3130,7 @@ components:
                 - startTime
                 - endTime
                 - totalValuePooled
-                - runePriceUSD
+                - qbtcPriceUSD
                 - poolsDepth
             properties:
                 startTime:
@@ -3142,9 +3142,9 @@ components:
                 totalValuePooled:
                     type: string
                     description: |
-                        Int64(e8) in rune, the total pooled value (both assets and rune) in all of the pools at
+                        Int64(e8) in qbtc, the total pooled value (both assets and qbtc) in all of the pools at
                         the end of the interval.
-                        Note: this is twice the aggregate Rune depth of all pools.
+                        Note: this is twice the aggregate QBTC depth of all pools.
                 poolsDepth:
                     type: array
                     items:
@@ -3157,13 +3157,13 @@ components:
                 totalValueLocked:
                     type: string
                     description: |
-                        Int64(e8), total value locked in the chain (in rune)
+                        Int64(e8), total value locked in the chain (in qbtc)
                         This equals `totalPooledValue + totalBondedValue`, as it combines the liquidity
                         pools and bonds of the nodes.
-                runePriceUSD:
+                qbtcPriceUSD:
                     type: string
                     description: |
-                        Float, the price of Rune based on the deepest USD pool at the end of the interval.
+                        Float, the price of QBTC based on the deepest USD pool at the end of the interval.
         DepthHistoryItemPool:
             type: object
             required:
@@ -3372,8 +3372,8 @@ components:
                             switch,
                             thorname,
                             send,
-                            runePoolDeposit,
-                            runePoolWithdraw,
+                            qbtcPoolDeposit,
+                            qbtcPoolWithdraw,
                         ]
                 status:
                     type: string
@@ -3475,10 +3475,10 @@ components:
                     $ref: "#/components/schemas/SendMetadata"
                 thorname:
                     $ref: "#/components/schemas/ThornameMetadata"
-                runePoolDeposit:
-                    $ref: "#/components/schemas/RunePoolDepositMetadata"
-                runePoolWithdraw:
-                    $ref: "#/components/schemas/RunePoolWithdrawMetadata"
+                qbtcPoolDeposit:
+                    $ref: "#/components/schemas/QbtcPoolDepositMetadata"
+                qbtcPoolWithdraw:
+                    $ref: "#/components/schemas/QbtcPoolWithdrawMetadata"
                 bond:
                     $ref: "#/components/schemas/BondMetadata"
                 failed:
@@ -3764,7 +3764,7 @@ components:
                 txType:
                     type: string
                     description: The type of the transaction given from its Memo.
-        RunePoolDepositMetadata:
+        QbtcPoolDepositMetadata:
             type: object
             required:
                 - units
@@ -3774,7 +3774,7 @@ components:
                     description: |
                         Int64, amount of units assigned to the member as result of the 
                         deposit
-        RunePoolWithdrawMetadata:
+        QbtcPoolWithdrawMetadata:
             type: object
             required:
                 - units
@@ -4064,15 +4064,15 @@ components:
         StatsData:
             type: object
             required:
-                - runeDepth
-                - switchedRune
-                - runePriceUSD
+                - qbtcDepth
+                - switchedQbtc
+                - qbtcPriceUSD
                 - swapVolume
                 - swapCount24h
                 - swapCount30d
                 - swapCount
                 - toAssetCount
-                - toRuneCount
+                - toQbtcCount
                 - synthMintCount
                 - synthBurnCount
                 - dailyActiveUsers
@@ -4083,15 +4083,15 @@ components:
                 - addLiquidityCount
                 - withdrawCount
             properties:
-                runeDepth:
+                qbtcDepth:
                     type: string
-                    description: Int64(e8), current total Rune in the pools.
-                switchedRune:
+                    description: Int64(e8), current total QBTC in the pools.
+                switchedQbtc:
                     type: string
-                    description: Int64(e8), amount of native rune switched from erc20 or bep2 rune.
-                runePriceUSD:
+                    description: Int64(e8), amount of native qbtc switched from erc20 or bep2 qbtc.
+                qbtcPriceUSD:
                     type: string
-                    description: Float, the price of Rune based on the deepest USD pool.
+                    description: Float, the price of QBTC based on the deepest USD pool.
                 swapVolume:
                     type: string
                     description: |
@@ -4108,7 +4108,7 @@ components:
                 toAssetCount:
                     type: string
                     description: Int64, number of swaps from Rune to Asset since beginning.
-                toRuneCount:
+                toQbtcCount:
                     type: string
                     description: Int64, number of swaps from Asset to Rune since beginning.
                 synthMintCount:

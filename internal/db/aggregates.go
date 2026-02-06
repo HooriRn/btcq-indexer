@@ -23,8 +23,8 @@ var aggBalances string
 //go:embed members.sql
 var aggMembers string
 
-//go:embed rune_price.sql
-var aggRunePrice string
+//go:embed qbtc_price.sql
+var aggQbtcPrice string
 
 const (
 	aggregatesRefreshInterval = 1 * time.Minute
@@ -443,7 +443,7 @@ func WatermarkedMaterializedTables() []string {
 }
 
 func AggregatesDDL() []string {
-	parts := []string{SchemaCleanUp("btcq_indexer_agg"), aggDDLPrefix, aggBalances, aggMembers, aggRunePrice}
+	parts := []string{SchemaCleanUp("btcq_indexer_agg"), aggDDLPrefix, aggBalances, aggMembers, aggQbtcPrice}
 	var b strings.Builder
 
 	// Sort to iterate in deterministic order.
@@ -620,7 +620,7 @@ func refreshAggregates(ctx context.Context, bulk bool, fullTimescaleRefreshForTe
 	updateAggregateSingle(ctx, refreshEnd, "update_balances")
 	updateAggregateSingle(ctx, refreshEnd, "update_members")
 	updateAggregateSingle(ctx, refreshEnd, "update_actions")
-	updateAggregateSingle(ctx, refreshEnd, "update_rune_price")
+	updateAggregateSingle(ctx, refreshEnd, "update_qbtc_price")
 
 	LastAggregatedBlock.Set(lastAggregated.Height, lastAggregated.Timestamp)
 

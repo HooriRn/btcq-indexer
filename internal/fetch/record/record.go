@@ -8,7 +8,7 @@ import (
 	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 )
 
-func AddressIsRune(address string) bool {
+func AddressIsQbtc(address string) bool {
 	return (strings.HasPrefix(address, "thor") ||
 		strings.HasPrefix(address, "tthor") ||
 		strings.HasPrefix(address, "sthor"))
@@ -46,7 +46,7 @@ func (r *eventRecorder) OnRewards(e *Rewards, meta *Metadata) {
 		return
 	}
 
-	cols2 := []string{"pool", "rune_e8", "saver_e8"}
+	cols2 := []string{"pool", "qbtc_e8", "saver_e8"}
 	for _, p := range e.PerPool {
 		err := InsertWithMeta("rewards_event_entries", meta, cols2, p.Asset, p.E8, 0)
 		if err != nil {
@@ -58,7 +58,7 @@ func (r *eventRecorder) OnRewards(e *Rewards, meta *Metadata) {
 	}
 
 	for _, a := range e.PerPool {
-		r.AddPoolRuneE8Depth(a.Asset, a.E8)
+		r.AddPoolQbtcE8Depth(a.Asset, a.E8)
 	}
 }
 

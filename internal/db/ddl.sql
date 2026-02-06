@@ -157,11 +157,11 @@ $$;
 -- Sparse table for depths.
 -- Only those height/pool pairs are filled where there is a change.
 -- For missing values, use the latest existing height for a pool.
--- Asset and Rune are filled together, it's not needed to look back for them separately.
+-- Asset and QBTC are filled together, it's not needed to look back for them separately.
 CREATE TABLE block_pool_depths (
     pool                TEXT NOT NULL,
     asset_e8            BIGINT NOT NULL,
-    rune_e8             BIGINT NOT NULL,
+    qbtc_e8             BIGINT NOT NULL,
     synth_e8            BIGINT NOT NULL,
     block_timestamp     BIGINT NOT NULL
 );
@@ -181,7 +181,7 @@ CALL setup_hypertable('rewards_events');
 
 CREATE TABLE rewards_event_entries (
     pool                TEXT NOT NULL,
-    rune_e8             BIGINT NOT NULL,
+    qbtc_e8             BIGINT NOT NULL,
     -- saver_e8 is the total amount earned in the paralel synth pool. 
     -- Rows having saver_e8 field do not come from reward events, 
     -- but from donate events with the memo "THOR-SAVERS-YIELD"

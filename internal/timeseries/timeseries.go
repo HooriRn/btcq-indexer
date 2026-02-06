@@ -37,7 +37,7 @@ type blockTrack struct {
 // AggTrack has a snapshot of runningTotals.
 type aggTrack struct {
 	AssetE8DepthPerPool map[string]int64
-	RuneE8DepthPerPool  map[string]int64
+	QbtcE8DepthPerPool   map[string]int64
 	SynthE8DepthPerPool map[string]int64
 }
 
@@ -71,8 +71,8 @@ func Setup() error {
 	for pool, E8 := range track.AssetE8DepthPerPool {
 		record.Recorder.SetAssetDepth(pool, E8)
 	}
-	for pool, E8 := range track.RuneE8DepthPerPool {
-		record.Recorder.SetRuneDepth(pool, E8)
+	for pool, E8 := range track.QbtcE8DepthPerPool {
+		record.Recorder.SetQbtcDepth(pool, E8)
 	}
 	for pool, E8 := range track.SynthE8DepthPerPool {
 		record.Recorder.SetSynthDepth(pool, E8)
@@ -131,7 +131,7 @@ func ProcessBlock(block *chain.Block, commit bool) (err error) {
 		Hash:      block.Hash,
 		aggTrack: aggTrack{
 			AssetE8DepthPerPool: record.Recorder.AssetE8DepthPerPool(),
-			RuneE8DepthPerPool:  record.Recorder.RuneE8DepthPerPool(),
+			QbtcE8DepthPerPool:  record.Recorder.QbtcE8DepthPerPool(),
 			SynthE8DepthPerPool: record.Recorder.SynthE8DepthPerPool(),
 		},
 	}
@@ -161,7 +161,7 @@ func ProcessBlock(block *chain.Block, commit bool) (err error) {
 
 	err = depthRecorder.update(block.Time,
 		track.aggTrack.AssetE8DepthPerPool,
-		track.aggTrack.RuneE8DepthPerPool,
+		track.aggTrack.QbtcE8DepthPerPool,
 		track.aggTrack.SynthE8DepthPerPool,
 		block.Height)
 	if err != nil {
@@ -216,7 +216,7 @@ func LastBlock() (height int64, timestamp time.Time, hash []byte) {
 }
 
 // Deprecated, use timeseries.Latest.GetState().PoolInfo(poolname) instead
-func AssetAndRuneDepths() (assetE8PerPool, runeE8PerPool map[string]int64, timestamp time.Time) {
+func AssetAndRuneDepths() (assetE8PerPool, qbtcE8PerPool map[string]int64, timestamp time.Time) {
 	track := getLastBlock()
-	return track.aggTrack.AssetE8DepthPerPool, track.aggTrack.RuneE8DepthPerPool, track.Timestamp
+	return track.aggTrack.AssetE8DepthPerPool, track.aggTrack.QbtcE8DepthPerPool, track.Timestamp
 }

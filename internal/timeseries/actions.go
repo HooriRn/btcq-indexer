@@ -596,9 +596,9 @@ func (a *action) completeFromDBRead(meta *actionMeta, fees coinList, streamingMe
 				hasOut = true
 			}
 
-			// Double swaps with RUNE output is affiliate
-			isRune := record.IsRune([]byte(o.Coins[0].Asset))
-			if isRune && o.Address != a.in[0].Address && len(a.pools) > 1 {
+			// Double swaps with QBTC output is affiliate
+			isQbtc := record.IsQbtc([]byte(o.Coins[0].Asset))
+			if isQbtc && o.Address != a.in[0].Address && len(a.pools) > 1 {
 				a.out[i].Affiliate = util.WrapBoolean(true)
 				// Show pending while only affiliate is available
 				if len(a.out) == 1 {
@@ -606,16 +606,16 @@ func (a *action) completeFromDBRead(meta *actionMeta, fees coinList, streamingMe
 				}
 			}
 
-			// Find the least amount of RUNE output
-			if o.Coins[0].Amount < min && meta.AffiliateFee > 0 && isRune {
+			// Find the least amount of QBTC output
+			if o.Coins[0].Amount < min && meta.AffiliateFee > 0 && isQbtc {
 				min = o.Coins[0].Amount
 				ind = i
 			}
 		}
 
-		// Single swap affiliate detection BTC -> RUNE
+		// Single swap affiliate detection BTC -> QBTC
 		outAsset := []byte(a.out[ind].Coins[0].Asset)
-		if len(a.pools) == 1 && len(a.out) > 1 && record.IsRune(outAsset) {
+		if len(a.pools) == 1 && len(a.out) > 1 && record.IsQbtc(outAsset) {
 			a.out[ind].Affiliate = util.WrapBoolean(true)
 		}
 
@@ -661,7 +661,7 @@ func (a *action) completeFromDBRead(meta *actionMeta, fees coinList, streamingMe
 		var runeOut, assetOut, runeFee, assetFee int64
 		for _, tx := range a.out {
 			for _, coin := range tx.Coins {
-				if coin.Asset != "THOR.RUNE" {
+				if coin.Asset != "QBTC.QBTC" {
 					assetOut = coin.Amount
 				} else {
 					runeOut = coin.Amount
@@ -755,12 +755,12 @@ func (a *action) completeFromDBRead(meta *actionMeta, fees coinList, streamingMe
 			RegistrationFee: util.IntStr(meta.RegistrationFeeE8),
 			TxType:          meta.TxType,
 		}
-	case "runePoolDeposit":
-		a.metadata.RunePoolDeposit = &oapigen.RunePoolDepositMetadata{
+	case "qbtcPoolDeposit":
+		a.metadata.QbtcPoolDeposit = &oapigen.QbtcPoolDepositMetadata{
 			Units: util.IntStr(meta.Units),
 		}
-	case "runePoolWithdraw":
-		a.metadata.RunePoolWithdraw = &oapigen.RunePoolWithdrawMetadata{
+	case "qbtcPoolWithdraw":
+		a.metadata.QbtcPoolWithdraw = &oapigen.QbtcPoolWithdrawMetadata{
 			Units:               util.IntStr(meta.Units),
 			AffiliateAddress:    meta.AffiliateAddress,
 			AffiliateAmount:     util.IntStr(meta.AffiliateAmount),
@@ -960,7 +960,7 @@ func actionsPreparedStatements(moment time.Time,
 			case "double":
 				actionFilters = append(actionFilters, `array_length(pools, 1) = 2`)
 			case "norune":
-				actionFilters = append(actionFilters, `assets NOT @> 'THOR.RUNE`)
+				actionFilters = append(actionFilters, `assets NOT @> 'QBTC.QBTC`)
 			default:
 				assets = append(assets, asset)
 			}
@@ -1104,10 +1104,10 @@ func actionsPreparedStatements(moment time.Time,
 
 func GetTopSwaps(ctx context.Context, period db.Buckets) (oapigen.ActionsResponse, error) {
 	q := `
-		WITH latest_rune_price AS (
+		WITH latest_qbtc_price AS (
 		SELECT
-			rune_price_e8
-		FROM rune_price
+			qbtc_price_e8
+		FROM qbtc_price
 		ORDER BY block_timestamp DESC
 		LIMIT 1
 		),
@@ -1115,7 +1115,7 @@ func GetTopSwaps(ctx context.Context, period db.Buckets) (oapigen.ActionsRespons
 		SELECT
 			DISTINCT ON (pool) pool,
 			asset_e8,
-			rune_e8,
+			qbtc_e8,
 			block_timestamp
 		FROM block_pool_depths
 		ORDER BY pool, block_timestamp DESC
@@ -1131,7 +1131,7 @@ func GetTopSwaps(ctx context.Context, period db.Buckets) (oapigen.ActionsRespons
 			a.meta,
 			a.streaming_meta
 		FROM btcq_indexer_agg.actions AS a
-		JOIN latest_rune_price AS r
+		JOIN latest_qbtc_price AS r
 		ON TRUE -- Cross join with latest rune price
 		JOIN latest_pool_depths AS l
 		ON a.ins->0->'coins'->0->>'asset' = l.pool
@@ -1140,7 +1140,7 @@ func GetTopSwaps(ctx context.Context, period db.Buckets) (oapigen.ActionsRespons
 		AND a.block_timestamp < $2
 		AND a.action_type = 'swap'
 		ORDER BY 
-		(l.rune_e8::DOUBLE PRECISION / l.asset_e8::DOUBLE PRECISION) * r.rune_price_e8 * (a.ins->0->'coins'->0->>'amount')::DOUBLE PRECISION DESC
+		(l.qbtc_e8::DOUBLE PRECISION / l.asset_e8::DOUBLE PRECISION) * r.qbtc_price_e8 * (a.ins->0->'coins'->0->>'amount')::DOUBLE PRECISION DESC
 		LIMIT 15;
 	`
 
@@ -1184,19 +1184,19 @@ func GetAffiliateStats(ctx context.Context, buckets db.Buckets, thorname string)
 			SUM(
 				(
 					CASE 
-					WHEN a.ins->0->'coins'->0->>'asset' = 'THOR.RUNE' THEN 1
-					WHEN l.asset_e8 > 0 THEN l.rune_e8::DOUBLE PRECISION / l.asset_e8::DOUBLE PRECISION
+					WHEN a.ins->0->'coins'->0->>'asset' = 'QBTC.QBTC' THEN 1
+					WHEN l.asset_e8 > 0 THEN l.qbtc_e8::DOUBLE PRECISION / l.asset_e8::DOUBLE PRECISION
 					ELSE 0
 					END
-				) * COALESCE(r.rune_price_e8, 0) * (a.ins->0->'coins'->0->>'amount')::DOUBLE PRECISION
+				) * COALESCE(r.qbtc_price_e8, 0) * (a.ins->0->'coins'->0->>'amount')::DOUBLE PRECISION
 			) AS total_volume,
 			count(1) as count,
 			COALESCE(meta->>'affiliateAddress', '') as affiliate
 		FROM btcq_indexer_agg.actions AS a
 		LEFT JOIN LATERAL (
-			SELECT rune_price_e8
-			FROM rune_price
-			WHERE rune_price.block_timestamp <= a.block_timestamp
+			SELECT qbtc_price_e8
+			FROM qbtc_price
+			WHERE qbtc_price.block_timestamp <= a.block_timestamp
 			ORDER BY block_timestamp DESC
 			LIMIT 1
 		) AS r ON TRUE
@@ -1205,7 +1205,7 @@ func GetAffiliateStats(ctx context.Context, buckets db.Buckets, thorname string)
 			FROM block_pool_depths
 			WHERE block_pool_depths.pool = a.pools[1]
 			AND block_pool_depths.block_timestamp <= a.block_timestamp
-			AND a.ins->0->'coins'->0->>'asset' <> 'THOR.RUNE'
+			AND a.ins->0->'coins'->0->>'asset' <> 'QBTC.QBTC'
 			ORDER BY block_timestamp DESC
 			LIMIT 1
 		) AS l ON TRUE
@@ -1304,12 +1304,12 @@ func GetAffiliateEarning(ctx context.Context, buckets db.Buckets, thorname strin
 		)
 		SELECT
 			` + db.SelectTruncatedTimestamp("a.block_timestamp", buckets) + ` as date,
-			SUM((a.meta->>'liquidityFee')::BIGINT * COALESCE(r.rune_price_e8, 0) / 1e6)::BIGINT AS liquidity_fee_usd,
+			SUM((a.meta->>'liquidityFee')::BIGINT * COALESCE(r.qbtc_price_e8, 0) / 1e6)::BIGINT AS liquidity_fee_usd,
 			SUM((a.meta->>'liquidityFee')::BIGINT) AS liquidity_fee_rune,
 			count(1) as count,
 			COALESCE(a.meta->>'affiliateAddress', '') as affiliate
 		FROM btcq_indexer_agg.actions AS a
-		JOIN latest_rune_price AS r ON TRUE
+		JOIN latest_qbtc_price AS r ON TRUE
 		` + db.Where(actionFilters...) + `
 		GROUP BY date, affiliate
 		ORDER BY date, affiliate;

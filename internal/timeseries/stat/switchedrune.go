@@ -7,7 +7,7 @@ import (
 	"github.com/btcq/btcq-indexer/internal/db"
 )
 
-func SwitchedRune(ctx context.Context) (int64, error) {
+func SwitchedQbtc(ctx context.Context) (int64, error) {
 	q := `SELECT COALESCE(SUM(mint_e8), 0) FROM switch_events`
 
 	var ret int64

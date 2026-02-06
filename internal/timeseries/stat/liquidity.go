@@ -13,7 +13,7 @@ import (
 // TODO (HooriRn): Delete imp protection from the code and table
 type liquidityBucket struct {
 	assetVolume int64
-	runeVolume  int64
+	qbtcVolume  int64
 	volume      int64
 	count       int64
 }
@@ -25,7 +25,7 @@ type liquidityOneTableResult struct {
 
 func liquidityChangesFromTable(
 	ctx context.Context, buckets db.Buckets, pool string,
-	table, assetColumn, runeColumn, impLossProtColumn string) (
+	table, assetColumn, qbtcColumn, impLossProtColumn string) (
 	ret liquidityOneTableResult, err error) {
 
 	window := buckets.Window()
@@ -47,8 +47,8 @@ func liquidityChangesFromTable(
 	query := `
 	SELECT
 		COUNT(*) AS count,
-		SUM(` + assetColumn + `) AS asset_in_rune_sum,
-		SUM(` + runeColumn + `) as rune_sum,
+		SUM(` + assetColumn + `) AS asset_in_qbtc_sum,
+		SUM(` + qbtcColumn + `) as qbtc_sum,
 		` + db.SelectTruncatedTimestamp("block_timestamp", buckets) + ` AS start_time
 	FROM ` + table + `
 	WHERE ` + poolFilter + `$1 <= block_timestamp AND block_timestamp < $2
@@ -68,15 +68,15 @@ func liquidityChangesFromTable(
 		var bucket liquidityBucket
 		var startTime db.Second
 		err = rows.Scan(
-			&bucket.count, &bucket.assetVolume, &bucket.runeVolume, &startTime)
+			&bucket.count, &bucket.assetVolume, &bucket.qbtcVolume, &startTime)
 		if err != nil {
 			return
 		}
-		bucket.volume = bucket.assetVolume + bucket.runeVolume
+		bucket.volume = bucket.assetVolume + bucket.qbtcVolume
 
 		ret.buckets[startTime] = bucket
 		ret.total.assetVolume += bucket.assetVolume
-		ret.total.runeVolume += bucket.runeVolume
+		ret.total.qbtcVolume += bucket.qbtcVolume
 		ret.total.volume += bucket.volume
 		ret.total.count += bucket.count
 	}
@@ -89,13 +89,13 @@ func GetLiquidityHistory(ctx context.Context, buckets db.Buckets, pool string) (
 	window := buckets.Window()
 
 	deposits, err := liquidityChangesFromTable(ctx, buckets, pool,
-		"stake_events", "_asset_in_rune_e8", "rune_e8", "")
+		"stake_events", "_asset_in_qbtc_e8", "qbtc_e8", "")
 	if err != nil {
 		return
 	}
 
 	withdraws, err := liquidityChangesFromTable(ctx, buckets, pool,
-		"withdraw_events", "_emit_asset_in_rune_e8", "emit_rune_e8", "imp_loss_protection_e8")
+		"withdraw_events", "_emit_asset_in_qbtc_e8", "emit_qbtc_e8", "imp_loss_protection_e8")
 	if err != nil {
 		return
 	}
@@ -113,7 +113,7 @@ func GetLiquidityHistory(ctx context.Context, buckets db.Buckets, pool string) (
 	ret = oapigen.LiquidityHistoryResponse{
 		Meta: buildLiquidityItem(
 			window.From, window.Until, withdraws.total, deposits.total,
-			usdPrices[len(usdPrices)-1].RunePriceUSD),
+			usdPrices[len(usdPrices)-1].QbtcPriceUSD),
 		Intervals: make([]oapigen.LiquidityHistoryItem, 0, buckets.Count()),
 	}
 
@@ -127,7 +127,7 @@ func GetLiquidityHistory(ctx context.Context, buckets db.Buckets, pool string) (
 		deposits := deposits.buckets[timestamp]
 
 		liquidityChangesItem := buildLiquidityItem(
-			timestamp, endTime, withdrawals, deposits, usdPrices[i].RunePriceUSD)
+			timestamp, endTime, withdrawals, deposits, usdPrices[i].QbtcPriceUSD)
 		ret.Intervals = append(ret.Intervals, liquidityChangesItem)
 	}
 
@@ -137,20 +137,20 @@ func GetLiquidityHistory(ctx context.Context, buckets db.Buckets, pool string) (
 func buildLiquidityItem(
 	startTime, endTime db.Second,
 	withdrawals, deposits liquidityBucket,
-	runePriceUSD float64) oapigen.LiquidityHistoryItem {
+	qbtcPriceUSD float64) oapigen.LiquidityHistoryItem {
 	return oapigen.LiquidityHistoryItem{
 		StartTime:               util.IntStr(startTime.ToI()),
 		EndTime:                 util.IntStr(endTime.ToI()),
 		AddAssetLiquidityVolume: util.IntStr(deposits.assetVolume),
-		AddRuneLiquidityVolume:  util.IntStr(deposits.runeVolume),
+		AddQbtcLiquidityVolume:  util.IntStr(deposits.qbtcVolume),
 		AddLiquidityVolume:      util.IntStr(deposits.volume),
 		AddLiquidityCount:       util.IntStr(deposits.count),
 		WithdrawAssetVolume:     util.IntStr(withdrawals.assetVolume),
-		WithdrawRuneVolume:      util.IntStr(withdrawals.runeVolume),
+		WithdrawQbtcVolume:      util.IntStr(withdrawals.qbtcVolume),
 		WithdrawVolume:          util.IntStr(withdrawals.volume),
 		WithdrawCount:           util.IntStr(withdrawals.count),
 		Net:                     util.IntStr(deposits.volume - withdrawals.volume),
-		RunePriceUSD:            floatStr(runePriceUSD),
+		QbtcPriceUSD:            floatStr(qbtcPriceUSD),
 	}
 }
 

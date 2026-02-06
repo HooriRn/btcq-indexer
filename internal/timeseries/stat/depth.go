@@ -20,8 +20,8 @@ type PoolDepthBucket struct {
 type TVLDepthBucket struct {
 	Window            db.Window
 	TotalPoolDepth    int64
-	RunePriceUSD      float64
-	PoolsMapRuneDepth map[string]int64
+	QbtcPriceUSD      float64
+	PoolsMapQbtcDepth map[string]int64
 }
 
 // - Queries database, possibly multiple rows per window.
@@ -80,22 +80,22 @@ func addUsdPools(pool string) []string {
 
 var poolDepthsAggregate = db.RegisterAggregate(
 	db.NewAggregate("pool_depths", "block_pool_depths").
-		AddJoinQuery("rune_price", "r").
+		AddJoinQuery("qbtc_price", "r").
 		AddGroupColumn("pool").
 		AddLastColumn("asset_e8").
-		AddLastColumn("rune_e8").
+		AddLastColumn("qbtc_e8").
 		AddLastColumn("synth_e8").
-		AddFirstExpression("open_price", "CASE WHEN asset_e8 > 0 THEN r.rune_price_e8 * (rune_e8::DOUBLE PRECISION / asset_e8::DOUBLE PRECISION) ELSE 0 END").
-		AddMaxExpression("high_price", "CASE WHEN asset_e8 > 0 THEN r.rune_price_e8 * (rune_e8::DOUBLE PRECISION / asset_e8::DOUBLE PRECISION) ELSE 0 END").
-		AddMinExpression("low_price", "CASE WHEN asset_e8 > 0 THEN r.rune_price_e8 * (rune_e8::DOUBLE PRECISION / asset_e8::DOUBLE PRECISION) ELSE 0 END").
-		AddLastExpression("close_price", "CASE WHEN asset_e8 > 0 THEN r.rune_price_e8 * (rune_e8::DOUBLE PRECISION / asset_e8::DOUBLE PRECISION) ELSE 0 END"))
+		AddFirstExpression("open_price", "CASE WHEN asset_e8 > 0 THEN r.qbtc_price_e8 * (qbtc_e8::DOUBLE PRECISION / asset_e8::DOUBLE PRECISION) ELSE 0 END").
+		AddMaxExpression("high_price", "CASE WHEN asset_e8 > 0 THEN r.qbtc_price_e8 * (qbtc_e8::DOUBLE PRECISION / asset_e8::DOUBLE PRECISION) ELSE 0 END").
+		AddMinExpression("low_price", "CASE WHEN asset_e8 > 0 THEN r.qbtc_price_e8 * (qbtc_e8::DOUBLE PRECISION / asset_e8::DOUBLE PRECISION) ELSE 0 END").
+		AddLastExpression("close_price", "CASE WHEN asset_e8 > 0 THEN r.qbtc_price_e8 * (qbtc_e8::DOUBLE PRECISION / asset_e8::DOUBLE PRECISION) ELSE 0 END"))
 
 func getDepthsHistory(ctx context.Context, buckets db.Buckets, pools []string,
 	saveDepths func(idx int, bucketWindow db.Window, depths timeseries.DepthMap)) (beforeDepthMap timeseries.DepthMap, err error) {
 	var poolDepths timeseries.DepthMap
 	beforeDepthMap = timeseries.DepthMap{}
 
-	// last rune and asset depths before the first bucket
+	// last qbtc and asset depths before the first bucket
 	poolDepths, err = DepthsBefore(ctx, pools, buckets.Timestamps[0].ToNano())
 	if err != nil {
 		return nil, err
@@ -127,7 +127,7 @@ func getDepthsHistory(ctx context.Context, buckets db.Buckets, pools []string,
 		SELECT
 			pool,
 			asset_e8,
-			rune_e8,
+			qbtc_e8,
 			synth_e8,
 			open_price,
 			high_price,
@@ -145,7 +145,7 @@ func getDepthsHistory(ctx context.Context, buckets db.Buckets, pools []string,
 	}
 
 	readNext := func(rows *sql.Rows) (nextTimestamp db.Second, err error) {
-		err = rows.Scan(&next.pool, &next.depths.AssetDepth, &next.depths.RuneDepth, &next.depths.SynthDepth, &next.depths.OpenPrice, &next.depths.HighPrice, &next.depths.LowPrice, &next.depths.ClosePrice, &nextTimestamp)
+		err = rows.Scan(&next.pool, &next.depths.AssetDepth, &next.depths.QbtcDepth, &next.depths.SynthDepth, &next.depths.OpenPrice, &next.depths.HighPrice, &next.depths.LowPrice, &next.depths.ClosePrice, &nextTimestamp)
 		if err != nil {
 			return 0, err
 		}
@@ -169,12 +169,12 @@ func PoolDepthHistory(ctx context.Context, buckets db.Buckets, pool string) (
 	ret = make([]PoolDepthBucket, buckets.Count())
 
 	saveDepths := func(idx int, bucketWindow db.Window, poolDepths timeseries.DepthMap) {
-		runePriceUSD := runePriceUSDForDepths(poolDepths)
+		qbtcPriceUSD := qbtcPriceUSDForDepths(poolDepths)
 		depths := poolDepths[pool]
 
 		ret[idx].Window = bucketWindow
 		ret[idx].Depths = depths
-		ret[idx].AssetPriceUSD = depths.AssetPrice() * runePriceUSD
+		ret[idx].AssetPriceUSD = depths.AssetPrice() * qbtcPriceUSD
 	}
 
 	beforeDepthMap, err := getDepthsHistory(ctx, buckets, allPools, saveDepths)
@@ -186,23 +186,23 @@ func TVLDepthHistory(ctx context.Context, buckets db.Buckets) (
 	ret = make([]TVLDepthBucket, buckets.Count())
 
 	saveDepths := func(idx int, bucketWindow db.Window, poolDepths timeseries.DepthMap) {
-		runePriceUSD := runePriceUSDForDepths(poolDepths)
+		qbtcPriceUSD := qbtcPriceUSDForDepths(poolDepths)
 
 		var depth int64 = 0
-		ret[idx].PoolsMapRuneDepth = map[string]int64{}
+		ret[idx].PoolsMapQbtcDepth = map[string]int64{}
 		for poolName, pair := range poolDepths {
 			// exclude derived asset pools, e.g. THOR.BTC
 			if record.GetCoinType([]byte(poolName)) != record.AssetDerived {
-				depth += pair.RuneDepth
+				depth += pair.QbtcDepth
 				if record.GetCoinType([]byte(poolName)) == record.AssetNative {
-					ret[idx].PoolsMapRuneDepth[poolName] = pair.RuneDepth
+					ret[idx].PoolsMapQbtcDepth[poolName] = pair.QbtcDepth
 				}
 			}
 		}
 
 		ret[idx].Window = bucketWindow
 		ret[idx].TotalPoolDepth = depth
-		ret[idx].RunePriceUSD = runePriceUSD
+		ret[idx].QbtcPriceUSD = qbtcPriceUSD
 	}
 
 	_, err = getDepthsHistory(ctx, buckets, nil, saveDepths)
@@ -211,7 +211,7 @@ func TVLDepthHistory(ctx context.Context, buckets db.Buckets) (
 
 type USDPriceBucket struct {
 	Window       db.Window
-	RunePriceUSD float64
+	QbtcPriceUSD float64
 }
 
 // Each bucket contains the latest depths before the timestamp.
@@ -228,7 +228,7 @@ func USDPriceHistory(ctx context.Context, buckets db.Buckets) (
 
 	saveDepths := func(idx int, bucketWindow db.Window, poolDepths timeseries.DepthMap) {
 		ret[idx].Window = bucketWindow
-		ret[idx].RunePriceUSD = runePriceUSDForDepths(poolDepths)
+		ret[idx].QbtcPriceUSD = qbtcPriceUSDForDepths(poolDepths)
 	}
 
 	_, err = getDepthsHistory(ctx, buckets, usdPoolWhitelist, saveDepths)
@@ -254,7 +254,7 @@ func DepthsBefore(ctx context.Context, pools []string, time db.Nano) (
 		SELECT
 			pool,
 			last(asset_e8, aggregate_timestamp) AS asset_e8,
-			last(rune_e8, aggregate_timestamp) AS rune_e8,
+			last(qbtc_e8, aggregate_timestamp) AS qbtc_e8,
 			last(synth_e8, aggregate_timestamp) AS synth_e8,
 			last(close_price, aggregate_timestamp) AS open_price,
 			last(close_price, aggregate_timestamp) AS high_price,
@@ -274,7 +274,7 @@ func DepthsBefore(ctx context.Context, pools []string, time db.Nano) (
 	for rows.Next() {
 		var pool string
 		var depths timeseries.PoolDepths
-		err = rows.Scan(&pool, &depths.AssetDepth, &depths.RuneDepth, &depths.SynthDepth,
+		err = rows.Scan(&pool, &depths.AssetDepth, &depths.QbtcDepth, &depths.SynthDepth,
 			&depths.OpenPrice, &depths.HighPrice, &depths.LowPrice, &depths.ClosePrice)
 		if err != nil {
 			return
@@ -307,7 +307,7 @@ func DepthsPeriod(ctx context.Context, pools []string, timeLow db.Nano, timeHigh
 		SELECT
 			pool,
 			last(asset_e8, aggregate_timestamp) AS asset_e8,
-			last(rune_e8, aggregate_timestamp) AS rune_e8,
+			last(qbtc_e8, aggregate_timestamp) AS qbtc_e8,
 			last(synth_e8, aggregate_timestamp) AS synth_e8,
 			first(open_price, aggregate_timestamp) AS open_price,
 			max(high_price) AS high_price,
@@ -327,7 +327,7 @@ func DepthsPeriod(ctx context.Context, pools []string, timeLow db.Nano, timeHigh
 	for rows.Next() {
 		var pool string
 		var depths timeseries.PoolDepths
-		err = rows.Scan(&pool, &depths.AssetDepth, &depths.RuneDepth, &depths.SynthDepth,
+		err = rows.Scan(&pool, &depths.AssetDepth, &depths.QbtcDepth, &depths.SynthDepth,
 			&depths.OpenPrice, &depths.HighPrice, &depths.LowPrice, &depths.ClosePrice)
 		if err != nil {
 			return

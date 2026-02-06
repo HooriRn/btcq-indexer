@@ -54,16 +54,16 @@ func jsonHealth(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	})
 }
 
-func luvi(assetE8 int64, runeE8 int64, poolUnits int64) float64 {
+func luvi(assetE8 int64, qbtcE8 int64, poolUnits int64) float64 {
 	if poolUnits <= 0 {
 		return math.NaN()
 	}
-	return math.Sqrt(float64(assetE8)*float64(runeE8)) / float64(poolUnits)
+	return math.Sqrt(float64(assetE8)*float64(qbtcE8)) / float64(poolUnits)
 }
 
 func luviFromLPUnits(depths timeseries.PoolDepths, lpUnits int64) float64 {
 	synthUnits := timeseries.CalculateSynthUnits(depths.AssetDepth, depths.SynthDepth, lpUnits)
-	return luvi(depths.AssetDepth, depths.RuneDepth, lpUnits+synthUnits)
+	return luvi(depths.AssetDepth, depths.QbtcDepth, lpUnits+synthUnits)
 }
 
 func jsonSwapHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -148,7 +148,7 @@ func toSwapHistoryItem(bucket stat.SwapBucket) oapigen.SwapHistoryItem {
 		SynthMintAverageSlip:   ratioStr(bucket.RuneToSynthSlip, bucket.RuneToSynthCount),
 		SynthRedeemAverageSlip: ratioStr(bucket.SynthToRuneSlip, bucket.SynthToRuneCount),
 		AverageSlip:            ratioStr(bucket.TotalSlip, bucket.TotalCount),
-		RunePriceUSD:           floatStr(bucket.RunePriceUSD),
+		QbtcPriceUSD:           floatStr(bucket.QbtcPriceUSD),
 	}
 }
 
@@ -468,7 +468,7 @@ func getPoolAggregates(ctx context.Context, pools []string, apyBucket db.Buckets
 	periodsPerYear := db.GetPPYFromBuckets(apyBucket)
 	for pool, earnings := range poolEarningsMapStat {
 		er := earnings.TotalLiquidityFeesRune + earnings.Rewards
-		pr := float64(er) / float64(latestState.Pools[pool].RuneDepth)
+		pr := float64(er) / float64(latestState.Pools[pool].QbtcDepth)
 		mapEarningsInfo[pool] = EarningsInfo{
 			Earnings:                   er,
 			AnnualEarningsAsPercentage: (pr * periodsPerYear),
@@ -514,10 +514,10 @@ func poolStatusFromMap(pool string, statusMap map[string]string) string {
 
 // calculateDepthsPercentage calculates the liquidity depths at ± 2% price movements
 // using Uniswap V2 constant product formula with fee from L1SLIPMINBPS mimir value.
-// Returns depth in RUNE units for both directions.
-// Depth represents the maximum RUNE value that can be traded before price moves ±2%.
-func calculateDepthsPercentage(assetDepth, runeDepth int64) (depthPlus2Percent, depthMinus2Percent int64) {
-	if assetDepth <= 0 || runeDepth <= 0 {
+// Returns depth in QBTC units for both directions.
+// Depth represents the maximum QBTC value that can be traded before price moves ±2%.
+func calculateDepthsPercentage(assetDepth, qbtcDepth int64) (depthPlus2Percent, depthMinus2Percent int64) {
+	if assetDepth <= 0 || qbtcDepth <= 0 {
 		return 0, 0
 	}
 
@@ -531,7 +531,7 @@ func calculateDepthsPercentage(assetDepth, runeDepth int64) (depthPlus2Percent, 
 	const priceChange = 0.02 // 2%
 
 	x := float64(assetDepth)
-	y := float64(runeDepth)
+	y := float64(qbtcDepth)
 	k := x * y
 
 	xPrimeUp := x / (1 + priceChange)
@@ -561,17 +561,17 @@ func calculateDepthsPercentage(assetDepth, runeDepth int64) (depthPlus2Percent, 
 }
 
 func buildPoolDetail(
-	ctx context.Context, pool, status string, aggregates poolAggregates, runePriceUsd float64,
+	ctx context.Context, pool, status string, aggregates poolAggregates, qbtcPriceUsd float64,
 	decimal int64) oapigen.PoolDetail {
 	assetDepth := aggregates.depths[pool].AssetDepth
-	runeDepth := aggregates.depths[pool].RuneDepth
+	qbtcDepth := aggregates.depths[pool].QbtcDepth
 	synthSupply := aggregates.depths[pool].SynthDepth
 	dailyVolume := aggregates.dailyVolumes[pool]
 	liquidityUnits := aggregates.liquidityUnits[pool]
 	synthUnits := timeseries.CalculateSynthUnits(assetDepth, synthSupply, liquidityUnits)
 	poolUnits := liquidityUnits + synthUnits
-	price := timeseries.AssetPrice(assetDepth, runeDepth)
-	priceUSD := price * runePriceUsd
+	price := timeseries.AssetPrice(assetDepth, qbtcDepth)
+	priceUSD := price * qbtcPriceUsd
 	saversUnit := aggregates.saverDataMap[pool].SaversUnits
 	saversDepth := aggregates.saverDataMap[pool].SaversDepth
 	earnings := aggregates.earningsDataMap[pool].Earnings
@@ -657,7 +657,7 @@ func jsonPools(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		return
 	}
 
-	runePriceUsd := stat.RunePriceUSD()
+	qbtcPriceUsd := stat.QbtcPriceUSD()
 
 	poolsDecimal := decimal.PoolsDecimal()
 
@@ -713,7 +713,7 @@ func jsonPool(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		return
 	}
 
-	runePriceUsd := stat.RunePriceUSD()
+	qbtcPriceUsd := stat.QbtcPriceUSD()
 
 	poolsDecimal := decimal.PoolsDecimal()
 
@@ -723,7 +723,7 @@ func jsonPool(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 
 	poolResponse := oapigen.PoolResponse(
-		buildPoolDetail(r.Context(), pool, status, *aggregates, runePriceUsd,
+		buildPoolDetail(r.Context(), pool, status, *aggregates, qbtcPriceUsd,
 			poolDecimal.NativeDecimals))
 	respJSON(w, poolResponse)
 }
@@ -987,24 +987,24 @@ func calculateJsonStats(ctx context.Context, w io.Writer) error {
 		return err
 	}
 
-	var runeDepth int64
+	var qbtcDepth int64
 	for poolName, poolInfo := range state.Pools {
 		if record.GetCoinType([]byte(poolName)) != record.AssetDerived {
-			runeDepth += poolInfo.RuneDepth
+			qbtcDepth += poolInfo.QbtcDepth
 		}
 	}
 
-	switchedRune, err := stat.SwitchedRune(ctx)
+	switchedQbtc, err := stat.SwitchedQbtc(ctx)
 	if err != nil {
 		return err
 	}
 
-	runePrice := stat.RunePriceUSD()
+	qbtcPrice := stat.QbtcPriceUSD()
 
 	writeJSON(w, oapigen.StatsResponse{
-		RuneDepth:          util.IntStr(runeDepth),
-		SwitchedRune:       util.IntStr(switchedRune),
-		RunePriceUSD:       floatStr(runePrice),
+		QbtcDepth:          util.IntStr(qbtcDepth),
+		SwitchedQbtc:       util.IntStr(switchedQbtc),
+		QbtcPriceUSD:       floatStr(qbtcPrice),
 		SwapVolume:         util.IntStr(swapsAll.Totals().Volume),
 		SwapCount24h:       util.IntStr(swaps24h.Totals().Count),
 		SwapCount30d:       util.IntStr(swaps30d.Totals().Count),
@@ -1274,7 +1274,7 @@ func jsonReserveHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Par
 	respJSON(w, ret)
 }
 
-func jsonRunePriceHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func jsonQbtcPriceHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	urlParams := r.URL.Query()
 
 	buckets, merr := db.BucketsFromQuery(r.Context(), &urlParams)
@@ -1289,7 +1289,7 @@ func jsonRunePriceHistory(w http.ResponseWriter, r *http.Request, _ httprouter.P
 		return
 	}
 
-	ret, err := stat.GetRunePriceHistory(r.Context(), buckets)
+	ret, err := stat.GetQbtcPriceHistory(r.Context(), buckets)
 	if err != nil {
 		btcqerr.InternalErrE(err).ReportHTTP(w)
 		return

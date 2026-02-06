@@ -158,7 +158,7 @@ func bucketedGasStat(ctx context.Context, buckets db.Buckets) (ret []ValueBucket
 
 	q := `
 		SELECT
-			COALESCE(SUM(rune_e8), 0) AS outflow,
+			COALESCE(SUM(qbtc_e8), 0) AS outflow,
 				` + db.SelectTruncatedTimestamp("block_timestamp", buckets) + ` AS truncated
 		FROM gas_events
 		WHERE $1 <= block_timestamp AND block_timestamp < $2

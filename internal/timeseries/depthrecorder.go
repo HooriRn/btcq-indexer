@@ -57,8 +57,8 @@ func isTORAnchor(pool string, height int64) bool {
 		usdPools = config.Global.UsdPools
 	}
 
-	for _, runePriceInUsd := range usdPools {
-		if pool == runePriceInUsd {
+	for _, qbtcPriceInUsd := range usdPools {
+		if pool == qbtcPriceInUsd {
 			poolStatus := record.Recorder.CurrentPoolStatus(pool)
 			if poolStatus != "available" {
 				continue
@@ -90,7 +90,7 @@ func isTORAnchor(pool string, height int64) bool {
 
 type depthManager struct {
 	assetE8DepthSnapshot mapDiff
-	runeE8DepthSnapshot  mapDiff
+	qbtcE8DepthSnapshot  mapDiff
 	synthE8DepthSnapshot mapDiff
 }
 
@@ -98,13 +98,13 @@ var depthRecorder depthManager
 
 // Insert rows in the block_pool_depths for every changed value in the depth maps.
 // If there is no change it doesn't write out anything.
-// All values will be written out together (assetDepth, runeDepth, synthDepth), even if only one of the values
+// All values will be written out together (assetDepth, qbtcDepth, synthDepth), even if only one of the values
 // changed in the pool.
 func (sm *depthManager) update(
-	timestamp time.Time, assetE8DepthPerPool, runeE8DepthPerPool, synthE8DepthPerPool map[string]int64,
+	timestamp time.Time, assetE8DepthPerPool, qbtcE8DepthPerPool, synthE8DepthPerPool map[string]int64,
 	height int64) error {
 	blockTimestamp := timestamp.UnixNano()
-	// We need to iterate over all 2*n maps: {old,new}{Asset,Rune,Synth}.
+	// We need to iterate over all 2*n maps: {old,new}{Asset,Qbtc,Synth}.
 	// First put all pool names into a set.
 	poolNames := map[string]bool{}
 	accumulatePoolNames := func(m map[string]int64) {
@@ -113,22 +113,22 @@ func (sm *depthManager) update(
 		}
 	}
 	accumulatePoolNames(assetE8DepthPerPool)
-	accumulatePoolNames(runeE8DepthPerPool)
+	accumulatePoolNames(qbtcE8DepthPerPool)
 	accumulatePoolNames(synthE8DepthPerPool)
 	accumulatePoolNames(sm.assetE8DepthSnapshot.snapshot)
-	accumulatePoolNames(sm.runeE8DepthSnapshot.snapshot)
+	accumulatePoolNames(sm.qbtcE8DepthSnapshot.snapshot)
 	accumulatePoolNames(sm.synthE8DepthSnapshot.snapshot)
 
-	cols := []string{"pool", "asset_e8", "rune_e8", "synth_e8", "block_timestamp"}
+	cols := []string{"pool", "asset_e8", "qbtc_e8", "synth_e8", "block_timestamp"}
 
 	var err error
-	runePricesInUsd := []float64{}
+	qbtcPricesInUsd := []float64{}
 	for pool := range poolNames {
 		assetDiff, assetValue := sm.assetE8DepthSnapshot.diffAtKey(pool, assetE8DepthPerPool)
-		runeDiff, runeValue := sm.runeE8DepthSnapshot.diffAtKey(pool, runeE8DepthPerPool)
+		qbtcDiff, qbtcValue := sm.qbtcE8DepthSnapshot.diffAtKey(pool, qbtcE8DepthPerPool)
 		synthDiff, synthValue := sm.synthE8DepthSnapshot.diffAtKey(pool, synthE8DepthPerPool)
-		if assetDiff || runeDiff || synthDiff {
-			err = db.Inserter.Insert("block_pool_depths", cols, pool, assetValue, runeValue, synthValue, blockTimestamp)
+		if assetDiff || qbtcDiff || synthDiff {
+			err = db.Inserter.Insert("block_pool_depths", cols, pool, assetValue, qbtcValue, synthValue, blockTimestamp)
 			if err != nil {
 				break
 			}
@@ -136,31 +136,31 @@ func (sm *depthManager) update(
 
 		// Add TOR anchors
 		if isTORAnchor(pool, height) {
-			usdPoolRatio := float64(assetE8DepthPerPool[pool]) / float64(runeE8DepthPerPool[pool])
-			runePricesInUsd = append(runePricesInUsd, usdPoolRatio)
+			usdPoolRatio := float64(assetE8DepthPerPool[pool]) / float64(qbtcE8DepthPerPool[pool])
+			qbtcPricesInUsd = append(qbtcPricesInUsd, usdPoolRatio)
 		}
 
 	}
 	sm.assetE8DepthSnapshot.save(assetE8DepthPerPool)
-	sm.runeE8DepthSnapshot.save(runeE8DepthPerPool)
+	sm.qbtcE8DepthSnapshot.save(qbtcE8DepthPerPool)
 	sm.synthE8DepthSnapshot.save(synthE8DepthPerPool)
 
 	// Calculate median of TOR anchors
 	// if there is no available anchor pools just use the deepest pool
-	var RunePriceInTOR float64
-	if len(runePricesInUsd) > 0 {
-		RunePriceInTOR = util.GetMedian(runePricesInUsd)
+	var QbtcPriceInTOR float64
+	if len(qbtcPricesInUsd) > 0 {
+		QbtcPriceInTOR = util.GetMedian(qbtcPricesInUsd)
 	} else {
 		var maxDepth int64 = -1
 		for _, pool := range config.Global.UsdPools {
 			if maxDepth > assetE8DepthPerPool[pool] {
-				RunePriceInTOR = float64(assetE8DepthPerPool[pool]) / float64(runeE8DepthPerPool[pool])
+				QbtcPriceInTOR = float64(assetE8DepthPerPool[pool]) / float64(qbtcE8DepthPerPool[pool])
 				maxDepth = assetE8DepthPerPool[pool]
 			}
 		}
 	}
 
-	err = db.Inserter.Insert("rune_price", []string{"rune_price_e8", "block_timestamp"}, RunePriceInTOR, blockTimestamp)
+	err = db.Inserter.Insert("qbtc_price", []string{"qbtc_price_e8", "block_timestamp"}, QbtcPriceInTOR, blockTimestamp)
 	if err != nil {
 		return err
 	}

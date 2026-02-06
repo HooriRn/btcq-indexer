@@ -35,8 +35,8 @@ func parseCosmosDenom(b string) (asset string, err error) {
 	case "":
 		err = fmt.Errorf("no units given in amount %q", b)
 		return
-	case "rune":
-		asset = nativeRune
+	case "rune", "qbtc":
+		asset = nativeQbtc
 	default:
 		asset = strings.ToUpper(denom)
 	}

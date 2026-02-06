@@ -48,7 +48,7 @@ func getTCYPriceBucket(ctx context.Context, w db.Buckets) (float64, error) {
 	q := `
 		SELECT 
 			COALESCE(
-				AVG(rune_e8::DOUBLE PRECISION / asset_e8::DOUBLE PRECISION),
+				AVG(qbtc_e8::DOUBLE PRECISION / asset_e8::DOUBLE PRECISION),
 				0
 			) AS average_price
 		FROM block_pool_depths
@@ -76,12 +76,12 @@ func GetTCYDistribution(ctx context.Context, address string, period db.Buckets) 
 
 	q := `
 		SELECT
-			SUM(t.rune_amt),
-			t.rune_address,
+			SUM(t.qbtc_amt),
+			t.qbtc_address,
 			t.block_timestamp,
-			AVG(r.rune_price_e8 * 1e8)::BIGINT as rune_price_e8
+			AVG(r.qbtc_price_e8 * 1e8)::BIGINT as qbtc_price_e8
 		FROM tcy_distribution_events t
-		JOIN rune_price r
+		JOIN qbtc_price r
 			ON t.block_timestamp = r.block_timestamp
 		` + db.Where(addressFilter) + `
 		GROUP BY t.rune_address, t.block_timestamp
@@ -97,21 +97,21 @@ func GetTCYDistribution(ctx context.Context, address string, period db.Buckets) 
 	var total int64
 	var lastMonthEarnings int64 = 0
 	for rows.Next() {
-		var runeAmt int64
+		var qbtcAmt int64
 		var blockTimestamp int64
-		var runePrice int64
-		err := rows.Scan(&runeAmt, &address, &blockTimestamp, &runePrice)
+		var qbtcPrice int64
+		err := rows.Scan(&qbtcAmt, &address, &blockTimestamp, &qbtcPrice)
 		if err != nil {
 			return oapigen.TCYDistribution{}, err
 		}
-		total += runeAmt
+		total += qbtcAmt
 		distributionItems = append(distributionItems, oapigen.TCYDistributionItem{
-			Amount: util.IntStr(runeAmt),
+			Amount: util.IntStr(qbtcAmt),
 			Date:   util.IntStr(blockTimestamp / 1e9),
-			Price:  util.IntStr(runePrice),
+			Price:  util.IntStr(qbtcPrice),
 		})
 		if period.Start().ToNano().ToI() <= blockTimestamp {
-			lastMonthEarnings += runeAmt
+			lastMonthEarnings += qbtcAmt
 		}
 	}
 
@@ -120,7 +120,7 @@ func GetTCYDistribution(ctx context.Context, address string, period db.Buckets) 
 		return oapigen.TCYDistribution{}, err
 	}
 
-	tcyRunePrice, err := getTCYPriceBucket(ctx, period)
+	tcyQbtcPrice, err := getTCYPriceBucket(ctx, period)
 	if err != nil {
 		return oapigen.TCYDistribution{}, err
 	}
@@ -137,7 +137,7 @@ func GetTCYDistribution(ctx context.Context, address string, period db.Buckets) 
 	periodsPerYear := db.GetPPYFromBuckets(period)
 	var apr float64
 	if staked > 0 {
-		apr = float64(lastMonthEarnings) / (float64(staked) * tcyRunePrice) * periodsPerYear
+		apr = float64(lastMonthEarnings) / (float64(staked) * tcyQbtcPrice) * periodsPerYear
 	}
 
 	ret := oapigen.TCYDistribution{

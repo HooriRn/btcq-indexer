@@ -14,12 +14,12 @@ CREATE TABLE btcq_indexer_agg.members_log (
     pending_asset_e8_delta bigint,
     pending_asset_e8_total bigint NOT NULL,
     asset_tx text,
-    -- rune fields
-    rune_addr text,
-    rune_e8_delta bigint,
-    pending_rune_e8_delta bigint,
-    pending_rune_e8_total bigint NOT NULL,
-    rune_tx text,
+    -- qbtc fields
+    qbtc_addr text,
+    qbtc_e8_delta bigint,
+    pending_qbtc_e8_delta bigint,
+    pending_qbtc_e8_total bigint NOT NULL,
+    qbtc_tx text,
     --
     event_id bigint NOT NULL,
     block_timestamp bigint NOT NULL
@@ -30,7 +30,7 @@ CREATE TABLE btcq_indexer_agg.members_log (
 CREATE VIEW btcq_indexer_agg.members_log_partial AS (
     SELECT * FROM (
         SELECT
-            COALESCE(rune_addr, asset_addr) AS member_id,
+            COALESCE(qbtc_addr, asset_addr) AS member_id,
             pool,
             'add' AS change_type,
             NULL::bigint AS basis_points,
@@ -41,11 +41,11 @@ CREATE VIEW btcq_indexer_agg.members_log_partial AS (
             NULL::bigint AS pending_asset_e8_delta,
             NULL::bigint AS pending_asset_e8_total,
             asset_tx,
-            rune_addr,
-            rune_e8 AS rune_e8_delta,
-            NULL::bigint AS pending_rune_e8_delta,
-            NULL::bigint AS pending_rune_e8_total,
-            rune_tx,
+            qbtc_addr,
+            qbtc_e8 AS qbtc_e8_delta,
+            NULL::bigint AS pending_qbtc_e8_delta,
+            NULL::bigint AS pending_qbtc_e8_total,
+            qbtc_tx,
             event_id,
             block_timestamp
         FROM stake_events
@@ -62,17 +62,17 @@ CREATE VIEW btcq_indexer_agg.members_log_partial AS (
             NULL::bigint AS pending_asset_e8_delta,
             NULL::bigint AS pending_asset_e8_total,
             NULL AS asset_tx,
-            NULL AS rune_addr,
-            -emit_rune_e8 AS rune_e8_delta,
-            NULL::bigint AS pending_rune_e8_delta,
-            NULL::bigint AS pending_rune_e8_total,
-            NULL AS rune_tx,
+            NULL AS qbtc_addr,
+            -emit_qbtc_e8 AS qbtc_e8_delta,
+            NULL::bigint AS pending_qbtc_e8_delta,
+            NULL::bigint AS pending_qbtc_e8_total,
+            NULL AS qbtc_tx,
             event_id,
             block_timestamp
         FROM withdraw_events
         UNION ALL
         SELECT
-            COALESCE(rune_addr, asset_addr) AS member_id,
+            COALESCE(qbtc_addr, asset_addr) AS member_id,
             pool,
             'pending_' || pending_type AS change_type,
             NULL::bigint AS basis_points,
@@ -83,11 +83,11 @@ CREATE VIEW btcq_indexer_agg.members_log_partial AS (
             CASE WHEN pending_type = 'add' THEN asset_e8 ELSE -asset_e8 END AS pending_asset_e8_delta,
             NULL::bigint AS pending_asset_e8_total,
             asset_tx,
-            rune_addr,
-            NULL::bigint AS rune_e8_delta,
-            CASE WHEN pending_type = 'add' THEN rune_e8 ELSE -rune_e8 END AS pending_rune_e8_delta,
-            NULL::bigint AS pending_rune_e8_total,
-            rune_tx,
+            qbtc_addr,
+            NULL::bigint AS qbtc_e8_delta,
+            CASE WHEN pending_type = 'add' THEN qbtc_e8 ELSE -qbtc_e8 END AS pending_qbtc_e8_delta,
+            NULL::bigint AS pending_qbtc_e8_total,
+            qbtc_tx,
             event_id,
             block_timestamp
         FROM pending_liquidity_events
@@ -105,12 +105,12 @@ CREATE TABLE btcq_indexer_agg.members (
     added_asset_e8_total bigint NOT NULL,
     withdrawn_asset_e8_total bigint NOT NULL,
     pending_asset_e8_total bigint NOT NULL,
-    -- rune fields
-    rune_addr text,
-    rune_e8_deposit bigint NOT NULL,
-    added_rune_e8_total bigint NOT NULL,
-    withdrawn_rune_e8_total bigint NOT NULL,
-    pending_rune_e8_total bigint NOT NULL,
+    -- qbtc fields
+    qbtc_addr text,
+    qbtc_e8_deposit bigint NOT NULL,
+    added_qbtc_e8_total bigint NOT NULL,
+    withdrawn_qbtc_e8_total bigint NOT NULL,
+    pending_qbtc_e8_total bigint NOT NULL,
     --
     first_added_timestamp bigint,
     last_added_timestamp bigint,
@@ -153,16 +153,16 @@ BEGIN
         member.member_id = NEW.member_id;
         member.pool = NEW.pool;
         member.asset_addr = NEW.asset_addr;
-        member.rune_addr = NEW.rune_addr;
+        member.qbtc_addr = NEW.qbtc_addr;
         member.lp_units_total = 0;
         member.added_asset_e8_total = 0;
         member.withdrawn_asset_e8_total = 0;
         member.pending_asset_e8_total = 0;
-        member.added_rune_e8_total = 0;
-        member.withdrawn_rune_e8_total = 0;
-        member.pending_rune_e8_total = 0;
+        member.added_qbtc_e8_total = 0;
+        member.withdrawn_qbtc_e8_total = 0;
+        member.pending_qbtc_e8_total = 0;
         member.asset_e8_deposit = 0;
-        member.rune_e8_deposit = 0;
+        member.qbtc_e8_deposit = 0;
 
         -- Add to members count table
         INSERT INTO btcq_indexer_agg.members_count VALUES
@@ -184,7 +184,7 @@ BEGIN
     -- a missing asset address to be changed into a specific address. But after that it
     -- cannot change again.
     member.asset_addr := COALESCE(member.asset_addr, NEW.asset_addr);
-    member.rune_addr := COALESCE(member.rune_addr, NEW.rune_addr);
+    member.qbtc_addr := COALESCE(member.qbtc_addr, NEW.qbtc_addr);
 
     member.lp_units_total := member.lp_units_total + COALESCE(NEW.lp_units_delta, 0);
     NEW.lp_units_total := member.lp_units_total;
@@ -192,17 +192,17 @@ BEGIN
 
     IF NEW.change_type = 'add' THEN
         member.added_asset_e8_total := member.added_asset_e8_total + NEW.asset_e8_delta;
-        member.added_rune_e8_total := member.added_rune_e8_total + NEW.rune_e8_delta;
+        member.added_qbtc_e8_total := member.added_qbtc_e8_total + NEW.qbtc_e8_delta;
 
         -- Calculate deposited Value here
         member.asset_e8_deposit := member.asset_e8_deposit + NEW.asset_e8_delta;
-        member.rune_e8_deposit := member.rune_e8_deposit + NEW.rune_e8_delta;
+        member.qbtc_e8_deposit := member.qbtc_e8_deposit + NEW.qbtc_e8_delta;
 
-        -- Reset pending asset and rune
+        -- Reset pending asset and qbtc
         NEW.pending_asset_e8_delta := -member.pending_asset_e8_total;
-        NEW.pending_rune_e8_delta := -member.pending_rune_e8_total;
+        NEW.pending_qbtc_e8_delta := -member.pending_qbtc_e8_total;
         member.pending_asset_e8_total := 0;
-        member.pending_rune_e8_total := 0;
+        member.pending_qbtc_e8_total := 0;
 
         member.first_added_timestamp := COALESCE(member.first_added_timestamp, NEW.block_timestamp);
         member.last_added_timestamp := NEW.block_timestamp;
@@ -211,31 +211,31 @@ BEGIN
     IF NEW.change_type = 'withdraw' THEN
         -- Deltas are negative here
         member.withdrawn_asset_e8_total := member.withdrawn_asset_e8_total - NEW.asset_e8_delta;
-        member.withdrawn_rune_e8_total := member.withdrawn_rune_e8_total - NEW.rune_e8_delta;
+        member.withdrawn_qbtc_e8_total := member.withdrawn_qbtc_e8_total - NEW.qbtc_e8_delta;
         -- Calculate deposited Value here
         member.asset_e8_deposit := ((10000 - NEW.basis_points)/10000) * member.asset_e8_deposit;
-        member.rune_e8_deposit := ((10000 - NEW.basis_points)/10000) * member.rune_e8_deposit;
+        member.qbtc_e8_deposit := ((10000 - NEW.basis_points)/10000) * member.qbtc_e8_deposit;
     END IF;
 
     IF NEW.change_type = 'pending_add' THEN
         member.pending_asset_e8_total := member.pending_asset_e8_total + NEW.pending_asset_e8_delta;
-        member.pending_rune_e8_total := member.pending_rune_e8_total + NEW.pending_rune_e8_delta;
+        member.pending_qbtc_e8_total := member.pending_qbtc_e8_total + NEW.pending_qbtc_e8_delta;
     END IF;
 
     IF NEW.change_type = 'pending_withdraw' THEN
-        -- Reset pending asset and rune
+        -- Reset pending asset and qbtc
         -- TODO(huginn): When we have reliable order information check that this is correct:
         member.pending_asset_e8_total := 0;
-        member.pending_rune_e8_total := 0;
+        member.pending_qbtc_e8_total := 0;
     END IF;
 
     -- Record into the log the new pending totals.
     NEW.pending_asset_e8_total := member.pending_asset_e8_total;
-    NEW.pending_rune_e8_total := member.pending_rune_e8_total;
+    NEW.pending_qbtc_e8_total := member.pending_qbtc_e8_total;
 
     -- Update the `members` table:
     IF member.lp_units_total = 0 AND member.pending_asset_e8_total = 0
-            AND member.pending_rune_e8_total = 0 THEN
+            AND member.pending_qbtc_e8_total = 0 THEN
         DELETE FROM btcq_indexer_agg.members
         WHERE member_id = member.member_id AND pool = member.pool;
 
@@ -260,11 +260,11 @@ BEGIN
             added_asset_e8_total = EXCLUDED.added_asset_e8_total,
             withdrawn_asset_e8_total = EXCLUDED.withdrawn_asset_e8_total,
             pending_asset_e8_total = EXCLUDED.pending_asset_e8_total,
-            rune_addr = EXCLUDED.rune_addr,
-            rune_e8_deposit = EXCLUDED.rune_e8_deposit,
-            added_rune_e8_total = EXCLUDED.added_rune_e8_total,
-            withdrawn_rune_e8_total = EXCLUDED.withdrawn_rune_e8_total,
-            pending_rune_e8_total = EXCLUDED.pending_rune_e8_total,
+            qbtc_addr = EXCLUDED.qbtc_addr,
+            qbtc_e8_deposit = EXCLUDED.qbtc_e8_deposit,
+            added_qbtc_e8_total = EXCLUDED.added_qbtc_e8_total,
+            withdrawn_qbtc_e8_total = EXCLUDED.withdrawn_qbtc_e8_total,
+            pending_qbtc_e8_total = EXCLUDED.pending_qbtc_e8_total,
             first_added_timestamp = EXCLUDED.first_added_timestamp,
             last_added_timestamp = EXCLUDED.last_added_timestamp;
     END IF;
