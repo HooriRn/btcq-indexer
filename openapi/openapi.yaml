@@ -146,7 +146,7 @@ paths:
                 - name: period
                   in: query
                   description: |
-                      Specifies the base interval from which annualPercentageRate and poolAPY is extrapolated.
+                      Specifies the base interval for earnings calculations.
                       Default is 14d.
                   required: false
                   example: "100d"
@@ -173,7 +173,7 @@ paths:
         get:
             operationId: GetPool
             summary: Details of a Pool
-            description: "Returns details of the pool: depths, price, 24h volume, APY. "
+            description: "Returns details of the pool: depths, price, 24h volume. "
             parameters:
                 - in: path
                   name: asset
@@ -185,7 +185,7 @@ paths:
                 - name: period
                   in: query
                   description: |
-                      Specifies the base interval from which APY is extrapolated.
+                      Specifies the base interval for earnings calculations.
                       Default is 14d.
                   required: false
                   example: "100d"
@@ -1840,20 +1840,11 @@ components:
                 - assetPrice
                 - assetPriceUSD
                 - liquidityInUSD
-                - annualPercentageRate
-                - poolAPY
                 - earnings
-                - earningsAnnualAsPercentOfDepth
                 - status
                 - liquidityUnits
-                - synthUnits
-                - synthSupply
                 - units
                 - nativeDecimal
-                - saversUnits
-                - saversDepth
-                - saversAPR
-                - lpLuvi
             properties:
                 asset:
                     type: string
@@ -1877,71 +1868,24 @@ components:
                 liquidityInUSD:
                     type: string
                     description: Float, the price of the liquidity pool in USD
-                poolAPY:
-                    type: string
-                    description: |
-                        Float, Annual Percentage Yield of earning to depth (earning/depth) estimated from a period
-                        (configurable by the period parameter, default is 14) E.g. 0.1 means 10% yearly return.
-                annualPercentageRate:
-                    type: string
-                    description: |
-                        Float, Annual Percentage Yield of earning to depth (earning/depth) estimated from a period
-                        (configurable by the period parameter, default is 14) E.g. 0.1 means 10% yearly return.
                 earnings:
                     type: string
                     description: |
                         Int64(e8), The earning that has been recorded from the pool asset's Liquidity Fees
                         and Rewards in RUNE. The earnings shown are from the period parameter default being 14 days 
                         (configurable by the period parameter).
-                earningsAnnualAsPercentOfDepth:
-                    type: string
-                    description: |
-                        Float, The estimation of earnings during the time interval expanded through a year 
-                        compared to the current pool depth.
-                        E.g. 0.1 means the pool based on this interval earnings can earn 10% of its pool during a year.
-                lpLuvi:
-                    type: string
-                    description: |
-                        Float, Annual yield estimated (compounding) from a period (default being 14d)
-                        configurable by the period parameter. Calculated from Liquidity Unit Value Index (LUVI).
-                        Due to Impermanent Loss and Synths Leverage this might be negative.
-                saversAPR:
-                    type: string
-                    description: |
-                        Float, Annual Return estimated linearly (not compounded) for savers from
-                        a period of typically the last 30 or 100 days (configurable by the period parameter,
-                        default is 14). E.g. 0.1 means 10% yearly return.
-                        If the savers period has not yet been reached, It will show zero instead.
                 status:
                     type: string
                     description: The state of the pool, e.g. Available, Staged.
                 liquidityUnits:
                     type: string
                     description: Int64, Liquidity Units in the pool.
-                synthUnits:
-                    type: string
-                    description: Int64, Synth Units in the pool.
-                synthSupply:
-                    type: string
-                    description: Int64, Synth supply in the pool.
                 units:
                     type: string
                     description: Int64, Total Units (synthUnits + liquidityUnits) in the pool.
                 nativeDecimal:
                     type: string
                     description: Int64, The native decimal number of the pool asset. (If the value is "-1", it means btcq-indexer doesn't know the pool native decimal)
-                saversUnits:
-                    type: string
-                    description: Int64, Units tracking savers vault ownership.
-                saversDepth:
-                    type: string
-                    description: Int64, Total synth locked in saver vault.
-                saversYieldShare:
-                    type: string
-                    description: |
-                        Float, the proportion of overall yield that is given to savers based on its size 
-                        (relative to dual side LPs) and the SynthYieldBasisPoints. E.g. 0.1 means 10% of the yield
-                        goes to the savers.
                 depthPlus2Percent:
                     type: string
                     description: |
@@ -1965,8 +1909,6 @@ components:
                 - assetDepth
                 - qbtcDepth
                 - liquidityUnits
-                - synthUnits
-                - synthSupply
                 - units
                 - toAssetVolume
                 - toQbtcVolume
@@ -1981,11 +1923,8 @@ components:
                 - toAssetFees
                 - toQbtcFees
                 - totalFees
-                - poolAPY
-                - annualPercentageRate
                 - earnings
                 - earningsAnnualAsPercentOfDepth
-                - saversAPR
                 - addAssetLiquidityVolume
                 - addQbtcLiquidityVolume
                 - addLiquidityVolume
@@ -2013,18 +1952,12 @@ components:
                 qbtcDepth:
                     type: string
                     description: Int64(e8), the amount of Rune in the pool
-                synthUnits:
-                    type: string
-                    description: Int64, Synth Units in the pool
-                synthSupply:
-                    type: string
-                    description: Int64, Synth supply in the pool
                 liquidityUnits:
                     type: string
                     description: Int64, Liquidity Units in the pool
                 units:
                     type: string
-                    description: Int64, Total Units (synthUnits + liquidityUnits) in the pool
+                    description: Int64, Total Units in the pool
                 toAssetVolume:
                     type: string
                     description: Int64(e8), same as history/swaps:toAssetVolume
@@ -2069,19 +2002,6 @@ components:
                 totalFees:
                     type: string
                     description: Int64(e8), same as history/swaps:totalFees
-                poolAPY:
-                    type: string
-                    description: deprecated now it's only showing zero util being deleted.
-                annualPercentageRate:
-                    type: string
-                    description: deprecated now it's only showing zero util being deleted.
-                saversAPR:
-                    type: string
-                    description: |
-                        Float, Annual Return estimated linearly (not compounded) for savers from
-                        a period of typically the last 30 or 100 days (configurable by the period parameter,
-                        default is 14). E.g. 0.1 means 10% yearly return.
-                        If the savers period has not yet been reached, It will show zero instead.
                 earnings:
                     type: string
                     description: |
@@ -3211,7 +3131,7 @@ components:
                 - standbyBonds
                 - activeNodeCount
                 - standbyNodeCount
-                - totalPooledRune
+                - totalPooledQbtc
                 - totalReserve
                 - nextChurnHeight
                 - poolActivationCountdown
@@ -3242,11 +3162,11 @@ components:
                     type: string
                     description: |
                         Int64, Number of standby nodes, some of them might become active at the next churn.
-                totalPooledRune:
+                totalPooledQbtc:
                     type: string
                     description: |
-                        Int64(e8), total Rune in all pools. Because asset and Rune value is the same amount in
-                        every pool (by definition), the total amount pooled is totalPooledRune*2.
+                        Int64(e8), total QBTC in all pools. Because asset and QBTC value is the same amount in
+                        every pool (by definition), the total amount pooled is totalPooledQbtc*2.
                 totalReserve:
                     type: string
                     description: Int64(e8), Current size of the Reserve.
@@ -3274,7 +3194,7 @@ components:
                     description: |
                         Float, E.g. 0.01 = 1%. Estimate of the compounded  liquidity provider earnings based
                         on the current reserve size, emmission curve, blocks per year and pool share factor =
-                        (WeeklyLiquidityIncome/(totalPooledRune*2) + 1)^52 - 1
+                        (WeeklyLiquidityIncome/(totalPooledQbtc*2) + 1)^52 - 1
         BondMetrics:
             type: object
             required:
@@ -3940,16 +3860,16 @@ components:
             type: object
             required:
                 - pool
-                - runeAddress
+                - qbtcAddress
                 - assetAddress
                 - liquidityUnits
-                - runeDeposit
+                - qbtcDeposit
                 - assetDeposit
-                - runeAdded
+                - qbtcAdded
                 - assetAdded
-                - runePending
+                - qbtcPending
                 - assetPending
-                - runeWithdrawn
+                - qbtcWithdrawn
                 - assetWithdrawn
                 - dateFirstAdded
                 - dateLastAdded
@@ -3957,19 +3877,19 @@ components:
                 pool:
                     type: string
                     description: Pool rest of the data refers to
-                runeAddress:
+                qbtcAddress:
                     type: string
-                    description: Rune address used by the member
+                    description: QBTC address used by the member
                 assetAddress:
                     type: string
                     description: asset address used by the member
                 liquidityUnits:
                     type: string
                     description: Int64, pool liquidity units that belong the the member
-                runeDeposit:
+                qbtcDeposit:
                     type: string
                     description: |
-                        Int64(e8), total Rune that is currently deposited to the pool by member.
+                        Int64(e8), total QBTC that is currently deposited to the pool by member.
                         This field is same as the `rune_deposit_value` field in thornode. Mainly can be used 
                         for tracking, mainly Growth Percentage
                 assetDeposit:
@@ -3978,23 +3898,23 @@ components:
                         Int64(e8), total asset that is currently deposited to the pool by member.
                         This field is same as the `asset_deposit_value` field in thornode. Mainly can be used 
                         for tracking, mainly Growth Percentage
-                runeAdded:
+                qbtcAdded:
                     type: string
-                    description: Int64(e8), total Rune added to the pool by member
+                    description: Int64(e8), total QBTC added to the pool by member
                 assetAdded:
                     type: string
                     description: Int64(e8), total asset added to the pool by member
-                runePending:
+                qbtcPending:
                     type: string
                     description: |
-                        Int64(e8), Rune sent but not added yet, it will be added when the asset pair arrives
+                        Int64(e8), QBTC sent but not added yet, it will be added when the asset pair arrives
                 assetPending:
                     type: string
                     description: |
-                        Int64(e8), asset sent but not added yet, it will be added when the rune pair arrives
-                runeWithdrawn:
+                        Int64(e8), asset sent but not added yet, it will be added when the qbtc pair arrives
+                qbtcWithdrawn:
                     type: string
-                    description: Int64(e8), total Rune withdrawn from the pool by member
+                    description: Int64(e8), total QBTC withdrawn from the pool by member
                 assetWithdrawn:
                     type: string
                     description: Int64(e8), total asset withdrawn from the pool by member

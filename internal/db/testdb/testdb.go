@@ -128,7 +128,7 @@ func InitTestBlocks(t *testing.T) *blockCreator {
 func DeclarePools(pools ...string) {
 	depths := []timeseries.Depth{}
 	for _, pool := range pools {
-		depths = append(depths, timeseries.Depth{Pool: pool, AssetDepth: 1, RuneDepth: 1, SynthDepth: 0})
+		depths = append(depths, timeseries.Depth{Pool: pool, AssetDepth: 1, QbtcDepth: 1, SynthDepth: 0})
 	}
 	timeseries.SetDepthsForTest(depths)
 }

@@ -3,11 +3,11 @@ package timeseries
 import (
 	"context"
 
-	"github.com/lib/pq"
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/fetch/record"
 	"github.com/btcq/btcq-indexer/internal/util"
 	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
+	"github.com/lib/pq"
 )
 
 // GetMemberIds returns the ids of all known members.

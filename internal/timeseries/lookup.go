@@ -13,12 +13,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pascaldekloe/metrics"
-	"github.com/rs/zerolog/log"
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/util"
 	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
 	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
+	"github.com/pascaldekloe/metrics"
+	"github.com/rs/zerolog/log"
 
 	"github.com/btcq/btcq-indexer/internal/fetch/notinchain"
 	"github.com/btcq/btcq-indexer/internal/fetch/record"
