@@ -21,12 +21,12 @@ var aggDDLPrefix string
 var aggBalances string
 
 // Disabled for now - members aggregator
-//
+
 //go:embed members.sql
 var _ string // aggMembers disabled
 
 //go:embed qbtc_price.sql
-var aggQbtcPrice string
+var _ string // aggQbtcPrice disabled
 
 const (
 	aggregatesRefreshInterval = 1 * time.Minute
@@ -445,7 +445,7 @@ func WatermarkedMaterializedTables() []string {
 }
 
 func AggregatesDDL() []string {
-	parts := []string{SchemaCleanUp("btcq_indexer_agg"), aggDDLPrefix, aggBalances, aggQbtcPrice}
+	parts := []string{SchemaCleanUp("btcq_indexer_agg"), aggDDLPrefix, aggBalances}
 	var b strings.Builder
 
 	// Sort to iterate in deterministic order.

@@ -55,21 +55,21 @@ func GetEarningsHistory(ctx context.Context, buckets db.Buckets) (oapigen.Earnin
 	window := buckets.Window()
 	timestamps := buckets.Timestamps[:len(buckets.Timestamps)-1]
 
-	liquidityFeesByPoolQ, params := SwapsAggregate.BucketedQuery(`
-		SELECT
-			rune_fees_E8,
-			asset_fees_E8,
-			liq_fee_in_rune_E8,
-			aggregate_timestamp/1000000000 AS start_time,
-			pool
-		FROM %s
-	`, buckets, nil, nil)
-
-	liquidityFeesByPoolRows, err := db.Query(ctx, liquidityFeesByPoolQ, params...)
-	if err != nil {
-		return oapigen.EarningsHistoryResponse{}, err
-	}
-	defer liquidityFeesByPoolRows.Close()
+	// liquidityFeesByPoolQ, params := SwapsAggregate.BucketedQuery(`
+	// 	SELECT
+	// 		rune_fees_E8,
+	// 		asset_fees_E8,
+	// 		liq_fee_in_rune_E8,
+	// 		aggregate_timestamp/1000000000 AS start_time,
+	// 		pool
+	// 	FROM %s
+	// `, buckets, nil, nil)
+	//
+	// liquidityFeesByPoolRows, err := db.Query(ctx, liquidityFeesByPoolQ, params...)
+	// if err != nil {
+	// 	return oapigen.EarningsHistoryResponse{}, err
+	// }
+	// defer liquidityFeesByPoolRows.Close()
 
 	// TODO(huginn): just use the basic bucketed query with nano timestamp
 	bondingRewardsQ, params := RewardsAggregate.BucketedQuery(`
@@ -146,41 +146,41 @@ func GetEarningsHistory(ctx context.Context, buckets db.Buckets) (oapigen.Earnin
 	var metaNodeCountWeightedSum int64
 
 	// Store query results into aggregate variables
-	for liquidityFeesByPoolRows.Next() {
-		var qbtcLiquidityFees, assetLiquidityFees, totalLiquidityFeesQbtc int64
-		var startTime db.Second
-		var pool string
-		err := liquidityFeesByPoolRows.Scan(
-			&qbtcLiquidityFees,
-			&assetLiquidityFees,
-			&totalLiquidityFeesQbtc,
-			&startTime,
-			&pool)
-		if err != nil {
-			return oapigen.EarningsHistoryResponse{}, err
-		}
-
-		if intervalPoolEarningsMaps[startTime] == nil {
-			intervalPoolEarningsMaps[startTime] = make(poolEarningsMap)
-		}
-
-		// Add fees to earnings by pool
-		intervalPoolEarnings := intervalPoolEarningsMaps[startTime].getPoolEarnings(pool)
-		metaPoolEarnings := metaPoolEarningsMap.getPoolEarnings(pool)
-
-		intervalPoolEarnings.QbtcLiquidityFees += qbtcLiquidityFees
-		metaPoolEarnings.QbtcLiquidityFees += qbtcLiquidityFees
-
-		intervalPoolEarnings.AssetLiquidityFees += assetLiquidityFees
-		metaPoolEarnings.AssetLiquidityFees += assetLiquidityFees
-
-		intervalPoolEarnings.TotalLiquidityFeesQbtc += totalLiquidityFeesQbtc
-		metaPoolEarnings.TotalLiquidityFeesQbtc += totalLiquidityFeesQbtc
-
-		// Add fees to total fees aggregate
-		intervalTotalLiquidityFees[startTime] += totalLiquidityFeesQbtc
-		metaTotalLiquidityFees += totalLiquidityFeesQbtc
-	}
+	// for liquidityFeesByPoolRows.Next() {
+	// 	var qbtcLiquidityFees, assetLiquidityFees, totalLiquidityFeesQbtc int64
+	// 	var startTime db.Second
+	// 	var pool string
+	// 	err := liquidityFeesByPoolRows.Scan(
+	// 		&qbtcLiquidityFees,
+	// 		&assetLiquidityFees,
+	// 		&totalLiquidityFeesQbtc,
+	// 		&startTime,
+	// 		&pool)
+	// 	if err != nil {
+	// 		return oapigen.EarningsHistoryResponse{}, err
+	// 	}
+	//
+	// 	if intervalPoolEarningsMaps[startTime] == nil {
+	// 		intervalPoolEarningsMaps[startTime] = make(poolEarningsMap)
+	// 	}
+	//
+	// 	// Add fees to earnings by pool
+	// 	intervalPoolEarnings := intervalPoolEarningsMaps[startTime].getPoolEarnings(pool)
+	// 	metaPoolEarnings := metaPoolEarningsMap.getPoolEarnings(pool)
+	//
+	// 	intervalPoolEarnings.QbtcLiquidityFees += qbtcLiquidityFees
+	// 	metaPoolEarnings.QbtcLiquidityFees += qbtcLiquidityFees
+	//
+	// 	intervalPoolEarnings.AssetLiquidityFees += assetLiquidityFees
+	// 	metaPoolEarnings.AssetLiquidityFees += assetLiquidityFees
+	//
+	// 	intervalPoolEarnings.TotalLiquidityFeesQbtc += totalLiquidityFeesQbtc
+	// 	metaPoolEarnings.TotalLiquidityFeesQbtc += totalLiquidityFeesQbtc
+	//
+	// 	// Add fees to total fees aggregate
+	// 	intervalTotalLiquidityFees[startTime] += totalLiquidityFeesQbtc
+	// 	metaTotalLiquidityFees += totalLiquidityFeesQbtc
+	// }
 
 	for bondingRewardsRows.Next() {
 		var bondingRewards int64
@@ -396,46 +396,46 @@ func GetPoolsEarnings(ctx context.Context, buckets db.Buckets) (poolEarningsMap,
 	defer poolRewardsRows.Close()
 
 	// Pool liquidity fees
-	liquidityFeesByPoolQ, params := SwapsAggregate.BucketedQuery(`
-		SELECT
-			rune_fees_E8,
-			asset_fees_E8,
-			liq_fee_in_rune_E8,
-			aggregate_timestamp/1000000000 AS start_time,
-			pool
-		FROM %s
-	`, buckets, nil, nil)
-
-	liquidityFeesByPoolRows, err := db.Query(ctx, liquidityFeesByPoolQ, params...)
-	if err != nil {
-		return nil, err
-	}
-	defer liquidityFeesByPoolRows.Close()
+	// liquidityFeesByPoolQ, params := SwapsAggregate.BucketedQuery(`
+	// 	SELECT
+	// 		rune_fees_E8,
+	// 		asset_fees_E8,
+	// 		liq_fee_in_rune_E8,
+	// 		aggregate_timestamp/1000000000 AS start_time,
+	// 		pool
+	// 	FROM %s
+	// `, buckets, nil, nil)
+	//
+	// liquidityFeesByPoolRows, err := db.Query(ctx, liquidityFeesByPoolQ, params...)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// defer liquidityFeesByPoolRows.Close()
 
 	mapPoolEarningStat := make(poolEarningsMap)
 
 	// TODO (HooriRn): check if we also calculate the synth pool as earning or Reward entries already
 	// does it.
-	for liquidityFeesByPoolRows.Next() {
-		var qbtcLiquidityFees, assetLiquidityFees, totalLiquidityFeesQbtc int64
-		var startTime db.Second
-		var pool string
-		err := liquidityFeesByPoolRows.Scan(
-			&qbtcLiquidityFees,
-			&assetLiquidityFees,
-			&totalLiquidityFeesQbtc,
-			&startTime,
-			&pool)
-		if err != nil {
-			return nil, err
-		}
-
-		// Add fees to earnings by pool
-		metaPoolEarnings := mapPoolEarningStat.getPoolEarnings(pool)
-		metaPoolEarnings.QbtcLiquidityFees += qbtcLiquidityFees
-		metaPoolEarnings.AssetLiquidityFees += assetLiquidityFees
-		metaPoolEarnings.TotalLiquidityFeesQbtc += totalLiquidityFeesQbtc
-	}
+	// for liquidityFeesByPoolRows.Next() {
+	// 	var qbtcLiquidityFees, assetLiquidityFees, totalLiquidityFeesQbtc int64
+	// 	var startTime db.Second
+	// 	var pool string
+	// 	err := liquidityFeesByPoolRows.Scan(
+	// 		&qbtcLiquidityFees,
+	// 		&assetLiquidityFees,
+	// 		&totalLiquidityFeesQbtc,
+	// 		&startTime,
+	// 		&pool)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	//
+	// 	// Add fees to earnings by pool
+	// 	metaPoolEarnings := mapPoolEarningStat.getPoolEarnings(pool)
+	// 	metaPoolEarnings.QbtcLiquidityFees += qbtcLiquidityFees
+	// 	metaPoolEarnings.AssetLiquidityFees += assetLiquidityFees
+	// 	metaPoolEarnings.TotalLiquidityFeesQbtc += totalLiquidityFeesQbtc
+	// }
 
 	for poolRewardsRows.Next() {
 		var runeE8 int64

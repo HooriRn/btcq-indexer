@@ -66,107 +66,107 @@ func luviFromLPUnits(depths timeseries.PoolDepths, lpUnits int64) float64 {
 	return luvi(depths.AssetDepth, depths.QbtcDepth, lpUnits+synthUnits)
 }
 
-func jsonSwapHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	urlParams := r.URL.Query()
+// func jsonSwapHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+// 	urlParams := r.URL.Query()
+//
+// 	buckets, merr := db.BucketsFromQuery(r.Context(), &urlParams)
+// 	if merr != nil {
+// 		merr.ReportHTTP(w)
+// 		return
+// 	}
+//
+// 	var pool *string
+// 	poolParam := util.ConsumeUrlParam(&urlParams, "pool")
+// 	if poolParam != "" {
+// 		pool = &poolParam
+// 	}
+//
+// 	merr = util.CheckUrlEmpty(urlParams)
+// 	if merr != nil {
+// 		merr.ReportHTTP(w)
+// 		return
+// 	}
+//
+// 	mergedPoolSwaps, err := stat.GetPoolSwaps(r.Context(), pool, buckets)
+// 	if err != nil {
+// 		btcqerr.InternalErr(err.Error()).ReportHTTP(w)
+// 		return
+// 	}
+// 	var result oapigen.SwapHistoryResponse = createVolumeIntervals(mergedPoolSwaps)
+// 	if buckets.OneInterval() {
+// 		result.Intervals = oapigen.SwapHistoryIntervals{}
+// 	}
+// 	respJSON(w, result)
+// }
 
-	buckets, merr := db.BucketsFromQuery(r.Context(), &urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
+// func toSwapHistoryItem(bucket stat.SwapBucket) oapigen.SwapHistoryItem {
+// 	return oapigen.SwapHistoryItem{
+// 		StartTime:              util.IntStr(bucket.StartTime.ToI()),
+// 		EndTime:                util.IntStr(bucket.EndTime.ToI()),
+// 		ToAssetVolume:          util.IntStr(bucket.QbtcToAssetVolume),
+//		ToQbtcVolume:           util.IntStr(bucket.AssetToQbtcVolume),
+//		ToTradeVolume:          util.IntStr(bucket.QbtcToTradeVolume),
+//		FromTradeVolume:        util.IntStr(bucket.TradeToQbtcVolume),
+//		ToSecuredVolume:        util.IntStr(bucket.SecuredToQbtcVolume),
+//		FromSecuredVolume:      util.IntStr(bucket.QbtcToSecuredVolume),
+//		SynthMintVolume:        util.IntStr(bucket.QbtcToSynthVolume),
+//		SynthRedeemVolume:      util.IntStr(bucket.SynthToQbtcVolume),
+//		TotalVolume:            util.IntStr(bucket.TotalVolume),
+//		ToAssetVolumeUSD:       util.IntStr(bucket.QbtcToAssetVolumeUSD),
+//		ToQbtcVolumeUSD:        util.IntStr(bucket.AssetToQbtcVolumeUSD),
+//		ToTradeVolumeUSD:       util.IntStr(bucket.QbtcToTradeVolumeUSD),
+//		FromTradeVolumeUSD:     util.IntStr(bucket.TradeToQbtcVolumeUSD),
+//		ToSecuredVolumeUSD:     util.IntStr(bucket.QbtcToSecuredVolumeUSD),
+//		FromSecuredVolumeUSD:   util.IntStr(bucket.SecuredToQbtcVolumeUSD),
+//		SynthMintVolumeUSD:     util.IntStr(bucket.QbtcToSynthVolumeUSD),
+//		SynthRedeemVolumeUSD:   util.IntStr(bucket.SynthToQbtcVolumeUSD),
+//		TotalVolumeUSD:         util.IntStr(bucket.TotalVolumeUSD),
+//		ToAssetCount:           util.IntStr(bucket.QbtcToAssetCount),
+//		ToQbtcCount:            util.IntStr(bucket.AssetToQbtcCount),
+//		ToTradeCount:           util.IntStr(bucket.QbtcToTradeCount),
+//		FromTradeCount:         util.IntStr(bucket.TradeToQbtcCount),
+//		ToSecuredCount:         util.IntStr(bucket.SecuredToQbtcCount),
+//		FromSecuredCount:       util.IntStr(bucket.QbtcToSecuredCount),
+//		SynthMintCount:         util.IntStr(bucket.QbtcToSynthCount),
+//		SynthRedeemCount:       util.IntStr(bucket.SynthToQbtcCount),
+//		TotalCount:             util.IntStr(bucket.TotalCount),
+//		ToAssetFees:            util.IntStr(bucket.QbtcToAssetFees),
+//		ToQbtcFees:             util.IntStr(bucket.AssetToQbtcFees),
+//		ToTradeFees:            util.IntStr(bucket.QbtcToTradeFees),
+//		FromTradeFees:          util.IntStr(bucket.TradeToQbtcFees),
+//		ToSecuredFees:          util.IntStr(bucket.QbtcToSecuredFees),
+//		FromSecuredFees:        util.IntStr(bucket.SecuredToQbtcFees),
+//		SynthMintFees:          util.IntStr(bucket.QbtcToSynthFees),
+//		SynthRedeemFees:        util.IntStr(bucket.SynthToQbtcFees),
+//		TotalFees:              util.IntStr(bucket.TotalFees),
+//		ToAssetAverageSlip:     ratioStr(bucket.QbtcToAssetSlip, bucket.QbtcToAssetCount),
+//		ToQbtcAverageSlip:      ratioStr(bucket.AssetToQbtcSlip, bucket.AssetToQbtcCount),
+//		ToTradeAverageSlip:     ratioStr(bucket.QbtcToTradeSlip, bucket.QbtcToTradeCount),
+//		FromTradeAverageSlip:   ratioStr(bucket.TradeToQbtcSlip, bucket.TradeToQbtcCount),
+//		ToSecuredAverageSlip:   ratioStr(bucket.SecuredToQbtcSlip, bucket.QbtcToSecuredCount),
+//		FromSecuredAverageSlip: ratioStr(bucket.SecuredToQbtcSlip, bucket.SecuredToQbtcCount),
+//		SynthMintAverageSlip:   ratioStr(bucket.QbtcToSynthSlip, bucket.QbtcToSynthCount),
+//		SynthRedeemAverageSlip: ratioStr(bucket.SynthToQbtcSlip, bucket.SynthToQbtcCount),
+//		AverageSlip:            ratioStr(bucket.TotalSlip, bucket.TotalCount),
+//		QbtcPriceUSD:           floatStr(bucket.QbtcPriceUSD),
+//	}
+// }
 
-	var pool *string
-	poolParam := util.ConsumeUrlParam(&urlParams, "pool")
-	if poolParam != "" {
-		pool = &poolParam
-	}
-
-	merr = util.CheckUrlEmpty(urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	mergedPoolSwaps, err := stat.GetPoolSwaps(r.Context(), pool, buckets)
-	if err != nil {
-		btcqerr.InternalErr(err.Error()).ReportHTTP(w)
-		return
-	}
-	var result oapigen.SwapHistoryResponse = createVolumeIntervals(mergedPoolSwaps)
-	if buckets.OneInterval() {
-		result.Intervals = oapigen.SwapHistoryIntervals{}
-	}
-	respJSON(w, result)
-}
-
-func toSwapHistoryItem(bucket stat.SwapBucket) oapigen.SwapHistoryItem {
-	return oapigen.SwapHistoryItem{
-		StartTime:              util.IntStr(bucket.StartTime.ToI()),
-		EndTime:                util.IntStr(bucket.EndTime.ToI()),
-		ToAssetVolume:          util.IntStr(bucket.QbtcToAssetVolume),
-		ToQbtcVolume:           util.IntStr(bucket.AssetToQbtcVolume),
-		ToTradeVolume:          util.IntStr(bucket.QbtcToTradeVolume),
-		FromTradeVolume:        util.IntStr(bucket.TradeToQbtcVolume),
-		ToSecuredVolume:        util.IntStr(bucket.SecuredToQbtcVolume),
-		FromSecuredVolume:      util.IntStr(bucket.QbtcToSecuredVolume),
-		SynthMintVolume:        util.IntStr(bucket.QbtcToSynthVolume),
-		SynthRedeemVolume:      util.IntStr(bucket.SynthToQbtcVolume),
-		TotalVolume:            util.IntStr(bucket.TotalVolume),
-		ToAssetVolumeUSD:       util.IntStr(bucket.QbtcToAssetVolumeUSD),
-		ToQbtcVolumeUSD:        util.IntStr(bucket.AssetToQbtcVolumeUSD),
-		ToTradeVolumeUSD:       util.IntStr(bucket.QbtcToTradeVolumeUSD),
-		FromTradeVolumeUSD:     util.IntStr(bucket.TradeToQbtcVolumeUSD),
-		ToSecuredVolumeUSD:     util.IntStr(bucket.QbtcToSecuredVolumeUSD),
-		FromSecuredVolumeUSD:   util.IntStr(bucket.SecuredToQbtcVolumeUSD),
-		SynthMintVolumeUSD:     util.IntStr(bucket.QbtcToSynthVolumeUSD),
-		SynthRedeemVolumeUSD:   util.IntStr(bucket.SynthToQbtcVolumeUSD),
-		TotalVolumeUSD:         util.IntStr(bucket.TotalVolumeUSD),
-		ToAssetCount:           util.IntStr(bucket.QbtcToAssetCount),
-		ToQbtcCount:            util.IntStr(bucket.AssetToQbtcCount),
-		ToTradeCount:           util.IntStr(bucket.QbtcToTradeCount),
-		FromTradeCount:         util.IntStr(bucket.TradeToQbtcCount),
-		ToSecuredCount:         util.IntStr(bucket.SecuredToQbtcCount),
-		FromSecuredCount:       util.IntStr(bucket.QbtcToSecuredCount),
-		SynthMintCount:         util.IntStr(bucket.QbtcToSynthCount),
-		SynthRedeemCount:       util.IntStr(bucket.SynthToQbtcCount),
-		TotalCount:             util.IntStr(bucket.TotalCount),
-		ToAssetFees:            util.IntStr(bucket.QbtcToAssetFees),
-		ToQbtcFees:             util.IntStr(bucket.AssetToQbtcFees),
-		ToTradeFees:            util.IntStr(bucket.QbtcToTradeFees),
-		FromTradeFees:          util.IntStr(bucket.TradeToQbtcFees),
-		ToSecuredFees:          util.IntStr(bucket.QbtcToSecuredFees),
-		FromSecuredFees:        util.IntStr(bucket.SecuredToQbtcFees),
-		SynthMintFees:          util.IntStr(bucket.QbtcToSynthFees),
-		SynthRedeemFees:        util.IntStr(bucket.SynthToQbtcFees),
-		TotalFees:              util.IntStr(bucket.TotalFees),
-		ToAssetAverageSlip:     ratioStr(bucket.QbtcToAssetSlip, bucket.QbtcToAssetCount),
-		ToQbtcAverageSlip:      ratioStr(bucket.AssetToQbtcSlip, bucket.AssetToQbtcCount),
-		ToTradeAverageSlip:     ratioStr(bucket.QbtcToTradeSlip, bucket.QbtcToTradeCount),
-		FromTradeAverageSlip:   ratioStr(bucket.TradeToQbtcSlip, bucket.TradeToQbtcCount),
-		ToSecuredAverageSlip:   ratioStr(bucket.SecuredToQbtcSlip, bucket.QbtcToSecuredCount),
-		FromSecuredAverageSlip: ratioStr(bucket.SecuredToQbtcSlip, bucket.SecuredToQbtcCount),
-		SynthMintAverageSlip:   ratioStr(bucket.QbtcToSynthSlip, bucket.QbtcToSynthCount),
-		SynthRedeemAverageSlip: ratioStr(bucket.SynthToQbtcSlip, bucket.SynthToQbtcCount),
-		AverageSlip:            ratioStr(bucket.TotalSlip, bucket.TotalCount),
-		QbtcPriceUSD:           floatStr(bucket.QbtcPriceUSD),
-	}
-}
-
-func createVolumeIntervals(buckets []stat.SwapBucket) (result oapigen.SwapHistoryResponse) {
-	metaBucket := stat.SwapBucket{}
-
-	for _, bucket := range buckets {
-		metaBucket.AddBucket(bucket)
-
-		result.Intervals = append(result.Intervals, toSwapHistoryItem(bucket))
-	}
-
-	result.Meta = toSwapHistoryItem(metaBucket)
-	result.Meta.StartTime = result.Intervals[0].StartTime
-	result.Meta.EndTime = result.Intervals[len(result.Intervals)-1].EndTime
-	result.Meta.QbtcPriceUSD = result.Intervals[len(result.Intervals)-1].QbtcPriceUSD
-	return
-}
+// func createVolumeIntervals(buckets []stat.SwapBucket) (result oapigen.SwapHistoryResponse) {
+// 	metaBucket := stat.SwapBucket{}
+//
+// 	for _, bucket := range buckets {
+// 		metaBucket.AddBucket(bucket)
+//
+// 		result.Intervals = append(result.Intervals, toSwapHistoryItem(bucket))
+// 	}
+//
+// 	result.Meta = toSwapHistoryItem(metaBucket)
+// 	result.Meta.StartTime = result.Intervals[0].StartTime
+// 	result.Meta.EndTime = result.Intervals[len(result.Intervals)-1].EndTime
+// 	result.Meta.QbtcPriceUSD = result.Intervals[len(result.Intervals)-1].QbtcPriceUSD
+// 	return
+// }
 
 // TODO(huginn): remove when bonds are fixed
 var ShowBonds bool = false
@@ -425,13 +425,14 @@ func getPoolAggregates(ctx context.Context, pools []string, apyBucket db.Buckets
 	*poolAggregates, error) {
 
 	latestState := timeseries.Latest.GetState()
-	now := latestState.NextSecond()
-	window24h := db.Window{From: now - 24*60*60, Until: now}
-
-	dailyVolumes, err := stat.PoolsTotalVolume(ctx, pools, window24h)
-	if err != nil {
-		return nil, err
-	}
+	// now := latestState.NextSecond()
+	// window24h := db.Window{From: now - 24*60*60, Until: now}
+	//
+	// dailyVolumes, err := stat.PoolsTotalVolume(ctx, pools, window24h)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	dailyVolumes := make(map[string]int64) // Return empty map
 
 	// this adds pool synth for pool endpoint
 	if len(pools) == 1 {
@@ -929,20 +930,20 @@ func calculateJsonStats(ctx context.Context, w io.Writer) error {
 		return err
 	}
 
-	swapsAll, err := stat.GlobalSwapStats(ctx, "day", 0)
-	if err != nil {
-		return err
-	}
-
-	swaps24h, err := stat.GlobalSwapStats(ctx, "5min", now-24*60*60)
-	if err != nil {
-		return err
-	}
-
-	swaps30d, err := stat.GlobalSwapStats(ctx, "hour", now-30*24*60*60)
-	if err != nil {
-		return err
-	}
+	// swapsAll, err := stat.GlobalSwapStats(ctx, "day", 0)
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// swaps24h, err := stat.GlobalSwapStats(ctx, "5min", now-24*60*60)
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// swaps30d, err := stat.GlobalSwapStats(ctx, "hour", now-30*24*60*60)
+	// if err != nil {
+	// 	return err
+	// }
 
 	var qbtcDepth int64
 	for poolName, poolInfo := range state.Pools {
@@ -962,17 +963,14 @@ func calculateJsonStats(ctx context.Context, w io.Writer) error {
 		QbtcDepth:          util.IntStr(qbtcDepth),
 		SwitchedQbtc:       util.IntStr(switchedQbtc),
 		QbtcPriceUSD:       floatStr(qbtcPrice),
-		SwapVolume:         util.IntStr(swapsAll.Totals().Volume),
-		SwapCount24h:       util.IntStr(swaps24h.Totals().Count),
-		SwapCount30d:       util.IntStr(swaps30d.Totals().Count),
-		SwapCount:          util.IntStr(swapsAll.Totals().Count),
-		ToAssetCount:       util.IntStr(swapsAll[db.RuneToAsset].Count),
-		ToQbtcCount:        util.IntStr(swapsAll[db.AssetToRune].Count),
-		SynthMintCount:     util.IntStr(swapsAll[db.RuneToSynth].Count),
-		SynthBurnCount:     util.IntStr(swapsAll[db.SynthToRune].Count),
-		DailyActiveUsers:   "0", // deprecated
-		MonthlyActiveUsers: "0", // deprecated
-		UniqueSwapperCount: "0", // deprecated
+		SwapVolume:         "0",
+		SwapCount24h:       "0",
+		SwapCount30d:       "0",
+		SwapCount:          "0",
+		ToAssetCount:       "0",
+		ToQbtcCount:        "0",
+		SynthMintCount:     "0",
+		SynthBurnCount:     "0",
 		AddLiquidityVolume: util.IntStr(stakes.TotalVolume),
 		WithdrawVolume:     util.IntStr(withdraws.TotalVolume),
 		AddLiquidityCount:  util.IntStr(stakes.Count),
