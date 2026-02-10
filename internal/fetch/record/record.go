@@ -93,3 +93,12 @@ func (r *eventRecorder) OnCosmWasm(e *CosmWasmEvent, meta *Metadata) {
 			meta.BlockHeight, err)
 	}
 }
+
+func (r *eventRecorder) OnTransfer(e *Transfer, meta *Metadata) {
+	cols := []string{"from_addr", "to_addr", "asset", "amount_e8"}
+	err := InsertWithMeta("transfer_events", meta, cols, e.FromAddr, e.ToAddr, e.Asset, e.AmountE8)
+	if err != nil {
+		btcqerr.LogEventParseErrorF("transfer event from height %d lost on %s",
+			meta.BlockHeight, err)
+	}
+}

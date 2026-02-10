@@ -400,3 +400,36 @@ func (e *CosmWasmEvent) LoadTendermint(attrs []abci.EventAttribute) error {
 
 	return nil
 }
+
+type Transfer struct {
+	FromAddr []byte
+	ToAddr   []byte
+	Asset    []byte
+	AmountE8 int64
+}
+
+func (e *Transfer) LoadTendermint(attrs []abci.EventAttribute) error {
+	for _, attr := range attrs {
+		var err error
+		switch attr.Key {
+		case "sender":
+			e.FromAddr = []byte(attr.Value)
+		case "recipient":
+			e.ToAddr = []byte(attr.Value)
+		case "amount":
+			e.Asset, e.AmountE8, err = parseCosmosCoin([]byte(attr.Value))
+			if err != nil {
+				return fmt.Errorf("malformed amount: %w", err)
+			}
+		default:
+			btcqerr.LogEventParseErrorF("unknown transfer event attribute %q=%q",
+				[]byte(attr.Key), []byte(attr.Value))
+		}
+
+		if err != nil {
+			return fmt.Errorf("malformed key: %v (%w)", attr.Value, err)
+		}
+	}
+
+	return nil
+}

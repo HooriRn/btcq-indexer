@@ -12,6 +12,7 @@ import (
 
 	abci "github.com/cometbft/cometbft/abci/types"
 
+	"github.com/btcq/btcq-indexer/config"
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/fetch/sync/chain"
 	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
@@ -199,6 +200,15 @@ func processEvent(event abci.Event, meta *Metadata) error {
 	case "limit_swap_close":
 	// BTCQ specific events
 	case "commission":
+	case "transfer":
+		if !config.Global.EventRecorder.OnTransferEnabled {
+			return nil
+		}
+		var x Transfer
+		if err := x.LoadTendermint(attrs); err != nil {
+			return err
+		}
+		Recorder.OnTransfer(&x, meta)
 	default:
 		// Check if the string starts with "wasm-"
 		if strings.HasPrefix(event.Type, "cosmos.epochs.") {
