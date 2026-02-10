@@ -20,8 +20,10 @@ var aggDDLPrefix string
 //go:embed balances.sql
 var aggBalances string
 
+// Disabled for now - members aggregator
+//
 //go:embed members.sql
-var aggMembers string
+var _ string // aggMembers disabled
 
 //go:embed qbtc_price.sql
 var aggQbtcPrice string
@@ -443,7 +445,7 @@ func WatermarkedMaterializedTables() []string {
 }
 
 func AggregatesDDL() []string {
-	parts := []string{SchemaCleanUp("btcq_indexer_agg"), aggDDLPrefix, aggBalances, aggMembers, aggQbtcPrice}
+	parts := []string{SchemaCleanUp("btcq_indexer_agg"), aggDDLPrefix, aggBalances, aggQbtcPrice}
 	var b strings.Builder
 
 	// Sort to iterate in deterministic order.
