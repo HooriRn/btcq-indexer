@@ -218,8 +218,8 @@ func processEvent(event abci.Event, meta *Metadata) error {
 			Recorder.OnCosmWasm(&x, meta)
 			break
 		}
-		btcqerr.LogEventParseErrorF("Unknown event type: %s, attributes: %s",
-			event.Type, FormatAttributes(attrs))
+		btcqerr.LogEventParseErrorF("block height %d unknown event type: %s, attributes: %s",
+			meta.BlockHeight, event.Type, FormatAttributes(attrs))
 		UnknownsTotal.Add(1)
 		return errEventType
 	}
@@ -233,7 +233,8 @@ func processTx(tx DecodedTx, result *abci.ExecTxResult, meta *Metadata) error {
 		case *types.MsgBtcBlock:
 			// qbtc block submission (qbtc.qbtc.v1.MsgBtcBlock), no indexer action
 		default:
-			fmt.Println("Unknown message type:", m)
+			btcqerr.LogEventParseErrorF("block height %d tx %d unknown message type: %T, tx hash: %s",
+				meta.BlockHeight, meta.EventId.TxIndex, m, tx.Hash)
 		}
 	}
 
