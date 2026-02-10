@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	_ "embed"
 	"fmt"
 	"io"
@@ -617,8 +618,8 @@ func refreshAggregates(ctx context.Context, bulk bool, fullTimescaleRefreshForTe
 	debugF()
 
 	updateAggregateSingle(ctx, refreshEnd, "update_balances")
-	updateAggregateSingle(ctx, refreshEnd, "update_members")
-	updateAggregateSingle(ctx, refreshEnd, "update_actions")
+	// TODO(HooriRn): re-enable this when we have a way to update the actions table
+	// updateAggregateSingle(ctx, refreshEnd, "update_actions")
 
 	LastAggregatedBlock.Set(lastAggregated.Height, lastAggregated.Timestamp)
 
@@ -659,7 +660,13 @@ func InitAggregatesRefresh(ctx context.Context) jobs.NamedFunction {
 		"SELECT watermark FROM btcq_indexer_agg.watermarks WHERE materialized_table = 'actions'").
 		Scan(&lastAggregateBlockTimestamp)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to query last watermark")
+		if err == sql.ErrNoRows {
+			// No watermark exists yet, start from the beginning
+			lastAggregateBlockTimestamp = 0
+			log.Info().Msg("No existing watermark found, starting aggregates from beginning")
+		} else {
+			log.Fatal().Err(err).Msg("Failed to query last watermark")
+		}
 	}
 	LastAggregatedBlock.Set(0, lastAggregateBlockTimestamp)
 	log.Info().Str("watermark", lastAggregateBlockTimestamp.ToTime().Format("2006-01-02 15:04")).

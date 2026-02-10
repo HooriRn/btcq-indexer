@@ -228,7 +228,7 @@ CALL setup_hypertable('instantiate_events');
 CREATE TABLE transfer_events (
     from_addr           TEXT NOT NULL,
     to_addr             TEXT NOT NULL,
-    asset               TEXT NOT NULL,
+    asset               TEXT,
     amount_e8           BIGINT NOT NULL,
     event_id            BIGINT NOT NULL,
     block_timestamp     BIGINT NOT NULL
@@ -241,5 +241,22 @@ CREATE TABLE qbtc_price (
     block_timestamp     BIGINT NOT NULL
 );
 
-CALL setup_hypertable('qbtc_price');
 CREATE INDEX ON qbtc_price (block_timestamp DESC);
+
+CREATE TABLE pool_events (
+    asset               TEXT NOT NULL,
+    status              TEXT NOT NULL,
+    event_id            BIGINT NOT NULL,
+    block_timestamp     BIGINT NOT NULL
+);
+
+CALL setup_hypertable('pool_events');
+
+CREATE TABLE set_mimir_events (
+    key                 TEXT NOT NULL,
+    value               TEXT NOT NULL,
+    event_id            BIGINT NOT NULL,
+    block_timestamp     BIGINT NOT NULL
+);
+
+CALL setup_hypertable('set_mimir_events');

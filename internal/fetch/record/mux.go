@@ -190,6 +190,15 @@ func processEvent(event abci.Event, meta *Metadata) error {
 			return err
 		}
 		Recorder.OnInstantiate(&x, meta)
+	case "transfer":
+		if !config.Global.EventRecorder.OnTransferEnabled {
+			return nil
+		}
+		var x Transfer
+		if err := x.LoadTendermint(attrs); err != nil {
+			return err
+		}
+		Recorder.OnTransfer(&x, meta)
 	case "tx":
 	case "coin_spent", "coin_received":
 	case "coinbase":
@@ -200,15 +209,7 @@ func processEvent(event abci.Event, meta *Metadata) error {
 	case "limit_swap_close":
 	// BTCQ specific events
 	case "commission":
-	case "transfer":
-		if !config.Global.EventRecorder.OnTransferEnabled {
-			return nil
-		}
-		var x Transfer
-		if err := x.LoadTendermint(attrs); err != nil {
-			return err
-		}
-		Recorder.OnTransfer(&x, meta)
+	case "message":
 	default:
 		// Check if the string starts with "wasm-"
 		if strings.HasPrefix(event.Type, "cosmos.epochs.") {
@@ -242,6 +243,8 @@ func processTx(tx DecodedTx, result *abci.ExecTxResult, meta *Metadata) error {
 		switch m := msg.(type) {
 		case *types.MsgBtcBlock:
 			// qbtc block submission (qbtc.qbtc.v1.MsgBtcBlock), no indexer action
+		case *types.MsgSetNodePeerAddress:
+			// set node peer address (qbtc.qbtc.v1.MsgSetNodePeerAddress), no indexer action
 		default:
 			btcqerr.LogEventParseErrorF("block height %d tx %d unknown message type: %T, tx hash: %s",
 				meta.BlockHeight, meta.EventId.TxIndex, m, tx.Hash)
