@@ -235,3 +235,11 @@ CREATE TABLE transfer_events (
 );
 
 CALL setup_hypertable('transfer_events');
+
+CREATE TABLE qbtc_price (
+    qbtc_price_e8       BIGINT NOT NULL,
+    block_timestamp     BIGINT NOT NULL
+);
+
+CALL setup_hypertable('qbtc_price');
+CREATE INDEX ON qbtc_price (block_timestamp DESC);

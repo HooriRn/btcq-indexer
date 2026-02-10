@@ -25,9 +25,6 @@ var aggBalances string
 //go:embed members.sql
 var _ string // aggMembers disabled
 
-//go:embed qbtc_price.sql
-var _ string // aggQbtcPrice disabled
-
 const (
 	aggregatesRefreshInterval = 1 * time.Minute
 	aggregatesMaxStepNano     = Nano(20 * 24 * 60 * 60 * 1e9)
