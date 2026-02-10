@@ -1255,36 +1255,6 @@ func jsonQbtcPriceHistory(w http.ResponseWriter, r *http.Request, _ httprouter.P
 	respJSON(w, ret)
 }
 
-func jsonAffiliateHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	buckets, merr := db.BucketsFromQuery(r.Context(), &urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	var thorname *string
-	poolParam := util.ConsumeUrlParam(&urlParams, "thorname")
-	if poolParam != "" {
-		thorname = &poolParam
-	}
-
-	merr = util.CheckUrlEmpty(urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	mergedAffiliates, err := stat.GetTHORNameAffiliate(r.Context(), thorname, buckets)
-	if err != nil {
-		btcqerr.InternalErr(err.Error()).ReportHTTP(w)
-		return
-	}
-
-	respJSON(w, mergedAffiliates)
-}
-
 func jsonRUJIMerge(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	urlParams := r.URL.Query()
 
