@@ -109,7 +109,7 @@ func DeleteWatermark(value int64) {
 	UPDATE 
 		btcq_indexer_agg.watermarks 
 	SET watermark = $1 
-	WHERE materialized_table = 'actions' OR materialized_table = 'qbtc_price'
+	WHERE materialized_table = 'actions'
 	`
 	_, err := TheDB.Exec(q, value)
 	if err != nil {

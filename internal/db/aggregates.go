@@ -619,7 +619,6 @@ func refreshAggregates(ctx context.Context, bulk bool, fullTimescaleRefreshForTe
 	updateAggregateSingle(ctx, refreshEnd, "update_balances")
 	updateAggregateSingle(ctx, refreshEnd, "update_members")
 	updateAggregateSingle(ctx, refreshEnd, "update_actions")
-	updateAggregateSingle(ctx, refreshEnd, "update_qbtc_price")
 
 	LastAggregatedBlock.Set(lastAggregated.Height, lastAggregated.Timestamp)
 
