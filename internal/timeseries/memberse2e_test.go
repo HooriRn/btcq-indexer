@@ -164,12 +164,12 @@ func TestMemberE2E(t *testing.T) {
 	require.Equal(t, 1, len(jsonApiResult.Pools))
 	bnbPool := jsonApiResult.Pools[0]
 	require.Equal(t, "BNB.BNB", bnbPool.Pool)
-	require.Equal(t, "thoraddr1", bnbPool.RuneAddress)
+	require.Equal(t, "thoraddr1", bnbPool.QbtcAddress)
 	require.Equal(t, "bnbaddr1", bnbPool.AssetAddress)
 	require.Equal(t, util.IntStr(1+2+3-1), bnbPool.LiquidityUnits)
-	require.Equal(t, util.IntStr(100+300+500), bnbPool.RuneAdded)
+	require.Equal(t, util.IntStr(100+300+500), bnbPool.QbtcAdded)
 	require.Equal(t, util.IntStr(200+400), bnbPool.AssetAdded)
-	require.Equal(t, "200", bnbPool.RuneWithdrawn)
+	require.Equal(t, "200", bnbPool.QbtcWithdrawn)
 	require.Equal(t, "400", bnbPool.AssetWithdrawn)
 	require.Equal(t, util.IntStr(db.StrToSec("2020-09-01 00:10:00").ToI()), bnbPool.DateFirstAdded)
 	require.Equal(t, util.IntStr(db.StrToSec("2020-09-01 00:10:10").ToI()), bnbPool.DateLastAdded)
@@ -201,7 +201,7 @@ func TestMemberE2E(t *testing.T) {
 	require.Equal(t, 1, len(jsonApiResult.Pools))
 	btcPool := jsonApiResult.Pools[0]
 	require.Equal(t, "BTC.BTC", btcPool.Pool)
-	require.Equal(t, "", btcPool.RuneAddress)
+	require.Equal(t, "", btcPool.QbtcAddress)
 }
 
 func TestMemberPicksFirstAssetAddress(t *testing.T) {
@@ -227,7 +227,7 @@ func TestMemberPicksFirstAssetAddress(t *testing.T) {
 
 	require.Equal(t, 1, len(jsonApiResult.Pools))
 	bnbPool := jsonApiResult.Pools[0]
-	require.Equal(t, "thoraddr1", bnbPool.RuneAddress)
+	require.Equal(t, "thoraddr1", bnbPool.QbtcAddress)
 	require.Equal(t, "bnbaddr2", bnbPool.AssetAddress)
 }
 
@@ -250,9 +250,9 @@ func TestMemberPending(t *testing.T) {
 
 	require.Equal(t, 1, len(jsonApiResult.Pools))
 	bnbPool := jsonApiResult.Pools[0]
-	require.Equal(t, "thoraddr1", bnbPool.RuneAddress)
+	require.Equal(t, "thoraddr1", bnbPool.QbtcAddress)
 
-	require.Equal(t, "10", bnbPool.RunePending)
+	require.Equal(t, "10", bnbPool.QbtcPending)
 	require.Equal(t, "15", bnbPool.AssetPending)
 	require.Equal(t, "BNB.BNB", bnbPool.Pool)
 }
@@ -293,9 +293,9 @@ func TestMemberPendingAlreadyAdded(t *testing.T) {
 
 		require.Equal(t, 1, len(jsonApiResult.Pools))
 		bnbPool := jsonApiResult.Pools[0]
-		require.Equal(t, "thoraddr1", bnbPool.RuneAddress)
+		require.Equal(t, "thoraddr1", bnbPool.QbtcAddress)
 		require.Equal(t, "assetaddr1", bnbPool.AssetAddress)
-		require.Equal(t, "0", bnbPool.RunePending)
+		require.Equal(t, "0", bnbPool.QbtcPending)
 		require.Equal(t, "100", bnbPool.AssetPending)
 	}
 
@@ -306,9 +306,9 @@ func TestMemberPendingAlreadyAdded(t *testing.T) {
 
 		require.Equal(t, 1, len(jsonApiResult.Pools))
 		bnbPool := jsonApiResult.Pools[0]
-		require.Equal(t, "thoraddr1", bnbPool.RuneAddress)
+		require.Equal(t, "thoraddr1", bnbPool.QbtcAddress)
 		require.Equal(t, "assetaddr1", bnbPool.AssetAddress)
-		require.Equal(t, "0", bnbPool.RunePending)
+		require.Equal(t, "0", bnbPool.QbtcPending)
 		require.Equal(t, "100", bnbPool.AssetPending)
 	}
 }
@@ -345,7 +345,7 @@ func TestMemberOnlyAsset(t *testing.T) {
 
 		require.Equal(t, 1, len(jsonApiResult.Pools))
 		bnbPool := jsonApiResult.Pools[0]
-		require.Equal(t, "", bnbPool.RuneAddress)
+		require.Equal(t, "", bnbPool.QbtcAddress)
 		require.Equal(t, "assetaddr2", bnbPool.AssetAddress)
 		require.Equal(t, "10", bnbPool.AssetAdded)
 		require.Equal(t, "5", bnbPool.AssetWithdrawn)
@@ -394,8 +394,8 @@ func TestMemberPendingAlreadyWithdrawn(t *testing.T) {
 
 	require.Equal(t, 1, len(jsonApiResult.Pools))
 	bnbPool := jsonApiResult.Pools[0]
-	require.Equal(t, "thoraddr1", bnbPool.RuneAddress)
-	require.Equal(t, "0", bnbPool.RunePending)
+	require.Equal(t, "thoraddr1", bnbPool.QbtcAddress)
+	require.Equal(t, "0", bnbPool.QbtcPending)
 }
 
 func TestMemberAsymRune(t *testing.T) {
@@ -412,7 +412,7 @@ func TestMemberAsymRune(t *testing.T) {
 
 	require.Equal(t, 1, len(jsonApiResult.Pools))
 	bnbPool := jsonApiResult.Pools[0]
-	require.Equal(t, "thoraddr1", bnbPool.RuneAddress)
+	require.Equal(t, "thoraddr1", bnbPool.QbtcAddress)
 	require.Equal(t, "", bnbPool.AssetAddress)
 }
 
@@ -484,7 +484,7 @@ func TestMemberSeparation(t *testing.T) {
 		require.Equal(t, 1, len(jsonApiResult.Pools))
 		bnbPool := jsonApiResult.Pools[0]
 		require.Equal(t, "1", bnbPool.LiquidityUnits)
-		require.Equal(t, "thoraddr", bnbPool.RuneAddress)
+		require.Equal(t, "thoraddr", bnbPool.QbtcAddress)
 		require.Equal(t, "bnbaddr", bnbPool.AssetAddress)
 	}
 	{
@@ -496,17 +496,17 @@ func TestMemberSeparation(t *testing.T) {
 
 		p := jsonApiResult.Pools
 		sort.Slice(p, func(i, j int) bool {
-			return p[i].RuneAddress < p[j].RuneAdded
+			return p[i].QbtcAddress < p[j].QbtcAdded
 		})
 
 		assetaddrMember := jsonApiResult.Pools[0]
 		require.Equal(t, "2", assetaddrMember.LiquidityUnits)
-		require.Equal(t, "", assetaddrMember.RuneAddress)
+		require.Equal(t, "", assetaddrMember.QbtcAddress)
 		require.Equal(t, "bnbaddr", assetaddrMember.AssetAddress)
 
 		thoraddrMember := jsonApiResult.Pools[1]
 		require.Equal(t, "1", thoraddrMember.LiquidityUnits)
-		require.Equal(t, "thoraddr", thoraddrMember.RuneAddress)
+		require.Equal(t, "thoraddr", thoraddrMember.QbtcAddress)
 		require.Equal(t, "bnbaddr", thoraddrMember.AssetAddress)
 	}
 }
@@ -532,7 +532,7 @@ func TestMemberRecreated(t *testing.T) {
 		require.Equal(t, 1, len(jsonApiResult.Pools))
 		bnbPool := jsonApiResult.Pools[0]
 		require.Equal(t, "1", bnbPool.LiquidityUnits)
-		require.Equal(t, "thoraddr", bnbPool.RuneAddress)
+		require.Equal(t, "thoraddr", bnbPool.QbtcAddress)
 		require.Equal(t, "bnbaddr", bnbPool.AssetAddress)
 	}
 
@@ -555,7 +555,7 @@ func TestMemberRecreated(t *testing.T) {
 		require.Equal(t, 1, len(jsonApiResult.Pools))
 		bnbPool := jsonApiResult.Pools[0]
 		require.Equal(t, "1", bnbPool.LiquidityUnits)
-		require.Equal(t, "thoraddr", bnbPool.RuneAddress)
+		require.Equal(t, "thoraddr", bnbPool.QbtcAddress)
 		require.Equal(t, "", bnbPool.AssetAddress)
 	}
 

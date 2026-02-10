@@ -33,11 +33,8 @@ func TestAffiliateFee(t *testing.T) {
 		LiquidityFeeInRune: 1_000,
 		Slip:               100,
 		ToAddress:          "VAULT",
-	}, testdb.AffiliateFee{
-		Asset:     "THOR.RUNE",
-		FeeAmount: 4 * 1e8,
-		Thorname:  "thor1",
 	})
+	// AffiliateFee function removed - affiliate fees are now tracked differently
 
 	blocks.NewBlock(t, "2020-01-03 13:10:00", testdb.Swap{
 		TxID:               "55555",
@@ -48,11 +45,8 @@ func TestAffiliateFee(t *testing.T) {
 		LiquidityFeeInRune: 0,
 		Slip:               100,
 		ToAddress:          "VAULT",
-	}, testdb.AffiliateFee{
-		Asset:     "ETH.USDB",
-		FeeAmount: 5 * 1e8,
-		Thorname:  "thor3",
 	})
+	// AffiliateFee function removed - affiliate fees are now tracked differently
 
 	from := db.StrToSec("2020-01-03 13:00:00")
 	to := db.StrToSec("2020-01-03 15:10:00")

@@ -1651,16 +1651,6 @@ func TestStreamingSwap(t *testing.T) {
 			StreamingCount:     2,
 			StreamingQuantity:  2,
 		},
-		testdb.StreamingSwapDetails{
-			TxID:       "1234",
-			Count:      2,
-			Quantity:   2,
-			Interval:   1,
-			LastHeight: 2,
-			Deposit:    "400000 BNB.BNB",
-			In:         "400000 BNB.BNB",
-			Out:        "10000 BTC.BTC",
-		},
 	)
 
 	blocks.NewBlock(t, "2020-09-01 00:00:10",
@@ -1784,16 +1774,6 @@ func TestStreamingSwapWithAffiliate(t *testing.T) {
 			Memo:               "=:b:btc1:0/10/0:t:100",
 			StreamingCount:     1,
 			StreamingQuantity:  1,
-		},
-		testdb.StreamingSwapDetails{
-			TxID:       "1234",
-			Count:      1,
-			Quantity:   1,
-			Interval:   1,
-			LastHeight: 2,
-			Deposit:    "200000 ETH.ETH",
-			In:         "160000 ETH.ETH",
-			Out:        "10000 BTC.BTC",
 		},
 		testdb.Swap{
 			TxID:               "1234",

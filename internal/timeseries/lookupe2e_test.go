@@ -51,7 +51,7 @@ func TestPoolsE2E(t *testing.T) {
 
 	require.Equal(t, len(sortedResp), 3)
 	require.Equal(t, sortedResp["POOL2"].AssetDepth, "2")
-	require.Equal(t, sortedResp["POOL2"].RuneDepth, "1")
+	require.Equal(t, sortedResp["POOL2"].QbtcDepth, "1")
 	require.Equal(t, sortedResp["POOL2"].AssetPrice, "0.5")
 	_, has_pool3 := sortedResp["POOL3"]
 	require.Equal(t, has_pool3, true) // Without filter we have the Staged pool

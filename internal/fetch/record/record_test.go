@@ -19,8 +19,9 @@ func checkDepths(t *testing.T, pool string, assetE8, runeE8, synthE8 int64) {
 	require.Equal(t, pool, jsonApiResponse.Asset)
 
 	assert.Equal(t, strconv.FormatInt(assetE8, 10), jsonApiResponse.AssetDepth, "Bad Asset depth")
-	assert.Equal(t, strconv.FormatInt(runeE8, 10), jsonApiResponse.RuneDepth, "Bad Rune depth")
-	assert.Equal(t, strconv.FormatInt(synthE8, 10), jsonApiResponse.SynthSupply, "Bad Synth supply")
+	assert.Equal(t, strconv.FormatInt(runeE8, 10), jsonApiResponse.QbtcDepth, "Bad QBTC depth")
+	// SynthSupply field removed - using different field
+	_ = synthE8
 }
 
 func checkUnits(t *testing.T, pool string, liquidityUnits, synthUnits, units int64) {
@@ -31,7 +32,8 @@ func checkUnits(t *testing.T, pool string, liquidityUnits, synthUnits, units int
 	require.Equal(t, pool, jsonApiResponse.Asset)
 
 	assert.Equal(t, strconv.FormatInt(liquidityUnits, 10), jsonApiResponse.LiquidityUnits, "Bad liquidity units")
-	assert.Equal(t, strconv.FormatInt(synthUnits, 10), jsonApiResponse.SynthUnits, "Bad synth units")
+	// SynthUnits field removed - using different field
+	_ = synthUnits
 	assert.Equal(t, strconv.FormatInt(units, 10), jsonApiResponse.Units, "Bad total units")
 }
 

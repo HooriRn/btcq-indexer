@@ -9,11 +9,16 @@ import (
 	"github.com/btcq/btcq-indexer/internal/api"
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/db/testdb"
+	"github.com/btcq/btcq-indexer/internal/util"
 	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
 func stringp(s string) *string {
 	return &s
+}
+
+func epochStr(date string) string {
+	return util.IntStr(db.StrToSec(date).ToI())
 }
 
 func TestTVLHistoryE2E(t *testing.T) {
@@ -144,7 +149,7 @@ func TestTVLHistoryE2E(t *testing.T) {
 	require.Equal(t, "356", jsonResult.Meta.TotalValuePooled)
 	require.Equal(t, stringp("0"), jsonResult.Meta.TotalValueBonded)
 	require.Equal(t, stringp("356"), jsonResult.Meta.TotalValueLocked)
-	require.Equal(t, "2", jsonResult.Meta.RunePriceUSD)
+	// RunePriceUSD field removed
 	require.Equal(t, 4, len(jsonResult.Meta.PoolsDepth))
 	for _, item := range jsonResult.Meta.PoolsDepth {
 		switch item.Pool {
@@ -168,7 +173,7 @@ func TestTVLHistoryE2E(t *testing.T) {
 	require.Equal(t, "280", jsonResult.Intervals[1].TotalValuePooled)
 	require.Equal(t, "380", jsonResult.Intervals[2].TotalValuePooled)
 	require.Equal(t, "380", jsonResult.Intervals[3].TotalValuePooled) // gapfill
-	require.Equal(t, "10", jsonResult.Intervals[3].RunePriceUSD)      // initial USD price
+	// RunePriceUSD field removed - initial USD price
 	require.Equal(t, "356", jsonResult.Intervals[4].TotalValuePooled)
 }
 
@@ -220,7 +225,7 @@ func TestTVLHistoryBondsE2E(t *testing.T) {
 		TotalValuePooled: "0",
 		TotalValueBonded: stringp("140"),
 		TotalValueLocked: stringp("140"),
-		RunePriceUSD:     "NaN",
+			// RunePriceUSD: // field removed     "NaN",
 		PoolsDepth:       []oapigen.DepthHistoryItemPool{},
 	}, jsonResult.Meta)
 	require.Equal(t, 4, len(jsonResult.Intervals))

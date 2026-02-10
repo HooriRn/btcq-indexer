@@ -3,11 +3,11 @@ package api_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/db/testdb"
 	"github.com/btcq/btcq-indexer/internal/timeseries"
 	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPoolsStatsDepths(t *testing.T) {
@@ -40,7 +40,7 @@ func TestPoolsStatsDepths(t *testing.T) {
 	testdb.MustUnmarshal(t, body, &result)
 
 	require.Equal(t, "101", result.AssetDepth)
-	require.Equal(t, "990", result.RuneDepth)
+	require.Equal(t, "990", result.QbtcDepth)
 }
 
 func TestPoolsStatsSwaps(t *testing.T) {
@@ -56,15 +56,15 @@ func TestPoolsStatsSwaps(t *testing.T) {
 	// TODO(muninn): add mint fields
 	require.Equal(t, "10", result.SwapCount)
 	require.Equal(t, "4", result.ToAssetCount)
-	require.Equal(t, "3", result.ToRuneCount)
+	require.Equal(t, "3", result.ToQbtcCount)
 	require.Equal(t, "40", result.ToAssetVolume)
-	require.Equal(t, "3300", result.ToRuneVolume)
+	require.Equal(t, "3300", result.ToQbtcVolume)
 	require.Equal(t, "10203440", result.SwapVolume)
 	require.Equal(t, "4", result.ToAssetFees)
-	require.Equal(t, "300", result.ToRuneFees)
+	require.Equal(t, "300", result.ToQbtcFees)
 	require.Equal(t, "604", result.TotalFees)
 	require.Equal(t, "5", result.ToAssetAverageSlip)
-	require.Equal(t, "6", result.ToRuneAverageSlip)
+	require.Equal(t, "6", result.ToQbtcAverageSlip)
 	require.Equal(t, "6", result.AverageSlip) // (4*5 + 3*6 + 2*7 + 1*8) / 10
 }
 
@@ -90,11 +90,11 @@ func TestPoolStatsLiquidity(t *testing.T) {
 	testdb.MustUnmarshal(t, body, &result)
 
 	require.Equal(t, "30", result.AddAssetLiquidityVolume)
-	require.Equal(t, "20", result.AddRuneLiquidityVolume)
+	require.Equal(t, "20", result.AddQbtcLiquidityVolume)
 	require.Equal(t, "50", result.AddLiquidityVolume)
 	require.Equal(t, "1", result.AddLiquidityCount)
 	require.Equal(t, "3", result.WithdrawAssetVolume)
-	require.Equal(t, "2", result.WithdrawRuneVolume)
+	require.Equal(t, "2", result.WithdrawQbtcVolume)
 	require.Equal(t, "5", result.WithdrawVolume)
 	require.Equal(t, "1", result.WithdrawCount)
 }
@@ -142,7 +142,7 @@ func TestPoolsStatsUniqueMemberCount(t *testing.T) {
 	testdb.InitTest(t)
 
 	timeseries.SetDepthsForTest([]timeseries.Depth{{
-		Pool: "BNB.BNB", AssetDepth: 1000, RuneDepth: 2000,
+		Pool: "BNB.BNB", AssetDepth: 1000, QbtcDepth: 2000,
 	}})
 
 	// 2 members

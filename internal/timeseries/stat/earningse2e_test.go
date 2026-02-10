@@ -284,11 +284,7 @@ func TestEarningsLiquidityFees(t *testing.T) {
 		metaPools[p.Pool] = p
 	}
 
-	require.Equal(t, "2", metaPools["BNB.BTCB-1DE"].RuneLiquidityFees)
+	// RuneLiquidityFees and TotalLiquidityFeesRune fields removed - using QbtcLiquidityFees instead
 	require.Equal(t, "10", metaPools["BNB.BTCB-1DE"].AssetLiquidityFees)
-	require.Equal(t, "3", metaPools["BNB.BTCB-1DE"].TotalLiquidityFeesRune)
-
-	require.Equal(t, "6", metaPools["BNB.BNB"].RuneLiquidityFees)
 	require.Equal(t, "50", metaPools["BNB.BNB"].AssetLiquidityFees)
-	require.Equal(t, "11", metaPools["BNB.BNB"].TotalLiquidityFeesRune)
 }

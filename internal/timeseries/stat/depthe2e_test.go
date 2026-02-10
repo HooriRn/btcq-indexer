@@ -98,11 +98,11 @@ func TestDepthHistoryE2E(t *testing.T) {
 		StartLPUnits:     "1",
 		StartSynthUnits:  "0",
 		StartMemberCount: "1",
-		StartRuneDepth:   "20",
+		StartQbtcDepth:   "20",
 		EndAssetDepth:    "33",
 		EndLPUnits:       "3",
 		EndSynthUnits:    "0",
-		EndRuneDepth:     "12",
+		EndQbtcDepth:     "12",
 		EndMemberCount:   "1",
 	}, jsonResult.Meta)
 	require.Equal(t, 4, len(jsonResult.Intervals))
@@ -112,10 +112,10 @@ func TestDepthHistoryE2E(t *testing.T) {
 
 	// initial value correct
 	jan9 := jsonResult.Intervals[0]
-	require.Equal(t, "20", jan9.RuneDepth)
+	require.Equal(t, "20", jan9.QbtcDepth)
 
 	jan10 := jsonResult.Intervals[1]
-	require.Equal(t, "22", jan10.RuneDepth)
+	require.Equal(t, "22", jan10.QbtcDepth)
 	require.Equal(t, "22", jan10.AssetDepth)
 	require.Equal(t, "1", jan10.AssetPrice)
 
@@ -418,13 +418,13 @@ func TestDepthAggregateE2E(t *testing.T) {
 		"http://localhost:8080/v2/history/depths/A.A?&to=%d", to))
 	testdb.MustUnmarshal(t, body, &jsonResult)
 
-	require.Equal(t, "40", jsonResult.Intervals[0].RuneDepth)
+	require.Equal(t, "40", jsonResult.Intervals[0].QbtcDepth)
 
 	body = testdb.CallJSON(t, fmt.Sprintf(
 		"http://localhost:8080/v2/history/depths/B.B?&to=%d", to))
 	testdb.MustUnmarshal(t, body, &jsonResult)
 
-	require.Equal(t, "10", jsonResult.Intervals[0].RuneDepth)
+	require.Equal(t, "10", jsonResult.Intervals[0].QbtcDepth)
 }
 
 func TestLiqUnitValueIndexWithInterval(t *testing.T) {
@@ -477,7 +477,7 @@ func TestLiqUnitValueIndexWithInterval(t *testing.T) {
 	testdb.MustUnmarshal(t, body, &jsonResult)
 
 	require.Equal(t, "220", jsonResult.Intervals[51].AssetDepth)
-	require.Equal(t, "550", jsonResult.Intervals[51].RuneDepth)
+	require.Equal(t, "550", jsonResult.Intervals[51].QbtcDepth)
 
 	//sqrt(100 * 1000) / 10, for both intervals, as we did not increase / decrease liquidity
 	testdb.RoughlyEqual(t, 31.622776, jsonResult.Intervals[0].Luvi)
@@ -610,8 +610,8 @@ func TestLiqUnitValueIndexSynths(t *testing.T) {
 	testdb.MustUnmarshal(t, body, &poolResult)
 
 	// TODO (HooriRn): Delete this, Deprecated
-	testdb.RoughlyEqual(t, 0, poolResult.AnnualPercentageRate)
-	testdb.RoughlyEqual(t, 0, poolResult.PoolAPY)
+	// AnnualPercentageRate and PoolAPY fields removed
+	_ = poolResult
 }
 
 func TestOHLCPricesE2E(t *testing.T) {

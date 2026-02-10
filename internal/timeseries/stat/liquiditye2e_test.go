@@ -61,7 +61,7 @@ func TestLiquidityHistoryE2E(t *testing.T) {
 	var jsonResult oapigen.LiquidityHistoryResponse
 	testdb.MustUnmarshal(t, body, &jsonResult)
 
-	require.Equal(t, epochStr("2020-09-03 00:00:00"), jsonResult.Meta.StartTime)
+	require.Equal(t, util.IntStr(db.StrToSec("2020-09-03 00:00:00").ToI()), jsonResult.Meta.StartTime)
 	require.Equal(t, util.IntStr(to), jsonResult.Meta.EndTime)
 	require.Equal(t, util.IntStr(expectedBTCDeposits+expectedBNBDeposits), jsonResult.Meta.AddLiquidityVolume)
 	require.Equal(t, util.IntStr(expectedBTCWithdrawals+expectedBNBWithdrawals), jsonResult.Meta.WithdrawVolume)
@@ -69,9 +69,9 @@ func TestLiquidityHistoryE2E(t *testing.T) {
 	require.Equal(t, "3", jsonResult.Meta.WithdrawCount)
 
 	require.Equal(t, 3, len(jsonResult.Intervals))
-	require.Equal(t, epochStr("2020-09-03 00:00:00"), jsonResult.Intervals[0].StartTime)
-	require.Equal(t, epochStr("2020-09-04 00:00:00"), jsonResult.Intervals[0].EndTime)
-	require.Equal(t, epochStr("2020-09-05 00:00:00"), jsonResult.Intervals[2].StartTime)
+	require.Equal(t, util.IntStr(db.StrToSec("2020-09-03 00:00:00").ToI()), jsonResult.Intervals[0].StartTime)
+	require.Equal(t, util.IntStr(db.StrToSec("2020-09-04 00:00:00").ToI()), jsonResult.Intervals[0].EndTime)
+	require.Equal(t, util.IntStr(db.StrToSec("2020-09-05 00:00:00").ToI()), jsonResult.Intervals[2].StartTime)
 	require.Equal(t, util.IntStr(to), jsonResult.Intervals[2].EndTime)
 
 	require.Equal(t, util.IntStr(expectedBTCDeposits), jsonResult.Intervals[0].AddLiquidityVolume)
@@ -111,7 +111,7 @@ func TestLiquidityAddOnePoolOnly(t *testing.T) {
 	// Having a 2 assetPrice is important for the assertions below.
 	depths := timeseries.Latest.GetState().Pools["BTC.BTC"]
 	require.Equal(t, int64(100), depths.AssetDepth)
-	require.Equal(t, int64(200), depths.RuneDepth)
+	require.Equal(t, int64(200), depths.QbtcDepth)
 
 	from := db.StrToSec("2020-01-01 00:00:00").ToI()
 	to := db.StrToSec("2020-01-02 00:00:00").ToI()
@@ -143,7 +143,7 @@ func TestLiquidityAssymetric(t *testing.T) {
 	// Having a 2 assetPrice is important for the assertions below.
 	depths := timeseries.Latest.GetState().Pools["BTC.BTC"]
 	require.Equal(t, int64(100), depths.AssetDepth)
-	require.Equal(t, int64(200), depths.RuneDepth)
+	require.Equal(t, int64(200), depths.QbtcDepth)
 
 	from := db.StrToSec("2020-01-01 00:00:00").ToI()
 	to := db.StrToSec("2020-01-02 00:00:00").ToI()
@@ -155,12 +155,12 @@ func TestLiquidityAssymetric(t *testing.T) {
 	testdb.MustUnmarshal(t, body, &jsonResult)
 
 	require.Equal(t, "20", jsonResult.Meta.AddAssetLiquidityVolume)
-	require.Equal(t, "2", jsonResult.Meta.AddRuneLiquidityVolume)
+	require.Equal(t, "2", jsonResult.Meta.AddQbtcLiquidityVolume)
 	require.Equal(t, "22", jsonResult.Meta.AddLiquidityVolume)
 	require.Equal(t, "1", jsonResult.Meta.AddLiquidityCount)
 
 	require.Equal(t, "2", jsonResult.Meta.WithdrawAssetVolume)
-	require.Equal(t, "1", jsonResult.Meta.WithdrawRuneVolume)
+	require.Equal(t, "1", jsonResult.Meta.WithdrawQbtcVolume)
 	require.Equal(t, "3", jsonResult.Meta.WithdrawVolume)
 	require.Equal(t, "1", jsonResult.Meta.WithdrawCount)
 }
