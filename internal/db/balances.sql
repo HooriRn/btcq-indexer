@@ -10,7 +10,7 @@ CREATE VIEW btcq_indexer_agg.balance_deltas AS (
 -- TODO(freki): add indices when serving code is done.
 CREATE TABLE btcq_indexer_agg.balances (
     addr text NOT NULL,
-    asset text DEFAULT QBTC,
+    asset text,
     amount_e8 bigint NOT NULL,
     block_timestamp bigint NOT NULL,
     PRIMARY KEY(addr, asset, block_timestamp)
@@ -20,7 +20,7 @@ CREATE TABLE btcq_indexer_agg.balances (
 -- TODO(huginn): investigate what table/index fillfactor results in the best performance.
 CREATE TABLE btcq_indexer_agg.current_balances (
     addr text NOT NULL,
-    asset text DEFAULT QBTC,
+    asset text,
     amount_e8 bigint NOT NULL,
     PRIMARY KEY(addr, asset)
 )
