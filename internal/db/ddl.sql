@@ -228,7 +228,7 @@ CALL setup_hypertable('instantiate_events');
 CREATE TABLE transfer_events (
     from_addr           TEXT NOT NULL,
     to_addr             TEXT NOT NULL,
-    asset               TEXT,
+    asset               TEXT DEFAULT 'QBTC.QBTC',
     amount_e8           BIGINT NOT NULL,
     event_id            BIGINT NOT NULL,
     block_timestamp     BIGINT NOT NULL
