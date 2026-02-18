@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/jackc/pgx/v4"
@@ -153,7 +154,31 @@ func (bi *BatchInserter) flushRaw(rawConn interface{}) (err error) {
 		return
 	}
 
-	for _, batch := range batches {
+	// Flush in deterministic order so that block_log is written before blocks (FK).
+	keys := make([]string, 0, len(batches))
+	for k := range batches {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		ti, tj := batches[keys[i]].table, batches[keys[j]].table
+		order := func(t string) int {
+			switch t {
+			case "block_log":
+				return 0
+			case "blocks":
+				return 1
+			default:
+				return 2
+			}
+		}
+		oi, oj := order(ti), order(tj)
+		if oi != oj {
+			return oi < oj
+		}
+		return keys[i] < keys[j]
+	})
+	for _, key := range keys {
+		batch := batches[key]
 		_, err = txn.CopyFrom(context.Background(),
 			pgx.Identifier{batch.table}, batch.columns, pgx.CopyFromRows(batch.rows))
 		if err != nil {
