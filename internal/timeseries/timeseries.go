@@ -159,6 +159,15 @@ func ProcessBlock(block *chain.Block, commit bool) (err error) {
 		return fmt.Errorf("persist block height %d: %w", block.Height, err)
 	}
 
+	finalizedEvents, txs, err := record.BuildBlocksPayload(block)
+	if err != nil {
+		return fmt.Errorf("build blocks payload height %d: %w", block.Height, err)
+	}
+	err = db.Inserter.Insert("blocks", []string{"height", "finalized_events", "txs"}, block.Height, finalizedEvents, txs)
+	if err != nil {
+		return fmt.Errorf("insert blocks height %d: %w", block.Height, err)
+	}
+
 	err = depthRecorder.update(block.Time,
 		track.aggTrack.AssetE8DepthPerPool,
 		track.aggTrack.QbtcE8DepthPerPool,

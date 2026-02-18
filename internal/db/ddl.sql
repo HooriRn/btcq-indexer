@@ -1,4 +1,4 @@
--- version 41
+-- version 42
 
 CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 
@@ -36,6 +36,12 @@ CREATE TABLE block_log (
     UNIQUE (timestamp)
 );
 
+CREATE TABLE blocks (
+    height              BIGINT NOT NULL PRIMARY KEY,
+    finalized_events    JSONB NOT NULL,
+    txs                 JSONB NOT NULL,
+    CONSTRAINT blocks_height_fkey FOREIGN KEY (height) REFERENCES block_log (height) ON DELETE CASCADE
+);
 
 -- For hypertables with an integer 'time' dimension (as opposed to TIMESTAMPTZ),
 -- TimescaleDB requires an 'integer_now' function to be set to use continuous aggregates.
