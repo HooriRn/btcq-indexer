@@ -403,11 +403,6 @@ func GetSinglePoolAPR(ctx context.Context,
 	return aprs[pool], nil
 }
 
-type SaverData struct {
-	SaversUnits int64
-	SaversDepth int64
-}
-
 type EarningsInfo struct {
 	Earnings                   int64
 	AnnualEarningsAsPercentage float64
@@ -417,7 +412,6 @@ type poolAggregates struct {
 	depths          timeseries.DepthMap
 	dailyVolumes    map[string]int64
 	liquidityUnits  map[string]int64
-	saverDataMap    map[string]SaverData
 	earningsDataMap map[string]EarningsInfo
 }
 
@@ -448,8 +442,6 @@ func getPoolAggregates(ctx context.Context, pools []string, apyBucket db.Buckets
 		return nil, err
 	}
 
-	saverData := getSaversData(latestState.Pools, liquidityUnitsNow)
-
 	// Get earnings data for the pools
 	poolEarningsMapStat, err := stat.GetPoolsEarnings(ctx, apyBucket)
 	if err != nil {
@@ -471,25 +463,10 @@ func getPoolAggregates(ctx context.Context, pools []string, apyBucket db.Buckets
 		depths:          latestState.Pools,
 		dailyVolumes:    dailyVolumes,
 		liquidityUnits:  liquidityUnitsNow,
-		saverDataMap:    saverData,
 		earningsDataMap: mapEarningsInfo,
 	}
 
 	return &aggregates, nil
-}
-
-func getSaversData(depths timeseries.DepthMap, liquidityUnits map[string]int64) map[string]SaverData {
-	ret := map[string]SaverData{}
-	for p := range depths {
-		actualPoolName := strings.Replace(p, "/", ".", 1)
-		if record.GetCoinType([]byte(p)) == record.AssetSynth {
-			ret[actualPoolName] = SaverData{
-				SaversDepth: depths[p].AssetDepth,
-				SaversUnits: liquidityUnits[p],
-			}
-		}
-	}
-	return ret
 }
 
 func poolStatusFromMap(pool string, statusMap map[string]string) string {
@@ -976,10 +953,8 @@ func calculateJsonStats(ctx context.Context, w io.Writer) error {
 	// }
 
 	var qbtcDepth int64
-	for poolName, poolInfo := range state.Pools {
-		if record.GetCoinType([]byte(poolName)) != record.AssetDerived {
-			qbtcDepth += poolInfo.QbtcDepth
-		}
+	for _, poolInfo := range state.Pools {
+		qbtcDepth += poolInfo.QbtcDepth
 	}
 
 	switchedQbtc, err := stat.SwitchedQbtc(ctx)
