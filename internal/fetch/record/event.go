@@ -18,6 +18,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -32,43 +33,11 @@ import (
 const (
 	// Native asset on QBTC chain.
 	nativeQbtc = "QBTC.QBTC"
-	// TCY asset on THORChain.
-	nativeTCY = "THOR.TCY"
-	// RUJI asset on THORChain.
-	nativeRUJI = "THOR.RUJI"
-	// NAMI asset on THORChain.
-	nativeNAMI = "THOR.NAMI"
 )
 
 // IsQbtc returns whether asset matches the QBTC asset.
 func IsQbtc(asset []byte) bool {
 	return string(asset) == nativeQbtc
-}
-
-// IsTcy returns whether asset matches any of the $TCY asset.
-func IsTcy(asset []byte) bool {
-	switch string(asset) {
-	case nativeTCY:
-		return true
-	}
-	return false
-}
-
-// IsRuji returns whether asset matches any of the $RUJI asset.
-func IsRuji(asset []byte) bool {
-	switch string(asset) {
-	case nativeRUJI:
-		return true
-	}
-	return false
-}
-
-func IsNami(asset []byte) bool {
-	switch string(asset) {
-	case nativeNAMI:
-		return true
-	}
-	return false
 }
 
 type CoinType int
@@ -78,57 +47,24 @@ const (
 	Qbtc CoinType = iota
 	// AssetNative coin native to a chain
 	AssetNative
-	// AssetSynth synth coin
-	AssetSynth
-	// AssetTrade trade account asset
-	AssetTrade
 	// UnknownCoin unknown coin
 	UnknownCoin
-	// Derived Asset coin, mostly made for THORFi
-	AssetDerived
-	// Secure Asset coin, v3 IBC
-	AssetSecure
 )
 
 var (
 	nativeSeparator = []byte(".")
-	synthSeparator  = []byte("/")
-	derivedAsset    = []byte("THOR.")
 	contractAsset   = []byte("X/")
-	tradeSeparator  = []byte("~")
-	secureSeparator = []byte("-")
 )
 
 func GetCoinType(asset []byte) CoinType {
 	if IsQbtc(asset) {
 		return Qbtc
 	}
-	if IsTcy(asset) {
-		return AssetNative
-	}
-	if IsRuji(asset) {
-		return AssetNative
-	}
-	if IsNami(asset) {
-		return AssetNative
-	}
 	if bytes.HasPrefix(bytes.ToUpper(asset), contractAsset) {
 		return AssetNative
 	}
-	if bytes.Contains(asset, synthSeparator) {
-		return AssetSynth
-	}
-	if bytes.HasPrefix(bytes.ToUpper(asset), derivedAsset) {
-		return AssetDerived
-	}
 	if bytes.Contains(asset, nativeSeparator) {
 		return AssetNative
-	}
-	if bytes.Contains(asset, tradeSeparator) {
-		return AssetTrade
-	}
-	if bytes.Contains(asset, secureSeparator) && !bytes.Contains(asset, nativeSeparator) {
-		return AssetSecure
 	}
 	return UnknownCoin
 }
@@ -154,14 +90,14 @@ func ParseAsset(asset []byte) (chain, ticker, id []byte) {
 	if bytes.Equal(match, nativeSeparator) {
 		sep = nativeSeparator
 	}
-	if bytes.Equal(match, synthSeparator) {
-		sep = synthSeparator
+	if bytes.Equal(match, []byte("/")) {
+		sep = []byte("/")
 	}
-	if bytes.Equal(match, tradeSeparator) {
-		sep = tradeSeparator
+	if bytes.Equal(match, []byte("~")) {
+		sep = []byte("~")
 	}
-	if bytes.Equal(match, secureSeparator) {
-		sep = secureSeparator
+	if bytes.Equal(match, []byte("-")) {
+		sep = []byte("-")
 	}
 	parts := bytes.SplitN(asset, sep, 2)
 	if len(parts) == 0 {
@@ -183,7 +119,7 @@ func ParseAsset(asset []byte) (chain, ticker, id []byte) {
 
 // GetNativeAsset returns native asset from a synth
 func GetNativeAsset(asset []byte) []byte {
-	if GetCoinType(asset) == AssetSynth || GetCoinType(asset) == AssetTrade || GetCoinType(asset) == AssetSecure {
+	if GetCoinType(asset) == UnknownCoin {
 		chain, ticker, ID := ParseAsset(asset)
 		if len(ID) == 0 {
 			return []byte(fmt.Sprintf("%s%s%s", chain, nativeSeparator, ticker))
@@ -222,6 +158,7 @@ func sanitizeBytes(v []byte) []byte {
 type Rewards struct {
 	BondE8    int64  // qbtc amount times 100 M
 	Validator []byte // validator address (THOR address), optional
+	AmountE8  int64  // total amount from the "amount" attribute (e.g. "203.986784140969162914qbtc"), in e8.
 	// PerPool has the QBTC amounts specified per pool (in .Asset).
 	PerPool []Amount
 }
@@ -237,6 +174,11 @@ func (e *Rewards) LoadTendermint(attrs []abci.EventAttribute) error {
 			}
 		case "validator":
 			e.Validator = []byte(attr.Value)
+		case "amount":
+			_, e.AmountE8, err = parseCosmosCoin([]byte(attr.Value))
+			if err != nil {
+				return fmt.Errorf("malformed amount: %w", err)
+			}
 
 		default:
 			v, err := strconv.ParseInt(string([]byte(attr.Value)), 10, 64)
@@ -280,10 +222,10 @@ func parseCoin(b []byte) (asset []byte, amountE8 int64, err error) {
 	return
 }
 
-var amountRegex = regexp.MustCompile(`^[0-9]+`)
+var amountRegex = regexp.MustCompile(`^[0-9]+(\.[0-9]*)?`)
 
-// Parses the cosmos amount format. E.g. "123btc/btc"
-// Returns uppercased. e.g. "BTC/BTC" 123
+// Parses the cosmos amount format. E.g. "123btc/btc", "203.986784140969162914qbtc"
+// Returns uppercased. e.g. "BTC/BTC" and amount in e8.
 func parseCosmosCoin(b []byte) (asset []byte, amountE8 int64, err error) {
 	if len(b) == 0 {
 		err = fmt.Errorf("empty amount")
@@ -296,10 +238,20 @@ func parseCosmosCoin(b []byte) (asset []byte, amountE8 int64, err error) {
 		return
 	}
 	numStr := s[:matchIndexes[1]]
-	amountE8, err = ParseInt(numStr)
-	if err != nil {
-		err = fmt.Errorf("couldn't parse amount value: %q", b)
-		return
+	if strings.Contains(numStr, ".") {
+		var f float64
+		f, err = strconv.ParseFloat(numStr, 64)
+		if err != nil {
+			err = fmt.Errorf("couldn't parse amount value: %q", b)
+			return
+		}
+		amountE8 = int64(math.Round(f * 1e8))
+	} else {
+		amountE8, err = ParseInt(numStr)
+		if err != nil {
+			err = fmt.Errorf("couldn't parse amount value: %q", b)
+			return
+		}
 	}
 
 	unit := strings.TrimSpace(s[matchIndexes[1]:])
