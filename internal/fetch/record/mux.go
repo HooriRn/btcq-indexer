@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -18,7 +17,6 @@ import (
 	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
 	"github.com/btcq/btcq-indexer/internal/util/timer"
 
-	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/btcq-org/qbtc/x/qbtc/types"
 )
 
@@ -30,8 +28,8 @@ var (
 	EventTotal           = metrics.Must1LabelCounter("btcq_indexer_chain_events_total", "group")
 	DeliverTxEventsTotal = EventTotal("deliver_tx")
 	FinalizedEventsTotal = EventTotal("finalized")
-	IgnoresTotal          = metrics.MustCounter("btcq_indexer_chain_event_ignores_total", "Number of known types not in use seen.")
-	UnknownsTotal         = metrics.MustCounter("btcq_indexer_chain_event_unknowns_total", "Number of unknown types discarded.")
+	IgnoresTotal         = metrics.MustCounter("btcq_indexer_chain_event_ignores_total", "Number of known types not in use seen.")
+	UnknownsTotal        = metrics.MustCounter("btcq_indexer_chain_event_unknowns_total", "Number of unknown types discarded.")
 
 	AttrPerEvent = metrics.MustHistogram("btcq_indexer_chain_event_attrs", "Number of attributes per event.", 0, 1, 7, 21, 144)
 
@@ -87,18 +85,6 @@ func ProcessBlock(block *chain.Block) {
 			btcqerr.LogEventParseErrorF("block height %d tx %d skipped: %s",
 				block.Height, txIndex, err)
 		}
-		for eventIndex, event := range tx.Events {
-			// Update the event according to its tx result
-			if err := processParentTx(decodedTx, &event); err != nil {
-				btcqerr.LogEventParseErrorF("block height %d tx %d event %d type %q skipped: %s (can't process parent)",
-					block.Height, txIndex, eventIndex, event.Type, err)
-			}
-			if err := processEvent(event, &m); err != nil {
-				btcqerr.LogEventParseErrorF("block height %d tx %d event %d type %q skipped: %s",
-					block.Height, txIndex, eventIndex, event.Type, err)
-			}
-			m.EventId.EventIndex++
-		}
 		m.EventId.TxIndex++
 	}
 
@@ -106,15 +92,6 @@ func ProcessBlock(block *chain.Block) {
 }
 
 var errEventType = errors.New("unknown event type")
-
-func getEventMode(event abci.Event) string {
-	for _, attr := range event.Attributes {
-		if attr.Key == "mode" {
-			return attr.Value
-		}
-	}
-	return ""
-}
 
 // Block notifies Listener for the transaction event.
 // Errors do not include the event type in the message.
@@ -133,7 +110,7 @@ func processEvent(event abci.Event, meta *Metadata) error {
 			continue
 		}
 
-		// filter empty values attributes - post V50 empty string should behave like nil
+		// filter empty values attributes
 		if len(attr.Value) == 0 {
 			continue
 		}
@@ -172,7 +149,6 @@ func processEvent(event abci.Event, meta *Metadata) error {
 	case "execute":
 	case "mint":
 	case "wasm":
-	case "limit_swap_close":
 	// BTCQ specific events
 	case "commission":
 	case "message":
@@ -204,7 +180,14 @@ func processEvent(event abci.Event, meta *Metadata) error {
 }
 
 func processTx(tx DecodedTx, result *abci.ExecTxResult, meta *Metadata) error {
-	// Thornode txs seems to have mainly one message
+	for eventIndex, event := range result.Events {
+		if err := processEvent(event, meta); err != nil {
+			btcqerr.LogEventParseErrorF("block height %d tx %d event %d type %q skipped: %s",
+				meta.BlockHeight, meta.EventId.TxIndex, eventIndex, event.Type, err)
+		}
+		meta.EventId.EventIndex++
+	}
+
 	for _, msg := range tx.Msgs {
 		switch m := msg.(type) {
 		case *types.MsgBtcBlock:
@@ -214,113 +197,6 @@ func processTx(tx DecodedTx, result *abci.ExecTxResult, meta *Metadata) error {
 		default:
 			btcqerr.LogEventParseErrorF("block height %d tx %d unknown message type: %T, tx hash: %s",
 				meta.BlockHeight, meta.EventId.TxIndex, m, tx.Hash)
-		}
-	}
-
-	return nil
-}
-
-func processParentTx(tx DecodedTx, event *abci.Event) error {
-	// If the tx cannot be decoded
-	if tx.Msgs == nil {
-		return nil
-	}
-
-	switch event.Type {
-	case "instantiate":
-		msgIndex := 0
-		for _, v := range event.Attributes {
-			if v.Key == "msg_index" {
-				var err error
-				msgIndex, err = strconv.Atoi(v.Value)
-				if err != nil {
-					return fmt.Errorf("can't parse msg_index: %w", err)
-				}
-				break
-			}
-		}
-
-		for i, msg := range tx.Msgs {
-			if i != msgIndex {
-				continue
-			}
-
-			switch m := msg.(type) {
-			case *wasmtypes.MsgInstantiateContract:
-				event.Attributes = append(event.Attributes, abci.EventAttribute{
-					Key:   "sender",
-					Value: m.Sender,
-				}, abci.EventAttribute{
-					Key:   "label",
-					Value: m.Label,
-				}, abci.EventAttribute{
-					Key:   "msg",
-					Value: string(m.Msg),
-				}, abci.EventAttribute{
-					Key:   "funds",
-					Value: m.Funds.String(),
-				}, abci.EventAttribute{
-					Key:   "admin_address",
-					Value: m.Admin,
-				}, abci.EventAttribute{
-					Key:   "tx_id",
-					Value: tx.Hash,
-				})
-			}
-			break
-		}
-	default:
-		if strings.HasPrefix(event.Type, "wasm-") {
-			msgIndex := 0
-			for _, v := range event.Attributes {
-				if v.Key == "msg_index" {
-					var err error
-					msgIndex, err = strconv.Atoi(v.Value)
-					if err != nil {
-						return fmt.Errorf("can't parse msg_index: %w", err)
-					}
-					break
-				}
-			}
-
-			for i, msg := range tx.Msgs {
-				if msgIndex != i {
-					continue
-				}
-
-				switch m := msg.(type) {
-				case *wasmtypes.MsgExecuteContract:
-					event.Attributes = append(event.Attributes, abci.EventAttribute{
-						Key:   "tx_id",
-						Value: tx.Hash,
-					}, abci.EventAttribute{
-						Key:   "sender",
-						Value: m.Sender,
-					}, abci.EventAttribute{
-						Key:   "msg",
-						Value: string(m.Msg),
-					}, abci.EventAttribute{
-						Key:   "funds",
-						Value: m.Funds.String(),
-					})
-				case *wasmtypes.MsgInstantiateContract:
-					event.Attributes = append(event.Attributes, abci.EventAttribute{
-						Key:   "tx_id",
-						Value: tx.Hash,
-					}, abci.EventAttribute{
-						Key:   "sender",
-						Value: m.Sender,
-					}, abci.EventAttribute{
-						Key:   "msg",
-						Value: string(m.Msg),
-					}, abci.EventAttribute{
-						Key:   "funds",
-						Value: m.Funds.String(),
-					})
-				}
-			}
-
-			break
 		}
 	}
 

@@ -4,11 +4,11 @@ import (
 	"encoding/hex"
 	"strings"
 
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	qbtctypes "github.com/btcq-org/qbtc/x/qbtc/types"
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/util/btcqlog"
-	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	tendtypes "github.com/cometbft/cometbft/types"
-	qbtctypes "github.com/btcq-org/qbtc/x/qbtc/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
@@ -71,9 +71,6 @@ func decodeTx(tx tendtypes.Tx) (ret DecodedTx) {
 	// each tx got a memo and hash which it comes from tmHash module
 	ret.Hash = strings.ToUpper(hex.EncodeToString(tx.Hash()))
 
-	// TODO:
-	// After cometBFT upgrade some txs fail
-	// non-positive integer: tx parse error [cosmos/cosmos-sdk@v0.50.9/x/auth/tx/decoder.go:49]
 	dtx, err := ebifrost.TxDecoder(protoCodec, authtx.DefaultTxDecoder(protoCodec))(tx)
 	if err != nil {
 		btcqlog.WarnF("fail to decode tx block endpoint tx: %v", err)
