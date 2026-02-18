@@ -252,3 +252,17 @@ func WrapBoolean(value bool) *bool {
 	}
 	return &value
 }
+
+// IsValidHexHash returns true if s is exactly 64 hex characters (e.g. a block hash).
+func IsValidHexHash(s string) bool {
+	if len(s) != 64 {
+		return false
+	}
+	for _, c := range s {
+		if (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') {
+			continue
+		}
+		return false
+	}
+	return true
+}

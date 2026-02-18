@@ -169,6 +169,54 @@ paths:
                 "200":
                     $ref: "#/components/responses/PoolsResponse"
 
+    "/v2/blocks":
+        get:
+            operationId: GetBlocks
+            summary: Blocks list or single block detail
+            description: |
+                With query param height or hash returns one block with full details (finalized_events, txs).
+                Without height/hash returns paginated list of blocks with summary (height, timestamp, hash, tx_count, finalized_events_count).
+                Pagination uses limit (default 20, max 100) and offset (0-based), order by height DESC.
+            parameters:
+                - name: height
+                  in: query
+                  description: Block height (return single block with full details)
+                  required: false
+                  schema:
+                      type: integer
+                      format: int64
+                - name: hash
+                  in: query
+                  description: Block hash hex (return single block with full details)
+                  required: false
+                  schema:
+                      type: string
+                - name: limit
+                  in: query
+                  description: Page size for list (default 20, max 100)
+                  required: false
+                  schema:
+                      type: integer
+                      default: 20
+                - name: offset
+                  in: query
+                  description: Pagination offset for list
+                  required: false
+                  schema:
+                      type: integer
+                      default: 0
+            responses:
+                "200":
+                    description: Single block detail or paginated list of block summaries
+                    content:
+                        application/json:
+                            schema:
+                                oneOf:
+                                    - $ref: "#/components/schemas/BlockDetailResponse"
+                                    - $ref: "#/components/schemas/BlocksListResponse"
+                "404":
+                    description: Block not found (when querying by height or hash)
+
     "/v2/pool/{asset}":
         get:
             operationId: GetPool
@@ -1523,6 +1571,18 @@ components:
                 application/json:
                     schema:
                         $ref: "#/components/schemas/PoolDetails"
+        BlockDetailResponse:
+            description: Single block with full details
+            content:
+                application/json:
+                    schema:
+                        $ref: "#/components/schemas/BlockDetailResponse"
+        BlocksListResponse:
+            description: Paginated list of block summaries
+            content:
+                application/json:
+                    schema:
+                        $ref: "#/components/schemas/BlocksListResponse"
         KnownPoolsResponse:
             description: Object containing known pools to status mapping
             content:
@@ -1826,6 +1886,96 @@ components:
             example:
                 "BTC.BTC": "available"
 
+        BlockDetailResponse:
+            type: object
+            required:
+                - height
+                - timestamp
+                - hash
+                - finalized_events
+                - txs
+            properties:
+                height:
+                    type: integer
+                    format: int64
+                timestamp:
+                    type: integer
+                    format: int64
+                    description: Nanos since epoch
+                hash:
+                    type: string
+                    description: Block hash uppercase hex
+                finalized_events:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/BlockEvent"
+                txs:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/BlockTx"
+        BlockEvent:
+            type: object
+            properties:
+                type:
+                    type: string
+                attributes:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/BlockEventAttribute"
+        BlockEventAttribute:
+            type: object
+            properties:
+                key:
+                    type: string
+                value:
+                    type: string
+        BlockSummaryItem:
+            type: object
+            required:
+                - height
+                - timestamp
+                - hash
+                - tx_count
+                - finalized_events_count
+            properties:
+                height:
+                    type: integer
+                    format: int64
+                timestamp:
+                    type: integer
+                    format: int64
+                hash:
+                    type: string
+                tx_count:
+                    type: integer
+                finalized_events_count:
+                    type: integer
+        BlockTx:
+            type: object
+            properties:
+                tx_hash:
+                    type: string
+                tx_hex:
+                    type: string
+                events:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/BlockEvent"
+        BlocksListResponse:
+            type: object
+            required:
+                - blocks
+                - limit
+                - offset
+            properties:
+                blocks:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/BlockSummaryItem"
+                limit:
+                    type: integer
+                offset:
+                    type: integer
         PoolDetails:
             type: array
             items:

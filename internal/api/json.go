@@ -637,6 +637,115 @@ func jsonPools(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	respJSON(w, poolsResponse)
 }
 
+const defaultBlocksLimit = 20
+const maxBlocksLimit = 100
+
+func jsonBlocks(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	urlParams := r.URL.Query()
+	heightParam := strings.TrimSpace(util.ConsumeUrlParam(&urlParams, "height"))
+	hashParam := strings.TrimSpace(util.ConsumeUrlParam(&urlParams, "hash"))
+	limitParam := strings.TrimSpace(util.ConsumeUrlParam(&urlParams, "limit"))
+	offsetParam := strings.TrimSpace(util.ConsumeUrlParam(&urlParams, "offset"))
+
+	if heightParam != "" || hashParam != "" {
+		if heightParam != "" && hashParam != "" {
+			btcqerr.BadRequest("provide only one of height or hash").ReportHTTP(w)
+			return
+		}
+		var block *db.BlockDetail
+		var err error
+		if heightParam != "" {
+			height, err := strconv.ParseInt(heightParam, 10, 64)
+			if err != nil || height < 0 {
+				btcqerr.BadRequest("invalid height").ReportHTTP(w)
+				return
+			}
+			block, err = db.GetBlockByHeight(r.Context(), height)
+			if err != nil {
+				btcqerr.InternalErrE(err).ReportHTTP(w)
+				return
+			}
+		} else {
+			if !util.IsValidHexHash(hashParam) {
+				btcqerr.BadRequest("invalid hash").ReportHTTP(w)
+				return
+			}
+			block, err = db.GetBlockByHash(r.Context(), hashParam)
+			if err != nil {
+				btcqerr.InternalErrE(err).ReportHTTP(w)
+				return
+			}
+		}
+		if block == nil {
+			http.Error(w, "Not Found", http.StatusNotFound)
+			return
+		}
+
+		var finalizedEvents []oapigen.BlockEvent
+		if len(block.FinalizedEvents) > 0 {
+			if err := json.Unmarshal(block.FinalizedEvents, &finalizedEvents); err != nil {
+				btcqerr.InternalErrE(err).ReportHTTP(w)
+				return
+			}
+		}
+		var txs []oapigen.BlockTx
+		if len(block.Txs) > 0 {
+			if err := json.Unmarshal(block.Txs, &txs); err != nil {
+				btcqerr.InternalErrE(err).ReportHTTP(w)
+				return
+			}
+		}
+		resp := oapigen.BlockDetailResponse{
+			Height:          block.Height,
+			Timestamp:       int64(block.Timestamp),
+			Hash:            db.PrintableHash(string(block.Hash)),
+			FinalizedEvents: finalizedEvents,
+			Txs:             txs,
+		}
+		respJSON(w, resp)
+		return
+	}
+
+	limit := defaultBlocksLimit
+	if limitParam != "" {
+		l, err := strconv.Atoi(limitParam)
+		if err != nil || l < 1 {
+			btcqerr.BadRequest("invalid limit").ReportHTTP(w)
+			return
+		}
+		if l > maxBlocksLimit {
+			l = maxBlocksLimit
+		}
+		limit = l
+	}
+	offset := 0
+	if offsetParam != "" {
+		o, err := strconv.Atoi(offsetParam)
+		if err != nil || o < 0 {
+			btcqerr.BadRequest("invalid offset").ReportHTTP(w)
+			return
+		}
+		offset = o
+	}
+
+	list, err := db.GetBlocksList(r.Context(), limit, offset)
+	if err != nil {
+		btcqerr.InternalErrE(err).ReportHTTP(w)
+		return
+	}
+	items := make([]oapigen.BlockSummaryItem, 0, len(list))
+	for _, s := range list {
+		items = append(items, oapigen.BlockSummaryItem{
+			Height:               s.Height,
+			Timestamp:            int64(s.Timestamp),
+			Hash:                 db.PrintableHash(string(s.Hash)),
+			TxCount:              s.TxCount,
+			FinalizedEventsCount: s.FinalizedEventsCount,
+		})
+	}
+	respJSON(w, oapigen.BlocksListResponse{Blocks: items, Limit: limit, Offset: offset})
+}
+
 func jsonPool(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	urlParams := r.URL.Query()
 

@@ -58,6 +58,7 @@ func InitHandler(nodeURL string) {
 	// Keep only health and pools endpoints
 	addMeasured(router, "/v2/health", jsonHealth)
 	addMeasured(router, "/v2/pools", jsonPools)
+	addMeasured(router, "/v2/blocks", jsonBlocks)
 
 	router.PanicHandler = panicHandler
 }
