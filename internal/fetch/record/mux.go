@@ -27,10 +27,9 @@ var (
 	blockProcTimer = timer.NewTimer("block_write_process")
 	EventProcTime  = metrics.Must1LabelHistogram("btcq_indexer_chain_event_process_seconds", "type", 0.001, 0.01, 0.1)
 
-	EventTotal            = metrics.Must1LabelCounter("btcq_indexer_chain_events_total", "group")
-	DeliverTxEventsTotal  = EventTotal("deliver_tx")
-	BeginBlockEventsTotal = EventTotal("begin_block")
-	EndBlockEventsTotal   = EventTotal("end_block")
+	EventTotal           = metrics.Must1LabelCounter("btcq_indexer_chain_events_total", "group")
+	DeliverTxEventsTotal = EventTotal("deliver_tx")
+	FinalizedEventsTotal = EventTotal("finalized")
 	IgnoresTotal          = metrics.MustCounter("btcq_indexer_chain_event_ignores_total", "Number of known types not in use seen.")
 	UnknownsTotal         = metrics.MustCounter("btcq_indexer_chain_event_unknowns_total", "Number of unknown types discarded.")
 
@@ -64,37 +63,19 @@ func ProcessBlock(block *chain.Block) {
 		EventId:        db.EventId{BlockHeight: block.Height},
 	}
 
-	// “The BeginBlock ABCI message is sent from the underlying Tendermint
-	// engine when a block proposal created by the correct proposer is
-	// received, before DeliverTx is run for each transaction in the block.
-	// It allows developers to have logic be executed at the beginning of
-	// each block.”
-	// — https://docs.cosmos.network/master/core/baseapp.html#beginblock
-	m.EventId.Location = db.BeginBlockEvents
+	// Process all FinalizeBlockEvents (begin/end block distinction not used).
+	m.EventId.Location = db.FinalizedBlockEvents
 	m.EventId.EventIndex = 1
-	beginBlockEventsCount := 0
+	finalizedCount := 0
 	for eventIndex, event := range block.Results.FinalizeBlockEvents {
-		hasMode := false
-		isBeginBlock := false
-		// Check if the event is a BeginBlock or if it doesn't have a mode attribute
-		for _, attr := range event.Attributes {
-			if attr.Key == "mode" {
-				hasMode = true
-				if attr.Value == "BeginBlock" {
-					isBeginBlock = true
-				}
-			}
+		if err := processEvent(event, &m); err != nil {
+			btcqerr.LogEventParseErrorF("block height %d finalize event %d type %q skipped: %s",
+				block.Height, eventIndex, event.Type, err)
 		}
-		if isBeginBlock || !hasMode {
-			if err := processEvent(event, &m); err != nil {
-				btcqerr.LogEventParseErrorF("block height %d begin event %d type %q skipped: %s",
-					block.Height, eventIndex, event.Type, err)
-			}
-			beginBlockEventsCount++
-		}
+		finalizedCount++
 		m.EventId.EventIndex++
 	}
-	BeginBlockEventsTotal.Add(uint64(beginBlockEventsCount))
+	FinalizedEventsTotal.Add(uint64(finalizedCount))
 
 	m.EventId.Location = db.TxsResults
 	m.EventId.TxIndex = 1
@@ -121,34 +102,19 @@ func ProcessBlock(block *chain.Block) {
 		m.EventId.TxIndex++
 	}
 
-	// “The EndBlock ABCI message is sent from the underlying Tendermint
-	// engine after DeliverTx as been run for each transaction in the block.
-	// It allows developers to have logic be executed at the end of each
-	// block.”
-	// — https://docs.cosmos.network/master/core/baseapp.html#endblock
-	endBlockEventsCount := 0
-	m.EventId.Location = db.EndBlockEvents
-	m.EventId.EventIndex = 1
-	for eventIndex, event := range block.Results.FinalizeBlockEvents {
-		for _, attr := range event.Attributes {
-			if attr.Key == "mode" {
-				if attr.Value == "EndBlock" {
-					if err := processEvent(event, &m); err != nil {
-						btcqerr.LogEventParseErrorF("block height %d end event %d type %q skipped: %s",
-							block.Height, eventIndex, event.Type, err)
-					}
-					m.EventId.EventIndex++
-					endBlockEventsCount++
-				}
-			}
-		}
-	}
-	EndBlockEventsTotal.Add(uint64(endBlockEventsCount))
-
 	AddMissingEvents(&m)
 }
 
 var errEventType = errors.New("unknown event type")
+
+func getEventMode(event abci.Event) string {
+	for _, attr := range event.Attributes {
+		if attr.Key == "mode" {
+			return attr.Value
+		}
+	}
+	return ""
+}
 
 // Block notifies Listener for the transaction event.
 // Errors do not include the event type in the message.

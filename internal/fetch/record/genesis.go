@@ -44,8 +44,8 @@ func LoadGenesis() {
 		},
 	}
 
-	BeginBlockEventsTotal.Add(uint64(0))
-	m.EventId.Location = db.BeginBlockEvents
+	FinalizedEventsTotal.Add(uint64(0))
+	m.EventId.Location = db.FinalizedBlockEvents
 	m.EventId.EventIndex = 1
 
 	err := db.Inserter.StartBlock()
