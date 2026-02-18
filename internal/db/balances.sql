@@ -1,10 +1,11 @@
 INSERT INTO btcq_indexer_agg.watermarks (materialized_table, watermark)
     VALUES ('balances', 0);
 
+-- Normalize NULL/empty asset to QBTC.QBTC so balances.asset (PK column) never gets null.
 CREATE VIEW btcq_indexer_agg.balance_deltas AS (
-    SELECT to_addr AS addr, asset, amount_e8, block_timestamp FROM transfer_events
+    SELECT to_addr AS addr, COALESCE(NULLIF(TRIM(asset), ''), 'QBTC.QBTC') AS asset, amount_e8, block_timestamp FROM transfer_events
     UNION ALL
-    SELECT from_addr AS addr, asset, -amount_e8 AS amount_e8, block_timestamp FROM transfer_events
+    SELECT from_addr AS addr, COALESCE(NULLIF(TRIM(asset), ''), 'QBTC.QBTC') AS asset, -amount_e8 AS amount_e8, block_timestamp FROM transfer_events
 );
 
 -- TODO(freki): add indices when serving code is done.
