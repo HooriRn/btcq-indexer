@@ -165,7 +165,7 @@ func TestLiquidityAssymetric(t *testing.T) {
 	require.Equal(t, "1", jsonResult.Meta.WithdrawCount)
 }
 
-// This testcase tests an edge case where saver with affiliate is happening and midgard get its
+// This testcase tests an edge case where a member with affiliate is happening and midgard get its
 // affiliate from swap event that is created afterward.
 func TestSaverAddAffiliate(t *testing.T) {
 	blocks := testdb.InitTestBlocks(t)

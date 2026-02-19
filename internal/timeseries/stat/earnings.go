@@ -16,7 +16,6 @@ type PoolEarnings struct {
 	QbtcLiquidityFees      int64 // fees charged in QBTC
 	AssetLiquidityFees     int64 // fees charged in asset
 	TotalLiquidityFeesQbtc int64 // asset + QBTC fees in QBTC
-	SaverRewards           int64 // saver reward
 	Rewards                int64 // rewards sent to / extracted from pool each block
 }
 
@@ -27,7 +26,6 @@ func (pe *PoolEarnings) toOapigen() oapigen.EarningsHistoryItemPool {
 		AssetLiquidityFees:     util.IntStr(pe.AssetLiquidityFees),
 		TotalLiquidityFeesQbtc: util.IntStr(pe.TotalLiquidityFeesQbtc),
 		Rewards:                util.IntStr(pe.Rewards),
-		SaverEarning:           util.IntStr(pe.SaverRewards),
 		Earnings:               util.IntStr(pe.TotalLiquidityFeesQbtc + pe.Rewards),
 	}
 }
@@ -89,7 +87,6 @@ func GetEarningsHistory(ctx context.Context, buckets db.Buckets) (oapigen.Earnin
 	poolRewardsQ, params := timeseries.RewardEntriesAggregate.BucketedQuery(`
 		SELECT
 			qbtc_e8,
-			saver_e8,
 			aggregate_timestamp/1000000000 AS start_time,
 			pool
 		FROM %s
@@ -197,10 +194,9 @@ func GetEarningsHistory(ctx context.Context, buckets db.Buckets) (oapigen.Earnin
 
 	for poolRewardsRows.Next() {
 		var runeE8 int64
-		var saverE8 int64
 		var startTime db.Second
 		var pool string
-		err := poolRewardsRows.Scan(&runeE8, &saverE8, &startTime, &pool)
+		err := poolRewardsRows.Scan(&runeE8, &startTime, &pool)
 		if err != nil {
 			return oapigen.EarningsHistoryResponse{}, err
 		}
@@ -212,10 +208,6 @@ func GetEarningsHistory(ctx context.Context, buckets db.Buckets) (oapigen.Earnin
 		// Add rewards to earnings by pool
 		intervalPoolEarningsMaps[startTime].getPoolEarnings(pool).Rewards += runeE8
 		metaPoolEarningsMap.getPoolEarnings(pool).Rewards += runeE8
-
-		// Add saver reward to the pool
-		intervalPoolEarningsMaps[startTime].getPoolEarnings(pool).SaverRewards += saverE8
-		metaPoolEarningsMap.getPoolEarnings(pool).SaverRewards += saverE8
 
 		// Add rewards to total pool rewards
 		intervalTotalPoolRewards[startTime] += runeE8
@@ -383,7 +375,6 @@ func GetPoolsEarnings(ctx context.Context, buckets db.Buckets) (poolEarningsMap,
 	poolRewardsQ, params := timeseries.RewardEntriesAggregate.BucketedQuery(`
 		SELECT
 			qbtc_e8,
-			saver_e8,
 			aggregate_timestamp/1000000000 AS start_time,
 			pool
 		FROM %s
@@ -439,20 +430,15 @@ func GetPoolsEarnings(ctx context.Context, buckets db.Buckets) (poolEarningsMap,
 
 	for poolRewardsRows.Next() {
 		var runeE8 int64
-		var saverE8 int64
 		var startTime db.Second
 		var pool string
-		err := poolRewardsRows.Scan(&runeE8, &saverE8, &startTime, &pool)
+		err := poolRewardsRows.Scan(&runeE8, &startTime, &pool)
 		if err != nil {
 			return nil, err
 		}
 
 		// Add rewards to earnings by pool
 		mapPoolEarningStat.getPoolEarnings(pool).Rewards += runeE8
-
-		// Add saver reward to the pool
-		mapPoolEarningStat.getPoolEarnings(pool).SaverRewards += saverE8
-
 	}
 
 	return mapPoolEarningStat, nil

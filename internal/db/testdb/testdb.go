@@ -355,8 +355,8 @@ func InsertRewardsEventWithValidator(t *testing.T, bondE8 int64, validator, fake
 
 func InsertRewardsEventEntry(t *testing.T, bondE8 int64, pool, fakeTimestamp string) {
 	const insertq = `INSERT INTO rewards_event_entries ` +
-		`(rune_e8, saver_e8, pool, event_id, block_timestamp) ` +
-		`VALUES ($1, 0, $2, 0, $3)`
+		`(qbtc_e8, pool, event_id, block_timestamp) ` +
+		`VALUES ($1, $2, 0, $3)`
 
 	timestamp := nanoWithDefault(fakeTimestamp)
 	MustExec(t, insertq, bondE8, pool, timestamp)

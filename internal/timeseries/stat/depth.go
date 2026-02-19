@@ -191,12 +191,9 @@ func TVLDepthHistory(ctx context.Context, buckets db.Buckets) (
 		var depth int64 = 0
 		ret[idx].PoolsMapQbtcDepth = map[string]int64{}
 		for poolName, pair := range poolDepths {
-			// exclude derived asset pools, e.g. THOR.BTC
-			if record.GetCoinType([]byte(poolName)) != record.AssetDerived {
-				depth += pair.QbtcDepth
-				if record.GetCoinType([]byte(poolName)) == record.AssetNative {
-					ret[idx].PoolsMapQbtcDepth[poolName] = pair.QbtcDepth
-				}
+			depth += pair.QbtcDepth
+			if record.GetCoinType([]byte(poolName)) == record.AssetNative {
+				ret[idx].PoolsMapQbtcDepth[poolName] = pair.QbtcDepth
 			}
 		}
 

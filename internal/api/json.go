@@ -804,9 +804,6 @@ func jsonMemberDetails(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 	urlParams := r.URL.Query()
 
 	showPoolsType := timeseries.RegularPools
-	if util.ConsumeUrlParam(&urlParams, "showSavers") == "true" {
-		showPoolsType = timeseries.RegularAndSaverPools
-	}
 
 	if merr := util.CheckUrlEmpty(urlParams); merr != nil {
 		merr.ReportHTTP(w)
@@ -829,63 +826,6 @@ func jsonMemberDetails(w http.ResponseWriter, r *http.Request, ps httprouter.Par
 
 	respJSON(w, oapigen.MemberDetailsResponse{
 		Pools: pools.ToOapigen(),
-	})
-}
-
-func getSaversRedeemValue(pools timeseries.MemberPools, poolsDepthMap timeseries.DepthMap,
-	poolsUnitsMap map[string]int64) map[string]int64 {
-	poolRedeemValueMap := map[string]int64{}
-	for _, pool := range pools {
-		poolUnits := float64(poolsUnitsMap[pool.Pool])
-		if poolUnits == 0.0 {
-			continue
-		}
-		saversDepth := float64(poolsDepthMap[pool.Pool].AssetDepth)
-		poolRedeemValueMap[pool.Pool] = int64((saversDepth * float64(pool.LiquidityUnits)) / poolUnits)
-	}
-
-	return poolRedeemValueMap
-}
-
-func jsonSaverDetails(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	if merr := util.CheckUrlEmpty(urlParams); merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	addr := strings.Join(withLowered(ps[0].Value), ",")
-
-	addrs := strings.Split(addr, ",")
-	pools, err := timeseries.GetMemberPools(r.Context(), addrs, timeseries.SaverPools)
-	if err != nil {
-		respError(w, err)
-		return
-	}
-
-	if len(pools) == 0 {
-		http.Error(w, "Not Found", http.StatusNotFound)
-		return
-	}
-
-	poolDepthMap := timeseries.Latest.GetState().Pools
-	memberPools := make([]string, 0)
-	for _, memberPool := range pools {
-		if timeseries.PoolExists(memberPool.Pool) {
-			memberPools = append(memberPools, memberPool.Pool)
-		}
-	}
-	poolUnitsMap, err := stat.CurrentPoolsLiquidityUnits(r.Context(), memberPools)
-	if err != nil {
-		respError(w, err)
-		return
-	}
-
-	poolRedeemValue := getSaversRedeemValue(pools, poolDepthMap, poolUnitsMap)
-
-	respJSON(w, oapigen.SaverDetailsResponse{
-		Pools: pools.ToSavers(poolRedeemValue),
 	})
 }
 

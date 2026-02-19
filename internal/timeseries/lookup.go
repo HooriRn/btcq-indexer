@@ -21,7 +21,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/btcq/btcq-indexer/internal/fetch/notinchain"
-	"github.com/btcq/btcq-indexer/internal/fetch/record"
 )
 
 // ErrBeyondLast denies a request into the future.
@@ -153,8 +152,7 @@ func PoolStatus(ctx context.Context, pool string) (string, error) {
 var RewardEntriesAggregate = db.RegisterAggregate(
 	db.NewAggregate("rewards_event_entries", "rewards_event_entries").
 		AddGroupColumn("pool").
-		AddBigintSumColumn("qbtc_e8").
-		AddBigintSumColumn("saver_e8"))
+		AddBigintSumColumn("qbtc_e8"))
 
 // TotalLiquidityFeesQbtc gets sum of liquidity fees in QBTC for a given time interval
 func TotalLiquidityFeesQbtc(ctx context.Context, from time.Time, to time.Time) (int64, error) {
@@ -387,11 +385,8 @@ func GetNetworkData(ctx context.Context) (oapigen.Network, error) {
 	var qbtcDepth int64
 	var availablePoolsQbtc int64
 	for poolName, depth := range qbtcE8DepthPerPool {
-		if record.GetCoinType([]byte(poolName)) != record.AssetDerived {
-			qbtcDepth += depth
-		}
-		if statusMap[poolName] == "available" &&
-			record.GetCoinType([]byte(poolName)) == record.AssetNative {
+		qbtcDepth += depth
+		if statusMap[poolName] == "available" {
 			availablePoolsQbtc += depth
 		}
 	}

@@ -82,19 +82,6 @@ func (memberPool MemberPool) toOapigen() oapigen.MemberPool {
 	}
 }
 
-func (memberPool MemberPool) toSavers() oapigen.SaverPool {
-	return oapigen.SaverPool{
-		Pool:           util.ConvertSynthPoolToNative(memberPool.Pool),
-		AssetAddress:   memberPool.AssetAddress,
-		AssetAdded:     util.IntStr(memberPool.AssetAdded),
-		AssetDeposit:   util.IntStr(memberPool.AssetDeposit),
-		SaverUnits:     util.IntStr(memberPool.LiquidityUnits),
-		AssetWithdrawn: util.IntStr(memberPool.AssetWithdrawn),
-		DateFirstAdded: util.IntStr(memberPool.DateFirstAdded),
-		DateLastAdded:  util.IntStr(memberPool.DateLastAdded),
-	}
-}
-
 // Pools data associated with a single member
 type MemberPools []MemberPool
 
@@ -107,36 +94,15 @@ func (memberPools MemberPools) ToOapigen() []oapigen.MemberPool {
 	return ret
 }
 
-func (memberPools MemberPools) ToSavers(poolRedeemValueMap map[string]int64) []oapigen.SaverPool {
-	ret := make([]oapigen.SaverPool, len(memberPools))
-	for i, memberPool := range memberPools {
-		ret[i] = memberPool.toSavers()
-		ret[i].AssetRedeem = util.IntStr(poolRedeemValueMap[memberPool.Pool])
-	}
-
-	return ret
-}
-
 type MemberPoolType int
 
 const (
-	RegularAndSaverPools MemberPoolType = iota // regular and synth pools too
-	RegularPools                               // regular (non-synth) pools e.g. 'BTC.BTC'
-	SaverPools                                 // LPs of synth pools e.g. 'BTC/BTC'
+	RegularPools MemberPoolType = iota // regular (non-synth) pools e.g. 'BTC.BTC'
 )
 
 func PoolBasedOfType(poolName string, poolType MemberPoolType) bool {
-	if poolType == RegularAndSaverPools {
-		return true
-	}
 	poolCoinType := record.GetCoinType([]byte(poolName))
-	if poolCoinType == record.AssetSynth && poolType == SaverPools {
-		return true
-	}
-	if poolCoinType == record.AssetNative && poolType == RegularPools {
-		return true
-	}
-	return false
+	return poolCoinType == record.AssetNative && poolType == RegularPools
 }
 
 func GetMemberPools(ctx context.Context, address []string, poolType MemberPoolType) (MemberPools, error) {

@@ -188,10 +188,6 @@ CALL setup_hypertable('rewards_events');
 CREATE TABLE rewards_event_entries (
     pool                TEXT NOT NULL,
     qbtc_e8             BIGINT NOT NULL,
-    -- saver_e8 is the total amount earned in the paralel synth pool. 
-    -- Rows having saver_e8 field do not come from reward events, 
-    -- but from donate events with the memo "THOR-SAVERS-YIELD"
-    saver_e8            BIGINT NOT NULL, 
     event_id            BIGINT NOT NULL,
     block_timestamp     BIGINT NOT NULL
 );

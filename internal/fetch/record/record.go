@@ -46,9 +46,9 @@ func (r *eventRecorder) OnRewards(e *Rewards, meta *Metadata) {
 		return
 	}
 
-	cols2 := []string{"pool", "qbtc_e8", "saver_e8"}
+	cols2 := []string{"pool", "qbtc_e8"}
 	for _, p := range e.PerPool {
-		err := InsertWithMeta("rewards_event_entries", meta, cols2, p.Asset, p.E8, 0)
+		err := InsertWithMeta("rewards_event_entries", meta, cols2, p.Asset, p.E8)
 		if err != nil {
 			btcqerr.LogEventParseErrorF(
 				"reserve event pools from height %d lost on %s",
