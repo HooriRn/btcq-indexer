@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
     title: btcq-indexer Public API
-    version: 2.34.1
+    version: 0.0.1
     contact:
         email: devs@thorchain.org
     description: >-
