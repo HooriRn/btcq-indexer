@@ -48,6 +48,9 @@ func InitHandler(nodeURL string) {
 	router.HandleOPTIONS = true
 	router.HandlerFunc(http.MethodGet, "/", serveRoot)
 
+	addMeasured(router, "/v2/doc", jsonDoc)
+	addMeasured(router, "/v2/swagger.json", jsonSwagger)
+
 	// Debug endpoints
 	router.HandlerFunc(http.MethodGet, "/v2/debug/metrics", metrics.ServeHTTP)
 	router.HandlerFunc(http.MethodGet, "/v2/debug/timers", timer.ServeHTTP)

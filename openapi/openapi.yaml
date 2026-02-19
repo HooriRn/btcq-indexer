@@ -13,7 +13,6 @@ info:
         To interact with THORChain protocol, users should query THORNode directly.
 
 paths:
-    # TODO(acsaba): remove remaining mentions of stake from documentation.
     /v2/doc:
         get:
             operationId: GetDocs
