@@ -1,5 +1,5 @@
 # Build Image
-FROM golang:1.24.6-bullseye AS build
+FROM golang:1.25.7 AS build
 
 # ca-certificates pull in default CAs, without this https fetch from blockstore will fail
 RUN apt-get update && \
@@ -7,7 +7,7 @@ RUN apt-get update && \
     build-essential \
     gcc \
     libc6-dev \
-    ca-certificates=20210119 && \
+    ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 ENV GOBIN=/go/bin
@@ -28,10 +28,9 @@ COPY openapi openapi
 # Compile.
 ENV CC=/usr/bin/gcc
 ENV CGO_ENABLED=1
-RUN go build -v -installsuffix cgo ./cmd/blockstore/dump
+
 RUN go build -v -installsuffix cgo ./cmd/btcq-indexer
-RUN go build -v -installsuffix cgo ./cmd/trimdb
-RUN go build -v -installsuffix cgo ./cmd/statechecks
+
 
 # Main Image
 FROM debian:bullseye-slim
