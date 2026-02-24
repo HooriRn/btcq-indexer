@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: btcq-indexer
+    restart: unless-stopped
     ports:
       - 8080:8080
     links:
@@ -23,7 +24,7 @@ services:
       - POSTGRES_USER=btcq_indexer
       - POSTGRES_PASSWORD=password
     ports:
-      - 5432:5432
+      - 6432:5432
     volumes:
       - pg:/var/lib/postgresql/data
 

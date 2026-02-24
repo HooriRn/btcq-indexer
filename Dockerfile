@@ -31,9 +31,8 @@ ENV CGO_ENABLED=1
 
 RUN go build -v -installsuffix cgo ./cmd/btcq-indexer
 
-
-# Main Image
-FROM debian:bullseye-slim
+# Main Image (bookworm has glibc 2.36; bullseye has 2.31 - binary needs 2.32+)
+FROM debian:bookworm-slim
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -44,11 +43,8 @@ RUN apt-get update && \
 RUN mkdir -p openapi/generated
 COPY --from=build /etc/ssl/certs /etc/ssl/certs
 COPY --from=build /tmp/btcq-indexer/openapi/generated/doc.html ./openapi/generated/doc.html
-COPY --from=build /tmp/btcq-indexer/dump .
 COPY --from=build /tmp/btcq-indexer/btcq-indexer .
-COPY --from=build /tmp/btcq-indexer/statechecks .
-COPY --from=build /tmp/btcq-indexer/trimdb .
-COPY --from=build /go/pkg/mod/github.com/!cosm!wasm/wasmvm/v2@v2.1.2/internal/api/libwasmvm.*.so /usr/lib
+COPY --from=build /go/pkg/mod/github.com/!cosm!wasm/wasmvm/v2@v2.2.4/internal/api/libwasmvm.*.so /usr/lib
 COPY config/config.json .
 COPY resources /resources
 
