@@ -15,60 +15,6 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-// Defines values for ActionStatus.
-const (
-	Failed  ActionStatus = "failed"
-	Pending ActionStatus = "pending"
-	Success ActionStatus = "success"
-)
-
-// Defines values for ActionType.
-const (
-	AddLiquidity     ActionType = "addLiquidity"
-	Donate           ActionType = "donate"
-	QbtcPoolDeposit  ActionType = "qbtcPoolDeposit"
-	QbtcPoolWithdraw ActionType = "qbtcPoolWithdraw"
-	Refund           ActionType = "refund"
-	Send             ActionType = "send"
-	Swap             ActionType = "swap"
-	Switch           ActionType = "switch"
-	Thorname         ActionType = "thorname"
-	Withdraw         ActionType = "withdraw"
-)
-
-// Defines values for GetAffiliateHistoryParamsInterval.
-const (
-	GetAffiliateHistoryParamsIntervalDay     GetAffiliateHistoryParamsInterval = "day"
-	GetAffiliateHistoryParamsIntervalHour    GetAffiliateHistoryParamsInterval = "hour"
-	GetAffiliateHistoryParamsIntervalMonth   GetAffiliateHistoryParamsInterval = "month"
-	GetAffiliateHistoryParamsIntervalN5min   GetAffiliateHistoryParamsInterval = "5min"
-	GetAffiliateHistoryParamsIntervalQuarter GetAffiliateHistoryParamsInterval = "quarter"
-	GetAffiliateHistoryParamsIntervalWeek    GetAffiliateHistoryParamsInterval = "week"
-	GetAffiliateHistoryParamsIntervalYear    GetAffiliateHistoryParamsInterval = "year"
-)
-
-// Defines values for GetAffiliateEarningParamsInterval.
-const (
-	GetAffiliateEarningParamsIntervalDay     GetAffiliateEarningParamsInterval = "day"
-	GetAffiliateEarningParamsIntervalHour    GetAffiliateEarningParamsInterval = "hour"
-	GetAffiliateEarningParamsIntervalMonth   GetAffiliateEarningParamsInterval = "month"
-	GetAffiliateEarningParamsIntervalN5min   GetAffiliateEarningParamsInterval = "5min"
-	GetAffiliateEarningParamsIntervalQuarter GetAffiliateEarningParamsInterval = "quarter"
-	GetAffiliateEarningParamsIntervalWeek    GetAffiliateEarningParamsInterval = "week"
-	GetAffiliateEarningParamsIntervalYear    GetAffiliateEarningParamsInterval = "year"
-)
-
-// Defines values for GetAffiliateStatsParamsInterval.
-const (
-	GetAffiliateStatsParamsIntervalDay     GetAffiliateStatsParamsInterval = "day"
-	GetAffiliateStatsParamsIntervalHour    GetAffiliateStatsParamsInterval = "hour"
-	GetAffiliateStatsParamsIntervalMonth   GetAffiliateStatsParamsInterval = "month"
-	GetAffiliateStatsParamsIntervalN5min   GetAffiliateStatsParamsInterval = "5min"
-	GetAffiliateStatsParamsIntervalQuarter GetAffiliateStatsParamsInterval = "quarter"
-	GetAffiliateStatsParamsIntervalWeek    GetAffiliateStatsParamsInterval = "week"
-	GetAffiliateStatsParamsIntervalYear    GetAffiliateStatsParamsInterval = "year"
-)
-
 // Defines values for GetDepthHistoryParamsInterval.
 const (
 	GetDepthHistoryParamsIntervalDay     GetDepthHistoryParamsInterval = "day"
@@ -80,28 +26,6 @@ const (
 	GetDepthHistoryParamsIntervalYear    GetDepthHistoryParamsInterval = "year"
 )
 
-// Defines values for GetEarningsHistoryParamsInterval.
-const (
-	GetEarningsHistoryParamsIntervalDay     GetEarningsHistoryParamsInterval = "day"
-	GetEarningsHistoryParamsIntervalHour    GetEarningsHistoryParamsInterval = "hour"
-	GetEarningsHistoryParamsIntervalMonth   GetEarningsHistoryParamsInterval = "month"
-	GetEarningsHistoryParamsIntervalN5min   GetEarningsHistoryParamsInterval = "5min"
-	GetEarningsHistoryParamsIntervalQuarter GetEarningsHistoryParamsInterval = "quarter"
-	GetEarningsHistoryParamsIntervalWeek    GetEarningsHistoryParamsInterval = "week"
-	GetEarningsHistoryParamsIntervalYear    GetEarningsHistoryParamsInterval = "year"
-)
-
-// Defines values for GetLiquidityHistoryParamsInterval.
-const (
-	GetLiquidityHistoryParamsIntervalDay     GetLiquidityHistoryParamsInterval = "day"
-	GetLiquidityHistoryParamsIntervalHour    GetLiquidityHistoryParamsInterval = "hour"
-	GetLiquidityHistoryParamsIntervalMonth   GetLiquidityHistoryParamsInterval = "month"
-	GetLiquidityHistoryParamsIntervalN5min   GetLiquidityHistoryParamsInterval = "5min"
-	GetLiquidityHistoryParamsIntervalQuarter GetLiquidityHistoryParamsInterval = "quarter"
-	GetLiquidityHistoryParamsIntervalWeek    GetLiquidityHistoryParamsInterval = "week"
-	GetLiquidityHistoryParamsIntervalYear    GetLiquidityHistoryParamsInterval = "year"
-)
-
 // Defines values for GetQbtcPriceHistoryParamsInterval.
 const (
 	GetQbtcPriceHistoryParamsIntervalDay     GetQbtcPriceHistoryParamsInterval = "day"
@@ -111,39 +35,6 @@ const (
 	GetQbtcPriceHistoryParamsIntervalQuarter GetQbtcPriceHistoryParamsInterval = "quarter"
 	GetQbtcPriceHistoryParamsIntervalWeek    GetQbtcPriceHistoryParamsInterval = "week"
 	GetQbtcPriceHistoryParamsIntervalYear    GetQbtcPriceHistoryParamsInterval = "year"
-)
-
-// Defines values for GetReserveHistoryParamsInterval.
-const (
-	GetReserveHistoryParamsIntervalDay     GetReserveHistoryParamsInterval = "day"
-	GetReserveHistoryParamsIntervalHour    GetReserveHistoryParamsInterval = "hour"
-	GetReserveHistoryParamsIntervalMonth   GetReserveHistoryParamsInterval = "month"
-	GetReserveHistoryParamsIntervalN5min   GetReserveHistoryParamsInterval = "5min"
-	GetReserveHistoryParamsIntervalQuarter GetReserveHistoryParamsInterval = "quarter"
-	GetReserveHistoryParamsIntervalWeek    GetReserveHistoryParamsInterval = "week"
-	GetReserveHistoryParamsIntervalYear    GetReserveHistoryParamsInterval = "year"
-)
-
-// Defines values for GetSwapHistoryParamsInterval.
-const (
-	GetSwapHistoryParamsIntervalDay     GetSwapHistoryParamsInterval = "day"
-	GetSwapHistoryParamsIntervalHour    GetSwapHistoryParamsInterval = "hour"
-	GetSwapHistoryParamsIntervalMonth   GetSwapHistoryParamsInterval = "month"
-	GetSwapHistoryParamsIntervalN5min   GetSwapHistoryParamsInterval = "5min"
-	GetSwapHistoryParamsIntervalQuarter GetSwapHistoryParamsInterval = "quarter"
-	GetSwapHistoryParamsIntervalWeek    GetSwapHistoryParamsInterval = "week"
-	GetSwapHistoryParamsIntervalYear    GetSwapHistoryParamsInterval = "year"
-)
-
-// Defines values for GetTVLHistoryParamsInterval.
-const (
-	GetTVLHistoryParamsIntervalDay     GetTVLHistoryParamsInterval = "day"
-	GetTVLHistoryParamsIntervalHour    GetTVLHistoryParamsInterval = "hour"
-	GetTVLHistoryParamsIntervalMonth   GetTVLHistoryParamsInterval = "month"
-	GetTVLHistoryParamsIntervalN5min   GetTVLHistoryParamsInterval = "5min"
-	GetTVLHistoryParamsIntervalQuarter GetTVLHistoryParamsInterval = "quarter"
-	GetTVLHistoryParamsIntervalWeek    GetTVLHistoryParamsInterval = "week"
-	GetTVLHistoryParamsIntervalYear    GetTVLHistoryParamsInterval = "year"
 )
 
 // Defines values for GetPoolParamsPeriod.
@@ -183,226 +74,17 @@ const (
 
 // Defines values for GetPoolsParamsPeriod.
 const (
-	GetPoolsParamsPeriodAll   GetPoolsParamsPeriod = "all"
-	GetPoolsParamsPeriodN100d GetPoolsParamsPeriod = "100d"
-	GetPoolsParamsPeriodN14d  GetPoolsParamsPeriod = "14d"
-	GetPoolsParamsPeriodN180d GetPoolsParamsPeriod = "180d"
-	GetPoolsParamsPeriodN1h   GetPoolsParamsPeriod = "1h"
-	GetPoolsParamsPeriodN24h  GetPoolsParamsPeriod = "24h"
-	GetPoolsParamsPeriodN30d  GetPoolsParamsPeriod = "30d"
-	GetPoolsParamsPeriodN365d GetPoolsParamsPeriod = "365d"
-	GetPoolsParamsPeriodN7d   GetPoolsParamsPeriod = "7d"
-	GetPoolsParamsPeriodN90d  GetPoolsParamsPeriod = "90d"
+	All   GetPoolsParamsPeriod = "all"
+	N100d GetPoolsParamsPeriod = "100d"
+	N14d  GetPoolsParamsPeriod = "14d"
+	N180d GetPoolsParamsPeriod = "180d"
+	N1h   GetPoolsParamsPeriod = "1h"
+	N24h  GetPoolsParamsPeriod = "24h"
+	N30d  GetPoolsParamsPeriod = "30d"
+	N365d GetPoolsParamsPeriod = "365d"
+	N7d   GetPoolsParamsPeriod = "7d"
+	N90d  GetPoolsParamsPeriod = "90d"
 )
-
-// Defines values for GetTcyDistributionParamsPeriod.
-const (
-	GetTcyDistributionParamsPeriodAll   GetTcyDistributionParamsPeriod = "all"
-	GetTcyDistributionParamsPeriodN100d GetTcyDistributionParamsPeriod = "100d"
-	GetTcyDistributionParamsPeriodN14d  GetTcyDistributionParamsPeriod = "14d"
-	GetTcyDistributionParamsPeriodN180d GetTcyDistributionParamsPeriod = "180d"
-	GetTcyDistributionParamsPeriodN1h   GetTcyDistributionParamsPeriod = "1h"
-	GetTcyDistributionParamsPeriodN24h  GetTcyDistributionParamsPeriod = "24h"
-	GetTcyDistributionParamsPeriodN30d  GetTcyDistributionParamsPeriod = "30d"
-	GetTcyDistributionParamsPeriodN365d GetTcyDistributionParamsPeriod = "365d"
-	GetTcyDistributionParamsPeriodN7d   GetTcyDistributionParamsPeriod = "7d"
-	GetTcyDistributionParamsPeriodN90d  GetTcyDistributionParamsPeriod = "90d"
-)
-
-// Defines values for GetVotesParamsPeriod.
-const (
-	All   GetVotesParamsPeriod = "all"
-	N100d GetVotesParamsPeriod = "100d"
-	N14d  GetVotesParamsPeriod = "14d"
-	N180d GetVotesParamsPeriod = "180d"
-	N1h   GetVotesParamsPeriod = "1h"
-	N24h  GetVotesParamsPeriod = "24h"
-	N30d  GetVotesParamsPeriod = "30d"
-	N365d GetVotesParamsPeriod = "365d"
-	N7d   GetVotesParamsPeriod = "7d"
-	N90d  GetVotesParamsPeriod = "90d"
-)
-
-// Action action details among with related transactions
-type Action struct {
-	// Date Int64, nano timestamp of the block at which the action was registered
-	Date string `json:"date"`
-
-	// Height Int64, height of the block at which the action was registered
-	Height string `json:"height"`
-
-	// In Inbound transactions related to the action
-	In       []Transaction `json:"in"`
-	Metadata Metadata      `json:"metadata"`
-
-	// Out Outbound transactions related to the action
-	Out []Transaction `json:"out"`
-
-	// Pools Pools involved in the action
-	Pools []string `json:"pools"`
-
-	// Status Indicates if the action is completed or if related outbound transactions are still
-	// pending, failed to be processed.
-	Status ActionStatus `json:"status"`
-
-	// Type Type of action
-	Type ActionType `json:"type"`
-}
-
-// ActionStatus Indicates if the action is completed or if related outbound transactions are still
-// pending, failed to be processed.
-type ActionStatus string
-
-// ActionType Type of action
-type ActionType string
-
-// ActionMeta action query metadata
-type ActionMeta struct {
-	// NextPageToken Int64, The last action event_id that can be used for pagination.
-	// This token is needed to be given for next page.
-	NextPageToken string `json:"nextPageToken"`
-
-	// PrevPageToken Int64, The first action event_id that can be used for previous pagination.
-	// This token is needed to be given for previous page.
-	PrevPageToken string `json:"prevPageToken"`
-}
-
-// AddLiquidityMetadata defines model for AddLiquidityMetadata.
-type AddLiquidityMetadata struct {
-	// AffiliateAddress Affiliate fee address of the addLiquidity
-	AffiliateAddress string `json:"affiliateAddress"`
-
-	// AffiliateFee Int64 (Basis points, 0-1000, where 1000=10%)
-	AffiliateFee string `json:"affiliateFee"`
-
-	// LiquidityUnits Int64, amount of liquidity units assigned to the member as result of the liquidity
-	// deposit
-	LiquidityUnits string `json:"liquidityUnits"`
-
-	// Memo Transaction memo of the addLiquidity action
-	Memo string `json:"memo"`
-}
-
-// AffiliateEarning defines model for AffiliateEarning.
-type AffiliateEarning = []AffiliateEarningInterval
-
-// AffiliateEarningInterval defines model for AffiliateEarningInterval.
-type AffiliateEarningInterval struct {
-	// Affiliates List of affiliate earnings for the time interval
-	Affiliates []AffiliateEarningItem `json:"affiliates"`
-
-	// Count Int64, The total count of affiliate transactions during the time interval
-	Count string `json:"count"`
-
-	// EndTime Int64, The end time of bucket in unix timestamp
-	EndTime string `json:"endTime"`
-
-	// StartTime Int64, The beginning time of bucket in unix timestamp
-	StartTime string `json:"startTime"`
-
-	// TotalEarningsRune Int64(e8), The total earnings (liquidity fees) of all affiliates in RUNE during the time interval
-	TotalEarningsRune string `json:"totalEarningsRune"`
-
-	// TotalEarningsUSD Int64(e2), The total earnings (liquidity fees) of all affiliates in USD during the time interval
-	TotalEarningsUSD string `json:"totalEarningsUSD"`
-}
-
-// AffiliateEarningItem defines model for AffiliateEarningItem.
-type AffiliateEarningItem struct {
-	// Affiliate Affiliate address or THORName
-	Affiliate string `json:"affiliate"`
-
-	// Count Int64, The count of transactions for this affiliate during the time interval
-	Count string `json:"count"`
-
-	// EarningsRUNE Int64(e8), The earnings (liquidity fees) for this affiliate in RUNE during the time interval
-	EarningsRUNE string `json:"earningsRUNE"`
-
-	// EarningsUSD Int64(e2), The earnings (liquidity fees) for this affiliate in USD during the time interval
-	EarningsUSD string `json:"earningsUSD"`
-}
-
-// AffiliateHistory defines model for AffiliateHistory.
-type AffiliateHistory struct {
-	Intervals AffiliateHistoryIntervals `json:"intervals"`
-	Meta      AffiliateHistoryMeta      `json:"meta"`
-}
-
-// AffiliateHistoryIntervals defines model for AffiliateHistoryIntervals.
-type AffiliateHistoryIntervals = []AffiliateHistoryItem
-
-// AffiliateHistoryItem defines model for AffiliateHistoryItem.
-type AffiliateHistoryItem struct {
-	// Count Int64, The count of affiliates during the time interval
-	Count string `json:"count"`
-
-	// EndTime Int64, The end time of bucket in unix timestamp
-	EndTime string `json:"endTime"`
-
-	// StartTime Int64, The beginning time of bucket in unix timestamp
-	StartTime string         `json:"startTime"`
-	Thornames []ItemThorname `json:"thornames"`
-
-	// Volume Int64(e8), The total earnings of the affiliates detonated in RUNE
-	Volume string `json:"volume"`
-
-	// VolumeUSD Int64(e2), The total earnings of the affiliates
-	// denoted in USD price
-	VolumeUSD string `json:"volumeUSD"`
-}
-
-// AffiliateHistoryMeta defines model for AffiliateHistoryMeta.
-type AffiliateHistoryMeta struct {
-	// Count Int64, The count of affiliates during the time interval
-	Count string `json:"count"`
-
-	// EndTime Int64, The end time of bucket in unix timestamp
-	EndTime string `json:"endTime"`
-
-	// StartTime Int64, The beginning time of bucket in unix timestamp
-	StartTime string `json:"startTime"`
-
-	// Volume Int64(e8), The total earnings of the affiliates detonated in RUNE
-	Volume string `json:"volume"`
-
-	// VolumeUSD Int64(e2), The total earnings of the affiliates
-	// denoted in USD price
-	VolumeUSD string `json:"volumeUSD"`
-}
-
-// AffiliateStatItem defines model for AffiliateStatItem.
-type AffiliateStatItem struct {
-	// Affiliate affiliate address
-	Affiliate string `json:"affiliate"`
-
-	// Count Int64, The count of swaps for the affiliate during the stats interval
-	Count string `json:"count"`
-
-	// VolumeUSD Int64(e2), The volume of swaps for the affiliate
-	// denoted in USD price of the rune in each swap
-	VolumeUSD string `json:"volumeUSD"`
-}
-
-// AffiliateStats defines model for AffiliateStats.
-type AffiliateStats = []AffiliateStatsItem
-
-// AffiliateStatsItem defines model for AffiliateStatsItem.
-type AffiliateStatsItem struct {
-	Affiliates []AffiliateStatItem `json:"affiliates"`
-
-	// Count Int64, The count of unique swaps during the stats interval
-	Count string `json:"count"`
-
-	// EndTime Int64, The end time of the stats interval in unix timestamp
-	EndTime string `json:"endTime"`
-
-	// StartTime Int64, The beginning time of the stats interval in unix timestamp
-	StartTime string `json:"startTime"`
-
-	// TotalVolumeUSD Int64(e2), The total volume of the affiliates
-	// denoted in USD price
-	TotalVolumeUSD string `json:"totalVolumeUSD"`
-}
 
 // Balance defines model for Balance.
 type Balance struct {
@@ -440,13 +122,6 @@ type BlockEventAttribute struct {
 	Value *string `json:"value,omitempty"`
 }
 
-// BlockRewards defines model for BlockRewards.
-type BlockRewards struct {
-	BlockReward string `json:"blockReward"`
-	BondReward  string `json:"bondReward"`
-	PoolReward  string `json:"poolReward"`
-}
-
 // BlockSummaryItem defines model for BlockSummaryItem.
 type BlockSummaryItem struct {
 	FinalizedEventsCount int    `json:"finalized_events_count"`
@@ -470,91 +145,6 @@ type BlocksListResponse struct {
 	Offset int                `json:"offset"`
 }
 
-// BondMetadata defines model for BondMetadata.
-type BondMetadata struct {
-	// Fee node operator fee
-	Fee *string `json:"fee,omitempty"`
-
-	// Memo Transaction memo of bond event
-	Memo string `json:"memo"`
-
-	// NodeAddress node address
-	NodeAddress string `json:"nodeAddress"`
-
-	// Provider bond provider address
-	Provider *string `json:"provider,omitempty"`
-}
-
-// BondMetrics defines model for BondMetrics.
-type BondMetrics struct {
-	// AverageActiveBond Int64(e8), Average bond of active nodes
-	AverageActiveBond string `json:"averageActiveBond"`
-
-	// AverageStandbyBond Int64(e8), Average bond of standby nodes
-	AverageStandbyBond string `json:"averageStandbyBond"`
-
-	// BondHardCap Int64(e8), Highest effective bond for nodes
-	BondHardCap string `json:"bondHardCap"`
-
-	// MaximumActiveBond Int64(e8), Maxinum bond of active nodes
-	MaximumActiveBond string `json:"maximumActiveBond"`
-
-	// MaximumStandbyBond Int64(e8), Maximum bond of standby nodes
-	MaximumStandbyBond string `json:"maximumStandbyBond"`
-
-	// MedianActiveBond Int64(e8), Median bond of active nodes
-	MedianActiveBond string `json:"medianActiveBond"`
-
-	// MedianStandbyBond Int64(e8), Median bond of standby nodes
-	MedianStandbyBond string `json:"medianStandbyBond"`
-
-	// MinimumActiveBond Int64(e8), Minimum bond of active nodes
-	MinimumActiveBond string `json:"minimumActiveBond"`
-
-	// MinimumStandbyBond Int64(e8), Minimum bond of standby nodes
-	MinimumStandbyBond string `json:"minimumStandbyBond"`
-
-	// TotalActiveBond Int64(e8), Total bond of active nodes
-	TotalActiveBond string `json:"totalActiveBond"`
-
-	// TotalStandbyBond Int64(e8), Total bond of standby nodes
-	TotalStandbyBond string `json:"totalStandbyBond"`
-}
-
-// BonderDetails defines model for BonderDetails.
-type BonderDetails struct {
-	// Address Bonder address
-	Address string       `json:"address"`
-	Nodes   []BonderNode `json:"nodes"`
-
-	// TotalBonded Int64(e8), total amount of RUNE bonded from the bonder
-	TotalBonded string `json:"totalBonded"`
-}
-
-// BonderNode defines model for BonderNode.
-type BonderNode struct {
-	// Address Bonded node address
-	Address string `json:"address"`
-
-	// Bond Int64(e8), amount of RUNE bonded to the node
-	Bond string `json:"bond"`
-
-	// Status status of the node
-	Status string `json:"status"`
-}
-
-// ChurnItem defines model for ChurnItem.
-type ChurnItem struct {
-	// Date full timestamp (nanoseconds since 1970) of the block at which the churn occurred
-	Date string `json:"date"`
-
-	// Height height of the block at which the churn occurred
-	Height string `json:"height"`
-}
-
-// Churns defines model for Churns.
-type Churns = []ChurnItem
-
 // Coin Represents a digital currency amount
 type Coin struct {
 	// Amount Int64(e8), asset Amount.
@@ -566,21 +156,6 @@ type Coin struct {
 
 // Coins defines model for Coins.
 type Coins = []Coin
-
-// ContractMetadata defines model for ContractMetadata.
-type ContractMetadata struct {
-	// Attributes contract attributes emitted from its event
-	Attributes map[string]interface{} `json:"attributes"`
-
-	// ContractType contract type defined by cosmwasm
-	ContractType string `json:"contractType"`
-
-	// Funds contract funds emitted from its event
-	Funds *string `json:"funds,omitempty"`
-
-	// Msg contract massages emitted from its event
-	Msg *map[string]interface{} `json:"msg,omitempty"`
-}
 
 // DepthHistory defines model for DepthHistory.
 type DepthHistory struct {
@@ -642,16 +217,6 @@ type DepthHistoryItem struct {
 	Units string `json:"units"`
 }
 
-// DepthHistoryItemPool defines model for DepthHistoryItemPool.
-type DepthHistoryItemPool struct {
-	// Pool asset for the given pool
-	Pool string `json:"pool"`
-
-	// TotalDepth Int64(e8) in rune, the total value in the pool (both assets and rune) at the end of the interval.
-	// Note: this is twice of the pool's Rune depth. (as pools are symmetrically balance)
-	TotalDepth string `json:"totalDepth"`
-}
-
 // DepthHistoryMeta defines model for DepthHistoryMeta.
 type DepthHistoryMeta struct {
 	// EndAssetDepth Int64(e8), the amount of Asset in the pool at the end of the interval at time endTime
@@ -698,83 +263,6 @@ type DepthHistoryMeta struct {
 	StartTime string `json:"startTime"`
 }
 
-// EarningsHistory defines model for EarningsHistory.
-type EarningsHistory struct {
-	Intervals EarningsHistoryIntervals `json:"intervals"`
-	Meta      EarningsHistoryItem      `json:"meta"`
-}
-
-// EarningsHistoryIntervals defines model for EarningsHistoryIntervals.
-type EarningsHistoryIntervals = []EarningsHistoryItem
-
-// EarningsHistoryItem defines model for EarningsHistoryItem.
-type EarningsHistoryItem struct {
-	// AvgNodeCount float64, Average amount of active nodes during the time interval
-	AvgNodeCount string `json:"avgNodeCount"`
-
-	// BlockRewards Int64(e8), Total block rewards emitted during the time interval
-	BlockRewards string `json:"blockRewards"`
-
-	// BondingEarnings Int64(e8), Share of earnings sent to nodes during the time interval
-	BondingEarnings string `json:"bondingEarnings"`
-
-	// Earnings Int64(e8), System income generated during the time interval. It is the sum of
-	// liquidity fees and block rewards
-	Earnings string `json:"earnings"`
-
-	// EndTime Int64, The end time of interval in unix timestamp
-	EndTime string `json:"endTime"`
-
-	// LiquidityEarnings Int64(e8), Share of earnings sent to pools during the time interval
-	LiquidityEarnings string `json:"liquidityEarnings"`
-
-	// LiquidityFees Int64(e8), Total liquidity fees, converted to QBTC, collected during the time interval
-	LiquidityFees string `json:"liquidityFees"`
-
-	// Pools Earnings data for each pool for the time interval
-	Pools []EarningsHistoryItemPool `json:"pools"`
-
-	// QbtcPriceUSD Float, the price of QBTC based on the deepest USD pool at the end of the interval.
-	QbtcPriceUSD string `json:"qbtcPriceUSD"`
-
-	// StartTime Int64, The beginning time of interval in unix timestamp
-	StartTime string `json:"startTime"`
-}
-
-// EarningsHistoryItemPool pool earnings data during the time interval
-type EarningsHistoryItemPool struct {
-	// AssetLiquidityFees Int64(e8), liquidity fees collected in the pool's asset
-	AssetLiquidityFees string `json:"assetLiquidityFees"`
-
-	// Earnings Int64(e8), total earnings in RUNE (totalLiquidityFees + rewards)
-	Earnings string `json:"earnings"`
-
-	// Pool asset for the given pool
-	Pool string `json:"pool"`
-
-	// QbtcLiquidityFees Int64(e8), liquidity fees collected in QBTC
-	QbtcLiquidityFees string `json:"qbtcLiquidityFees"`
-
-	// Rewards Int64(e8), QBTC amount sent to (positive) or taken from (negative) the pool as
-	// a result of balancing it's share of system income each block
-	Rewards string `json:"rewards"`
-
-	// TotalLiquidityFeesQbtc Int64(e8), total liquidity fees (assetFees + qbtcFees) collected, shown in QBTC
-	TotalLiquidityFeesQbtc string `json:"totalLiquidityFeesQbtc"`
-}
-
-// FailedMetadata defines model for FailedMetadata.
-type FailedMetadata struct {
-	// Code failed transaction code
-	Code string `json:"code"`
-
-	// Memo failed transaction memo
-	Memo string `json:"memo"`
-
-	// Reason failed transaction code
-	Reason string `json:"reason"`
-}
-
 // GenesisInf defines model for GenesisInf.
 type GenesisInf struct {
 	// Hash Genesis Block hash
@@ -809,234 +297,6 @@ type HeightTS struct {
 	// Timestamp Block timestamp (seconds since epoch)
 	Timestamp int `json:"timestamp"`
 }
-
-// Holder defines model for Holder.
-type Holder struct {
-	// Address address of the holder
-	Address string `json:"address"`
-	Coins   Coins  `json:"coins"`
-}
-
-// Holders defines model for Holders.
-type Holders = []Holder
-
-// ItemThorname defines model for ItemThorname.
-type ItemThorname struct {
-	// Count Int64, The count of affiliates with the same thorname during the time interval
-	Count string `json:"count"`
-
-	// Thorname thorname of the affiliate
-	Thorname string `json:"thorname"`
-
-	// Volume Int64(e8), The volume of affiliates with the same thorname detonated in RUNE
-	Volume string `json:"volume"`
-
-	// VolumeUSD Int64(e2), The volume of affiliates with the same thorname
-	// denoted in USD price of the rune in each swap
-	VolumeUSD string `json:"volumeUSD"`
-}
-
-// KnownPools defines model for KnownPools.
-type KnownPools map[string]string
-
-// LimitSwapMetadata defines model for LimitSwapMetadata.
-type LimitSwapMetadata struct {
-	// Memo Transaction memo of bond event
-	Memo string `json:"memo"`
-}
-
-// LiquidityHistory defines model for LiquidityHistory.
-type LiquidityHistory struct {
-	Intervals LiquidityHistoryIntervals `json:"intervals"`
-	Meta      LiquidityHistoryItem      `json:"meta"`
-}
-
-// LiquidityHistoryIntervals defines model for LiquidityHistoryIntervals.
-type LiquidityHistoryIntervals = []LiquidityHistoryItem
-
-// LiquidityHistoryItem defines model for LiquidityHistoryItem.
-type LiquidityHistoryItem struct {
-	// AddAssetLiquidityVolume Int64(e8), total assets deposited during the time interval.
-	// Denoted in QBTC using the price at deposit time.
-	AddAssetLiquidityVolume string `json:"addAssetLiquidityVolume"`
-
-	// AddLiquidityCount Int64, number of deposits during the time interval.
-	AddLiquidityCount string `json:"addLiquidityCount"`
-
-	// AddLiquidityVolume Int64(e8), total of qbtc and asset deposits.
-	// Denoted in QBTC (using the price at deposit time).
-	AddLiquidityVolume string `json:"addLiquidityVolume"`
-
-	// AddQbtcLiquidityVolume Int64(e8), total QBTC deposited during the time interval.
-	AddQbtcLiquidityVolume string `json:"addQbtcLiquidityVolume"`
-
-	// EndTime Int64, The end time of bucket in unix timestamp
-	EndTime string `json:"endTime"`
-
-	// Net Int64(e8), net liquidity changes (withdrawals - deposits) during the time interval
-	Net string `json:"net"`
-
-	// QbtcPriceUSD Float, the price of QBTC based on the deepest USD pool at the end of the interval.
-	QbtcPriceUSD string `json:"qbtcPriceUSD"`
-
-	// StartTime Int64, The beginning time of bucket in unix timestamp
-	StartTime string `json:"startTime"`
-
-	// WithdrawAssetVolume Int64(e8), total assets withdrawn during the time interval.
-	// Denoted in QBTC using the price at withdraw time.
-	WithdrawAssetVolume string `json:"withdrawAssetVolume"`
-
-	// WithdrawCount Int64, number of withdraw during the time interval.
-	WithdrawCount string `json:"withdrawCount"`
-
-	// WithdrawQbtcVolume Int64(e8), total QBTC withdrawn during the time interval.
-	WithdrawQbtcVolume string `json:"withdrawQbtcVolume"`
-
-	// WithdrawVolume Int64(e8), total of qbtc and asset withdrawals.
-	// Denoted in QBTC (using the price at withdraw time).
-	WithdrawVolume string `json:"withdrawVolume"`
-}
-
-// MemberDetails defines model for MemberDetails.
-type MemberDetails struct {
-	// Pools List details of all the liquidity providers identified with the given address
-	Pools []MemberPool `json:"pools"`
-}
-
-// MemberPool defines model for MemberPool.
-type MemberPool struct {
-	// AssetAdded Int64(e8), total asset added to the pool by member
-	AssetAdded string `json:"assetAdded"`
-
-	// AssetAddress asset address used by the member
-	AssetAddress string `json:"assetAddress"`
-
-	// AssetDeposit Int64(e8), total asset that is currently deposited to the pool by member.
-	// This field is same as the `asset_deposit_value` field in thornode. Mainly can be used
-	// for tracking, mainly Growth Percentage
-	AssetDeposit string `json:"assetDeposit"`
-
-	// AssetPending Int64(e8), asset sent but not added yet, it will be added when the qbtc pair arrives
-	AssetPending string `json:"assetPending"`
-
-	// AssetWithdrawn Int64(e8), total asset withdrawn from the pool by member
-	AssetWithdrawn string `json:"assetWithdrawn"`
-
-	// DateFirstAdded Int64, Unix timestamp for the first time member deposited into the pool
-	DateFirstAdded string `json:"dateFirstAdded"`
-
-	// DateLastAdded Int64, Unix timestamp for the last time member deposited into the pool
-	DateLastAdded string `json:"dateLastAdded"`
-
-	// LiquidityUnits Int64, pool liquidity units that belong the the member
-	LiquidityUnits string `json:"liquidityUnits"`
-
-	// Pool Pool rest of the data refers to
-	Pool string `json:"pool"`
-
-	// QbtcAdded Int64(e8), total QBTC added to the pool by member
-	QbtcAdded string `json:"qbtcAdded"`
-
-	// QbtcAddress QBTC address used by the member
-	QbtcAddress string `json:"qbtcAddress"`
-
-	// QbtcDeposit Int64(e8), total QBTC that is currently deposited to the pool by member.
-	// This field is same as the `rune_deposit_value` field in thornode. Mainly can be used
-	// for tracking, mainly Growth Percentage
-	QbtcDeposit string `json:"qbtcDeposit"`
-
-	// QbtcPending Int64(e8), QBTC sent but not added yet, it will be added when the asset pair arrives
-	QbtcPending string `json:"qbtcPending"`
-
-	// QbtcWithdrawn Int64(e8), total QBTC withdrawn from the pool by member
-	QbtcWithdrawn string `json:"qbtcWithdrawn"`
-}
-
-// Members defines model for Members.
-type Members = []string
-
-// Metadata defines model for Metadata.
-type Metadata struct {
-	AddLiquidity     *AddLiquidityMetadata     `json:"addLiquidity,omitempty"`
-	Bond             *BondMetadata             `json:"bond,omitempty"`
-	Contract         *ContractMetadata         `json:"contract,omitempty"`
-	Failed           *FailedMetadata           `json:"failed,omitempty"`
-	LimitSwap        *LimitSwapMetadata        `json:"limitSwap,omitempty"`
-	QbtcPoolDeposit  *QbtcPoolDepositMetadata  `json:"qbtcPoolDeposit,omitempty"`
-	QbtcPoolWithdraw *QbtcPoolWithdrawMetadata `json:"qbtcPoolWithdraw,omitempty"`
-	Rebond           *RebondMetadata           `json:"rebond,omitempty"`
-	Refund           *RefundMetadata           `json:"refund,omitempty"`
-	Send             *SendMetadata             `json:"send,omitempty"`
-	Swap             *SwapMetadata             `json:"swap,omitempty"`
-	Tcy              *TcyMetadata              `json:"tcy,omitempty"`
-	Thorname         *ThornameMetadata         `json:"thorname,omitempty"`
-	Withdraw         *WithdrawMetadata         `json:"withdraw,omitempty"`
-}
-
-// Network defines model for Network.
-type Network struct {
-	// ActiveBonds Array of rune amounts (e8) bonded by each active node.
-	ActiveBonds []string `json:"activeBonds"`
-
-	// ActiveNodeCount Int64, Number of active nodes
-	ActiveNodeCount string       `json:"activeNodeCount"`
-	BlockRewards    BlockRewards `json:"blockRewards"`
-	BondMetrics     BondMetrics  `json:"bondMetrics"`
-
-	// BondingAPY Float, E.g. 0.01 = 1%. Estimate of the compounded bonding earnings based on the current
-	// reserve size, emmission curve, blocks per year and pool share factor =
-	// (WeeklyBondIncome/BondAmount + 1)^52 - 1
-	BondingAPY string `json:"bondingAPY"`
-
-	// LiquidityAPY Float, E.g. 0.01 = 1%. Estimate of the compounded  liquidity provider earnings based
-	// on the current reserve size, emmission curve, blocks per year and pool share factor =
-	// (WeeklyLiquidityIncome/(totalPooledQbtc*2) + 1)^52 - 1
-	LiquidityAPY string `json:"liquidityAPY"`
-
-	// NextChurnHeight Int64, height (block number) of the next churn.
-	NextChurnHeight string `json:"nextChurnHeight"`
-
-	// PoolActivationCountdown Int64, the remaining time of pool activation (in blocks)
-	PoolActivationCountdown string `json:"poolActivationCountdown"`
-
-	// PoolShareFactor Float [0..1], the ratio which is used to split earnings between liquidity provider and
-	// nodes.
-	// LPIncome = rewards * poolShareFactor ;
-	// BondIncome :=  rewards * (1 - poolShareFactor)
-	PoolShareFactor string `json:"poolShareFactor"`
-
-	// StandbyBonds Array of rune amounts (e8) bonded by each standby node.
-	StandbyBonds []string `json:"standbyBonds"`
-
-	// StandbyNodeCount Int64, Number of standby nodes, some of them might become active at the next churn.
-	StandbyNodeCount string `json:"standbyNodeCount"`
-
-	// TotalPooledQbtc Int64(e8), total QBTC in all pools. Because asset and QBTC value is the same amount in
-	// every pool (by definition), the total amount pooled is totalPooledQbtc*2.
-	TotalPooledQbtc string `json:"totalPooledQbtc"`
-
-	// TotalReserve Int64(e8), Current size of the Reserve.
-	TotalReserve string `json:"totalReserve"`
-}
-
-// NetworkFees List of network fees associated to an action. One network fee is charged for each
-// outbound transaction
-type NetworkFees = []Coin
-
-// Node defines model for Node.
-type Node struct {
-	// Ed25519 ed25519 public key
-	Ed25519 string `json:"ed25519"`
-
-	// NodeAddress node thorchain address
-	NodeAddress string `json:"nodeAddress"`
-
-	// Secp256k1 secp256k1 public key
-	Secp256k1 string `json:"secp256k1"`
-}
-
-// Nodes defines model for Nodes.
-type Nodes = []Node
 
 // PoolDetail defines model for PoolDetail.
 type PoolDetail struct {
@@ -1195,32 +455,6 @@ type PoolStatsDetail struct {
 	WithdrawVolume string `json:"withdrawVolume"`
 }
 
-// QbtcPoolDepositMetadata defines model for QbtcPoolDepositMetadata.
-type QbtcPoolDepositMetadata struct {
-	// Units Int64, amount of units assigned to the member as result of the
-	// deposit
-	Units string `json:"units"`
-}
-
-// QbtcPoolWithdrawMetadata defines model for QbtcPoolWithdrawMetadata.
-type QbtcPoolWithdrawMetadata struct {
-	// AffiliateAddress Transaction affiliate address
-	AffiliateAddress string `json:"affiliateAddress"`
-
-	// AffiliateAmount Int64, Transaction affiliate amount in rune
-	AffiliateAmount string `json:"affiliateAmount"`
-
-	// AffiliateBasisPoint Transaction affiliate basis point
-	AffiliateBasisPoint string `json:"affiliateBasisPoint"`
-
-	// BasisPoints Int64 (Basis points, 0-10000, where 10000=100%), percentage of total ownership
-	// withdrawn
-	BasisPoints string `json:"basisPoints"`
-
-	// Units Int64, amount of units removed from the member as result of the withdrawal
-	Units string `json:"units"`
-}
-
 // QbtcPriceHistory defines model for QbtcPriceHistory.
 type QbtcPriceHistory struct {
 	Intervals QbtcPriceIntervals `json:"intervals"`
@@ -1255,109 +489,6 @@ type QbtcPriceMeta struct {
 
 	// StartTime Int64, The beginning time of bucket in unix timestamp
 	StartTime string `json:"startTime"`
-}
-
-// RebondMetadata defines model for RebondMetadata.
-type RebondMetadata struct {
-	// Memo Transaction memo of bond event
-	Memo string `json:"memo"`
-
-	// NewBondAddress new bond address
-	NewBondAddress string `json:"newBondAddress"`
-
-	// NodeAddress node address
-	NodeAddress string `json:"nodeAddress"`
-}
-
-// RefundMetadata defines model for RefundMetadata.
-type RefundMetadata struct {
-	// AffiliateAddress Affiliate fee address of the swap, empty if fee swap
-	AffiliateAddress string `json:"affiliateAddress"`
-
-	// AffiliateFee Int64 (Basis points, 0-1000, where 1000=10%)
-	AffiliateFee string `json:"affiliateFee"`
-
-	// Memo Transaction memo of the refund action
-	Memo string `json:"memo"`
-
-	// NetworkFees List of network fees associated to an action. One network fee is charged for each
-	// outbound transaction
-	NetworkFees NetworkFees `json:"networkFees"`
-
-	// Reason Reason for the refund
-	Reason string `json:"reason"`
-
-	// TxType The type of the transaction given from its Memo
-	// Type of Transaction type:
-	// "unknown", "add", "withdraw", "swap", "limitOrder", "outbound", "donate",
-	// "bond", "unbond", "leave", "yggdrasilFund", "yggdrasilReturn", "reserve",
-	// "refund", "migrate", "ragnarok", "switch", "noOp", "consolidate", "thorname",
-	// "loanOpen", "loanRepayment"
-	TxType string `json:"txType"`
-}
-
-// ReserveHistory defines model for ReserveHistory.
-type ReserveHistory struct {
-	Intervals ReserveIntervals `json:"intervals"`
-	Meta      ReserveMeta      `json:"meta"`
-}
-
-// ReserveIntervals defines model for ReserveIntervals.
-type ReserveIntervals = []ReserveItem
-
-// ReserveItem defines model for ReserveItem.
-type ReserveItem struct {
-	// EndTime Int64, The end time of bucket in unix timestamp
-	EndTime string `json:"endTime"`
-
-	// GasFeeOutbound Int64(e8), fee made from outbound
-	GasFeeOutbound string `json:"gasFeeOutbound"`
-
-	// GasReimbursement Int64(e8), RUNE paid to the pool for compensating the gas fees
-	GasReimbursement string `json:"gasReimbursement"`
-
-	// NetworkFee Int64(e8), RUNE paid to the system on deposit, send messages
-	NetworkFee string `json:"networkFee"`
-
-	// StartTime Int64, The beginning time of bucket in unix timestamp
-	StartTime string `json:"startTime"`
-}
-
-// ReserveMeta defines model for ReserveMeta.
-type ReserveMeta struct {
-	// EndTime Int64, The end time of bucket in unix timestamp
-	EndTime string `json:"endTime"`
-
-	// GasFeeOutbound Int64(e8), fee made from outbound
-	GasFeeOutbound string `json:"gasFeeOutbound"`
-
-	// GasReimbursement Int64(e8), RUNE paid to the pool for compensating the gas fees
-	GasReimbursement string `json:"gasReimbursement"`
-
-	// NetworkFee Int64(e8), RUNE paid to the system on deposit, send messages
-	NetworkFee string `json:"networkFee"`
-
-	// StartTime Int64, The beginning time of bucket in unix timestamp
-	StartTime string `json:"startTime"`
-}
-
-// ReverseTHORNames defines model for ReverseTHORNames.
-type ReverseTHORNames = []string
-
-// SendMetadata defines model for SendMetadata.
-type SendMetadata struct {
-	// Code failed transaction code
-	Code string `json:"code"`
-
-	// Memo Transaction memo of the send action
-	Memo string `json:"memo"`
-
-	// NetworkFees List of network fees associated to an action. One network fee is charged for each
-	// outbound transaction
-	NetworkFees NetworkFees `json:"networkFees"`
-
-	// Reason failed transaction code
-	Reason string `json:"reason"`
 }
 
 // StatsData defines model for StatsData.
@@ -1417,470 +548,14 @@ type StatsData struct {
 	WithdrawVolume string `json:"withdrawVolume"`
 }
 
-// StreamingSwapMeta Streaming Metadata associated with the action if it was streaming swap
-type StreamingSwapMeta struct {
-	// Count Int64, Number of swaps events which already happened.
-	Count string `json:"count"`
-
-	// DepositedCoin Represents a digital currency amount
-	DepositedCoin Coin `json:"depositedCoin"`
-
-	// FailedSwapReasons Array of failed swaps reasons in streaming swap.
-	FailedSwapReasons *[]string `json:"failedSwapReasons,omitempty"`
-
-	// FailedSwaps Array of failed swaps index in streaming swap.
-	FailedSwaps *[]string `json:"failedSwaps,omitempty"`
-
-	// InCoin Represents a digital currency amount
-	InCoin Coin `json:"inCoin"`
-
-	// Interval Int64, Number of blocks between swpas. (Blocks/Swap) E.g. 1 means every block.
-	Interval string `json:"interval"`
-
-	// LastHeight Int64, The last blockheight the final swap happened (not outbound). This field will be missing until the final swap happens.
-	LastHeight string `json:"lastHeight"`
-
-	// OutCoin Represents a digital currency amount
-	OutCoin Coin `json:"outCoin"`
-
-	// OutEstimation Int64, The estimated output based on the first swap block * quantity.
-	// This is the current method quote calculate the estimation.
-	OutEstimation string `json:"outEstimation"`
-
-	// Quantity Int64,  Number of swaps which thorchain is planning to execute. Total count at the end might be less.
-	Quantity string `json:"quantity"`
-}
-
-// SwapHistory defines model for SwapHistory.
-type SwapHistory struct {
-	Intervals SwapHistoryIntervals `json:"intervals"`
-	Meta      SwapHistoryItem      `json:"meta"`
-}
-
-// SwapHistoryIntervals defines model for SwapHistoryIntervals.
-type SwapHistoryIntervals = []SwapHistoryItem
-
-// SwapHistoryItem defines model for SwapHistoryItem.
-type SwapHistoryItem struct {
-	// AverageSlip Float64 (Basis points, 0-10000, where 10000=100%), the weighted average (by count)
-	// of toAssetAverageSlip, toQbtcAverageSlip, synthMintAverageSlip, synthRedeemAverageSlip.
-	// Big swaps have the same weight as small swaps.
-	AverageSlip string `json:"averageSlip"`
-
-	// EndTime Int64, The end time of bucket in unix timestamp
-	EndTime string `json:"endTime"`
-
-	// FromTradeAverageSlip Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-	// from asset to trade asset.
-	// Big swaps have the same weight as small swaps
-	FromTradeAverageSlip string `json:"fromTradeAverageSlip"`
-
-	// FromTradeCount Int64, count of swaps from trade asset to qbtc
-	FromTradeCount string `json:"fromTradeCount"`
-
-	// FromTradeFees Int64(e8), the fees collected from swaps from trade asset to qbtc (in qbtc)
-	FromTradeFees string `json:"fromTradeFees"`
-
-	// FromTradeVolume Int64(e8), volume of swaps from qbtc to trade asset denoted in qbtc
-	FromTradeVolume string `json:"fromTradeVolume"`
-
-	// FromTradeVolumeUSD Int64(e2), volume of swaps from trade asset to qbtc denoted in USD price of the qbtc in each swap
-	FromTradeVolumeUSD string `json:"fromTradeVolumeUSD"`
-
-	// QbtcPriceUSD Float, the price of QBTC based on the deepest USD pool at the end of the interval.
-	QbtcPriceUSD string `json:"qbtcPriceUSD"`
-
-	// StartTime Int64, The beginning time of bucket in unix timestamp
-	StartTime string `json:"startTime"`
-
-	// SynthMintAverageSlip Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-	// from qbtc to synthetic asset.
-	// Big swaps have the same weight as small swaps
-	SynthMintAverageSlip string `json:"synthMintAverageSlip"`
-
-	// SynthMintCount Int64, count of qbtc to synthetic asset swaps
-	SynthMintCount string `json:"synthMintCount"`
-
-	// SynthMintFees Int64(e8), the fees collected from swaps from qbtc to synthetic asset (in qbtc)
-	SynthMintFees string `json:"synthMintFees"`
-
-	// SynthMintVolume Int64(e8), volume of swaps from qbtc to synthetic asset denoted in qbtc
-	SynthMintVolume string `json:"synthMintVolume"`
-
-	// SynthMintVolumeUSD Int64(e2), volume of swaps from qbtc to synthetic asset denoted in USD price of the qbtc in each swap
-	SynthMintVolumeUSD string `json:"synthMintVolumeUSD"`
-
-	// SynthRedeemAverageSlip Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-	// from synthetic asset to qbtc.
-	// Big swaps have the same weight as small swaps
-	SynthRedeemAverageSlip string `json:"synthRedeemAverageSlip"`
-
-	// SynthRedeemCount Int64, count of synthetic asset to qbtc swaps
-	SynthRedeemCount string `json:"synthRedeemCount"`
-
-	// SynthRedeemFees Int64(e8), the fees collected from swaps from synthetic asset to qbtc (in qbtc)
-	SynthRedeemFees string `json:"synthRedeemFees"`
-
-	// SynthRedeemVolume Int64(e8), volume of swaps from synthetic asset to qbtc denoted in qbtc
-	SynthRedeemVolume string `json:"synthRedeemVolume"`
-
-	// SynthRedeemVolumeUSD Int64(e2), volume of swaps from synthetic asset to qbtc denoted in USD price of the qbtc in each swap
-	SynthRedeemVolumeUSD string `json:"synthRedeemVolumeUSD"`
-
-	// ToAssetAverageSlip Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-	// from qbtc to asset.
-	// Big swaps have the same weight as small swaps
-	ToAssetAverageSlip string `json:"toAssetAverageSlip"`
-
-	// ToAssetCount Int64, count of swaps from qbtc to asset
-	ToAssetCount string `json:"toAssetCount"`
-
-	// ToAssetFees Int64(e8), the fees collected from swaps from qbtc to asset (in qbtc)
-	ToAssetFees string `json:"toAssetFees"`
-
-	// ToAssetVolume Int64(e8), volume of swaps from qbtc to asset denoted in qbtc
-	ToAssetVolume string `json:"toAssetVolume"`
-
-	// ToAssetVolumeUSD Int64(e2), volume of swaps from qbtc to asset denoted in USD price of the qbtc in each swap
-	ToAssetVolumeUSD string `json:"toAssetVolumeUSD"`
-
-	// ToQbtcAverageSlip Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-	// from asset to qbtc.
-	// Big swaps have the same weight as small swaps
-	ToQbtcAverageSlip string `json:"toQbtcAverageSlip"`
-
-	// ToQbtcCount Int64, count of swaps from asset to qbtc
-	ToQbtcCount string `json:"toQbtcCount"`
-
-	// ToQbtcFees Int64(e8), the fees collected from swaps from asset to qbtc (in qbtc)
-	ToQbtcFees string `json:"toQbtcFees"`
-
-	// ToQbtcVolume Int64(e8), volume of swaps from asset to qbtc denoted in qbtc
-	ToQbtcVolume string `json:"toQbtcVolume"`
-
-	// ToQbtcVolumeUSD Int64(e2), volume of swaps from asset to qbtc denoted in USD price of the qbtc in each swap
-	ToQbtcVolumeUSD string `json:"toQbtcVolumeUSD"`
-
-	// ToTradeAverageSlip Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-	// from qbtc to trade asset.
-	// Big swaps have the same weight as small swaps
-	ToTradeAverageSlip string `json:"toTradeAverageSlip"`
-
-	// ToTradeCount Int64, count of swaps from qbtc to trade asset
-	ToTradeCount string `json:"toTradeCount"`
-
-	// ToTradeFees Int64(e8), the fees collected from swaps from qbtc to trade asset (in qbtc)
-	ToTradeFees string `json:"toTradeFees"`
-
-	// ToTradeVolume Int64(e8), volume of swaps from trade asset to qbtc denoted in qbtc
-	ToTradeVolume string `json:"toTradeVolume"`
-
-	// ToTradeVolumeUSD Int64(e2), volume of swaps from qbtc to trade asset denoted in USD price of the qbtc in each swap
-	ToTradeVolumeUSD string `json:"toTradeVolumeUSD"`
-
-	// TotalCount Int64, toAssetCount + toQbtcCount + synthMintCount + synthRedeemCount
-	TotalCount string `json:"totalCount"`
-
-	// TotalFees Int64(e8), toAssetFees + toQbtcFees + synthMintFees + synthRedeemFees
-	TotalFees string `json:"totalFees"`
-
-	// TotalVolume Int64(e8),
-	// toAssetVolume + toQbtcVolume + synthMintVolume + synthRedeemVolume (denoted in qbtc)
-	TotalVolume string `json:"totalVolume"`
-
-	// TotalVolumeUSD Int64(e2),
-	// toAssetVolume + toQbtcVolume + synthMintVolume + synthRedeemVolume (denoted in USD price of the qbtc in each swap)
-	TotalVolumeUSD string `json:"totalVolumeUSD"`
-}
-
-// SwapMetadata defines model for SwapMetadata.
-type SwapMetadata struct {
-	// AffiliateAddress Affiliate fee address of the swap, empty if fee swap
-	AffiliateAddress string `json:"affiliateAddress"`
-
-	// AffiliateFee Int64 (Basis points, 0-1000, where 1000=10%)
-	AffiliateFee string `json:"affiliateFee"`
-
-	// InPriceUSD in asset price usd at the first interval
-	InPriceUSD string `json:"inPriceUSD"`
-
-	// IsStreamingSwap indicate whether this action was streaming
-	IsStreamingSwap bool `json:"isStreamingSwap"`
-
-	// LiquidityFee Int64(e8), RUNE amount charged as swap liquidity fee
-	LiquidityFee string `json:"liquidityFee"`
-
-	// Memo Transaction memo of the swap action
-	Memo string `json:"memo"`
-
-	// NetworkFees List of network fees associated to an action. One network fee is charged for each
-	// outbound transaction
-	NetworkFees NetworkFees `json:"networkFees"`
-
-	// OutPriceUSD out asset price usd at the first interval
-	OutPriceUSD string `json:"outPriceUSD"`
-
-	// StreamingSwapMeta Streaming Metadata associated with the action if it was streaming swap
-	StreamingSwapMeta *StreamingSwapMeta `json:"streamingSwapMeta,omitempty"`
-
-	// SwapSlip Int64 (Basis points, 0-10000, where 10000=100%), swap slip percentage
-	SwapSlip string `json:"swapSlip"`
-
-	// SwapTarget Int64(e8), minimum output amount specified for the swap
-	SwapTarget string `json:"swapTarget"`
-
-	// TxType The type of the transaction given from its Memo.
-	// Type of Transaction:
-	// "unknown", "add", "withdraw", "swap", "limitOrder", "outbound", "donate",
-	// "bond", "unbond", "leave", "yggdrasilFund", "yggdrasilReturn", "reserve",
-	// "refund", "migrate", "ragnarok", "switch", "noOp", "consolidate", "thorname",
-	// "loanOpen", "loanRepayment"
-	TxType string `json:"txType"`
-}
-
-// TCYDistribution defines model for TCYDistribution.
-type TCYDistribution struct {
-	// Address TCY holder address.
-	Address string `json:"address"`
-
-	// Apr Float, annual percentage rate of the TCY distribution.
-	Apr string `json:"apr"`
-
-	// Distributions List details of all the TCY distributions.
-	Distributions []TCYDistributionItem `json:"distributions"`
-
-	// Total Int64(e8), total amount of RUNE distributed to the TCY holder.
-	Total string `json:"total"`
-}
-
-// TCYDistributionItem defines model for TCYDistributionItem.
-type TCYDistributionItem struct {
-	// Amount Int64(e8), amount of RUNE distributed to the TCY holder.
-	Amount string `json:"amount"`
-
-	// Date Int64, Unix timestamp for the TCY distribution.
-	Date string `json:"date"`
-
-	// Price Int64(e8), RUNE price at the time of distribution.
-	Price string `json:"price"`
-}
-
-// THORNameDetails defines model for THORNameDetails.
-type THORNameDetails struct {
-	// Entries List details of all chains and their addresses for a given THORName
-	Entries []THORNameEntry `json:"entries"`
-
-	// Expire Int64, THORChain block height in which THORName expires
-	Expire string `json:"expire"`
-
-	// Owner owner's THOR address
-	Owner string `json:"owner"`
-}
-
-// THORNameEntry defines model for THORNameEntry.
-type THORNameEntry struct {
-	// Address address on blockchain
-	Address string `json:"address"`
-
-	// Chain blockchain
-	Chain string `json:"chain"`
-}
-
-// TVLHistory defines model for TVLHistory.
-type TVLHistory struct {
-	Intervals TVLHistoryIntervals `json:"intervals"`
-	Meta      TVLHistoryItem      `json:"meta"`
-}
-
-// TVLHistoryIntervals defines model for TVLHistoryIntervals.
-type TVLHistoryIntervals = []TVLHistoryItem
-
-// TVLHistoryItem defines model for TVLHistoryItem.
-type TVLHistoryItem struct {
-	// EndTime Int64, The end time of bucket in unix timestamp
-	EndTime    string                 `json:"endTime"`
-	PoolsDepth []DepthHistoryItemPool `json:"poolsDepth"`
-
-	// QbtcPriceUSD Float, the price of QBTC based on the deepest USD pool at the end of the interval.
-	QbtcPriceUSD string `json:"qbtcPriceUSD"`
-
-	// StartTime Int64, The beginning time of bucket in unix timestamp
-	StartTime string `json:"startTime"`
-
-	// TotalValueBonded Int64(e8), the total amount of bonds (both active and standby) at the end of
-	// the interval
-	TotalValueBonded *string `json:"totalValueBonded,omitempty"`
-
-	// TotalValueLocked Int64(e8), total value locked in the chain (in qbtc)
-	// This equals `totalPooledValue + totalBondedValue`, as it combines the liquidity
-	// pools and bonds of the nodes.
-	TotalValueLocked *string `json:"totalValueLocked,omitempty"`
-
-	// TotalValuePooled Int64(e8) in qbtc, the total pooled value (both assets and qbtc) in all of the pools at
-	// the end of the interval.
-	// Note: this is twice the aggregate QBTC depth of all pools.
-	TotalValuePooled string `json:"totalValuePooled"`
-}
-
-// TcyMetadata defines model for TcyMetadata.
-type TcyMetadata struct {
-	// Memo Transaction memo of tcy message.
-	Memo string `json:"memo"`
-}
-
-// ThornameMetadata defines model for ThornameMetadata.
-type ThornameMetadata struct {
-	// Address The CHAIN address thorname has been registered to.
-	Address string `json:"address"`
-
-	// Chain The thorname's chain.
-	Chain string `json:"chain"`
-
-	// Expire Int64, THORChain block height in which THORName expires.
-	Expire string `json:"expire"`
-
-	// FundAmount Int64, the amount of funding for the THORName registration.
-	FundAmount string `json:"fundAmount"`
-
-	// Memo Transaction memo of thorname deposit message.
-	Memo string `json:"memo"`
-
-	// Owner owner's THOR address.
-	Owner string `json:"owner"`
-
-	// RegistrationFee Int64, the registration fee paid.
-	RegistrationFee string `json:"registrationFee"`
-
-	// Thorname The thorname registered to the address.
-	Thorname string `json:"thorname"`
-
-	// TxType The type of the transaction given from its Memo.
-	TxType string `json:"txType"`
-}
-
-// Transaction Transaction data
-type Transaction struct {
-	// Address Sender address
-	Address string `json:"address"`
-
-	// Affiliate if transactions flaged as affiliate
-	Affiliate *bool `json:"affiliate,omitempty"`
-	Coins     Coins `json:"coins"`
-
-	// Height The thorchain height that the outbound transaction occurred.
-	Height *string `json:"height,omitempty"`
-
-	// TxID Transaction id hash. Some transactions (such as outbound transactions made in the
-	// native asset) may have a zero value.
-	TxID string `json:"txID"`
-}
-
-// VoteItem defines model for VoteItem.
-type VoteItem struct {
-	// Address node address that voted in the protocol
-	Address string `json:"address"`
-
-	// Date full timestamp (nanoseconds since 1970) of the block at which the churn occurred
-	Date string `json:"date"`
-
-	// Key key amount of the vote
-	Key string `json:"key"`
-}
-
-// VoteValue defines model for VoteValue.
-type VoteValue struct {
-	// Value value of the vote
-	Value string     `json:"value"`
-	Votes []VoteItem `json:"votes"`
-}
-
-// Votes defines model for Votes.
-type Votes = []VoteValue
-
-// WithdrawMetadata defines model for WithdrawMetadata.
-type WithdrawMetadata struct {
-	// Asymmetry Decimal (-1.0 <=> 1.0), indicates how asymmetrical the withdrawal was. 0 means
-	// totally symmetrical
-	Asymmetry string `json:"asymmetry"`
-
-	// BasisPoints Int64 (Basis points, 0-10000, where 10000=100%), percentage of total pool ownership
-	// withdrawn
-	BasisPoints string `json:"basisPoints"`
-
-	// ImpermanentLossProtection Int64, additional Rune paid out because of impermanent loss protection
-	ImpermanentLossProtection string `json:"impermanentLossProtection"`
-
-	// LiquidityUnits Int64, amount of liquidity units removed from the member as result of the withdrawal
-	LiquidityUnits string `json:"liquidityUnits"`
-
-	// Memo Transaction memo of the withdraw action
-	Memo string `json:"memo"`
-
-	// NetworkFees List of network fees associated to an action. One network fee is charged for each
-	// outbound transaction
-	NetworkFees NetworkFees `json:"networkFees"`
-}
-
-// ActionsResponse defines model for ActionsResponse.
-type ActionsResponse struct {
-	Actions []Action `json:"actions"`
-
-	// Count Int64, number of results matching the given filters. It may be -1 if
-	// btcq-indexer is having trouble counting the results and has to cancel the count query
-	// (temporary fix). Also, if new action parameters is used it won't be returned.
-	Count *string `json:"count,omitempty"`
-
-	// Meta action query metadata
-	Meta ActionMeta `json:"meta"`
-}
-
-// AffiliateEarningResponse defines model for AffiliateEarningResponse.
-type AffiliateEarningResponse = AffiliateEarning
-
-// AffiliateHistoryResponse defines model for AffiliateHistoryResponse.
-type AffiliateHistoryResponse = AffiliateHistory
-
-// AffiliateStatsResponse defines model for AffiliateStatsResponse.
-type AffiliateStatsResponse = AffiliateStats
-
 // BalanceResponse defines model for BalanceResponse.
 type BalanceResponse = Balance
-
-// BonderDetailsResponse defines model for BonderDetailsResponse.
-type BonderDetailsResponse = BonderDetails
-
-// ChurnsResponse defines model for ChurnsResponse.
-type ChurnsResponse = Churns
 
 // DepthHistoryResponse defines model for DepthHistoryResponse.
 type DepthHistoryResponse = DepthHistory
 
-// EarningsHistoryResponse defines model for EarningsHistoryResponse.
-type EarningsHistoryResponse = EarningsHistory
-
 // HealthResponse defines model for HealthResponse.
 type HealthResponse = Health
-
-// HolderResponse defines model for HolderResponse.
-type HolderResponse = Holders
-
-// KnownPoolsResponse defines model for KnownPoolsResponse.
-type KnownPoolsResponse = KnownPools
-
-// LiquidityHistoryResponse defines model for LiquidityHistoryResponse.
-type LiquidityHistoryResponse = LiquidityHistory
-
-// MemberDetailsResponse defines model for MemberDetailsResponse.
-type MemberDetailsResponse = MemberDetails
-
-// MembersResponse defines model for MembersResponse.
-type MembersResponse = Members
-
-// NetworkResponse defines model for NetworkResponse.
-type NetworkResponse = Network
-
-// NodesResponse defines model for NodesResponse.
-type NodesResponse = Nodes
 
 // PoolResponse defines model for PoolResponse.
 type PoolResponse = PoolDetail
@@ -1894,83 +569,8 @@ type PoolsResponse = PoolDetails
 // QbtcPriceHistoryResponse defines model for QbtcPriceHistoryResponse.
 type QbtcPriceHistoryResponse = QbtcPriceHistory
 
-// ReserveHistoryResponse defines model for ReserveHistoryResponse.
-type ReserveHistoryResponse = ReserveHistory
-
-// ReverseTHORNameResponse defines model for ReverseTHORNameResponse.
-type ReverseTHORNameResponse = ReverseTHORNames
-
 // StatsResponse defines model for StatsResponse.
 type StatsResponse = StatsData
-
-// SwapHistoryResponse defines model for SwapHistoryResponse.
-type SwapHistoryResponse = SwapHistory
-
-// TCYDistributionResponse defines model for TCYDistributionResponse.
-type TCYDistributionResponse = TCYDistribution
-
-// THORNameDetailsResponse defines model for THORNameDetailsResponse.
-type THORNameDetailsResponse = THORNameDetails
-
-// TVLHistoryResponse defines model for TVLHistoryResponse.
-type TVLHistoryResponse = TVLHistory
-
-// VotesResponse defines model for VotesResponse.
-type VotesResponse = Votes
-
-// GetActionsParams defines parameters for GetActions.
-type GetActionsParams struct {
-	// Address Comma separated list. Address of sender or recipient of any in/out transaction related
-	// to the action.
-	Address *string `form:"address,omitempty" json:"address,omitempty"`
-
-	// Txid ID of any in/out tx related to the action
-	Txid *string `form:"txid,omitempty" json:"txid,omitempty"`
-
-	// Asset Comma separated list. Any asset that is part of the action (CHAIN.SYMBOL)
-	// Additionally, synth, nosynth, and noqbtc filters can be used for swap, add/withdraw actions.
-	Asset *string `form:"asset,omitempty" json:"asset,omitempty"`
-
-	// Type One or more comma separated unique types of action
-	// (swap, addLiquidity, withdraw, donate, refund, switch, thorname, qbtcPoolDeposit, qbtcPoolWithdraw)
-	Type *string `form:"type,omitempty" json:"type,omitempty"`
-
-	// TxType One or more comma separated transaction type of the action, it's the tx type parsed
-	// from memo. For example: Loan is a swap event but it's considered as loan tx type
-	// Type of Transactions:
-	// "unknown", "add", "withdraw", "swap", "limitOrder", "outbound", "donate",
-	// "bond", "unbond", "leave", "yggdrasilFund", "yggdrasilReturn", "reserve",
-	// "refund", "migrate", "ragnarok", "switch", "noOp", "consolidate", "thorname",
-	// "loanOpen", "loanRepayment"
-	TxType *string `form:"txType,omitempty" json:"txType,omitempty"`
-
-	// Affiliate Comma separated list. Affiliate address of the action (swap, refund)
-	Affiliate *string `form:"affiliate,omitempty" json:"affiliate,omitempty"`
-
-	// Limit number of actions returned, default is 50
-	Limit *int64 `form:"limit,omitempty" json:"limit,omitempty"`
-
-	// Offset pagination offset, default is 0
-	Offset *int64 `form:"offset,omitempty" json:"offset,omitempty"`
-
-	// NextPageToken if this is given, the actions for the next page will be given
-	NextPageToken *int64 `form:"nextPageToken,omitempty" json:"nextPageToken,omitempty"`
-
-	// Timestamp if this is given, the actions older than the timestamp will be given
-	Timestamp *int64 `form:"timestamp,omitempty" json:"timestamp,omitempty"`
-
-	// Height if this is given, the actions older than the height will be given
-	Height *int64 `form:"height,omitempty" json:"height,omitempty"`
-
-	// PrevPageToken if this is given, the actions for the previous page will be given
-	PrevPageToken *int64 `form:"prevPageToken,omitempty" json:"prevPageToken,omitempty"`
-
-	// FromTimestamp if this is given, the actions newer than the timestamp will be given
-	FromTimestamp *int64 `form:"fromTimestamp,omitempty" json:"fromTimestamp,omitempty"`
-
-	// FromHeight if this is given, the actions newer than the height will be given
-	FromHeight *int64 `form:"fromHeight,omitempty" json:"fromHeight,omitempty"`
-}
 
 // GetBalanceParams defines parameters for GetBalance.
 type GetBalanceParams struct {
@@ -1996,69 +596,6 @@ type GetBlocksParams struct {
 	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
 }
 
-// GetAffiliateHistoryParams defines parameters for GetAffiliateHistory.
-type GetAffiliateHistoryParams struct {
-	// Thorname Return history given thorname. Returns sum of all thornames if missing.
-	Thorname *string `form:"thorname,omitempty" json:"thorname,omitempty"`
-
-	// Interval Interval of calculations
-	Interval *GetAffiliateHistoryParamsInterval `form:"interval,omitempty" json:"interval,omitempty"`
-
-	// Count Number of intervals to return. Should be between [1..400].
-	Count *int `form:"count,omitempty" json:"count,omitempty"`
-
-	// To End time of the query as unix timestamp. If only count is given, defaults to now.
-	To *int64 `form:"to,omitempty" json:"to,omitempty"`
-
-	// From Start time of the query as unix timestamp
-	From *int64 `form:"from,omitempty" json:"from,omitempty"`
-}
-
-// GetAffiliateHistoryParamsInterval defines parameters for GetAffiliateHistory.
-type GetAffiliateHistoryParamsInterval string
-
-// GetAffiliateEarningParams defines parameters for GetAffiliateEarning.
-type GetAffiliateEarningParams struct {
-	// Thorname Return earnings for given thorname. Returns all affiliates if missing.
-	Thorname *string `form:"thorname,omitempty" json:"thorname,omitempty"`
-
-	// Interval Interval of calculations
-	Interval *GetAffiliateEarningParamsInterval `form:"interval,omitempty" json:"interval,omitempty"`
-
-	// Count Number of intervals to return. Should be between [1..400].
-	Count *int `form:"count,omitempty" json:"count,omitempty"`
-
-	// To End time of the query as unix timestamp. If only count is given, defaults to now.
-	To *int64 `form:"to,omitempty" json:"to,omitempty"`
-
-	// From Start time of the query as unix timestamp
-	From *int64 `form:"from,omitempty" json:"from,omitempty"`
-}
-
-// GetAffiliateEarningParamsInterval defines parameters for GetAffiliateEarning.
-type GetAffiliateEarningParamsInterval string
-
-// GetAffiliateStatsParams defines parameters for GetAffiliateStats.
-type GetAffiliateStatsParams struct {
-	// Thorname Return history given thorname. Returns sum of all thornames if missing.
-	Thorname *string `form:"thorname,omitempty" json:"thorname,omitempty"`
-
-	// Interval Interval of calculations
-	Interval *GetAffiliateStatsParamsInterval `form:"interval,omitempty" json:"interval,omitempty"`
-
-	// Count Number of intervals to return. Should be between [1..400].
-	Count *int `form:"count,omitempty" json:"count,omitempty"`
-
-	// To End time of the query as unix timestamp. If only count is given, defaults to now.
-	To *int64 `form:"to,omitempty" json:"to,omitempty"`
-
-	// From Start time of the query as unix timestamp
-	From *int64 `form:"from,omitempty" json:"from,omitempty"`
-}
-
-// GetAffiliateStatsParamsInterval defines parameters for GetAffiliateStats.
-type GetAffiliateStatsParamsInterval string
-
 // GetDepthHistoryParams defines parameters for GetDepthHistory.
 type GetDepthHistoryParams struct {
 	// Interval Interval of calculations
@@ -2077,45 +614,6 @@ type GetDepthHistoryParams struct {
 // GetDepthHistoryParamsInterval defines parameters for GetDepthHistory.
 type GetDepthHistoryParamsInterval string
 
-// GetEarningsHistoryParams defines parameters for GetEarningsHistory.
-type GetEarningsHistoryParams struct {
-	// Interval Interval of calculations
-	Interval *GetEarningsHistoryParamsInterval `form:"interval,omitempty" json:"interval,omitempty"`
-
-	// Count Number of intervals to return. Should be between [1..400].
-	Count *int `form:"count,omitempty" json:"count,omitempty"`
-
-	// To End time of the query as unix timestamp. If only count is given, defaults to now.
-	To *int64 `form:"to,omitempty" json:"to,omitempty"`
-
-	// From Start time of the query as unix timestamp
-	From *int64 `form:"from,omitempty" json:"from,omitempty"`
-}
-
-// GetEarningsHistoryParamsInterval defines parameters for GetEarningsHistory.
-type GetEarningsHistoryParamsInterval string
-
-// GetLiquidityHistoryParams defines parameters for GetLiquidityHistory.
-type GetLiquidityHistoryParams struct {
-	// Pool Return stats for given pool. Returns sum of all pools if missing
-	Pool *string `form:"pool,omitempty" json:"pool,omitempty"`
-
-	// Interval Interval of calculations
-	Interval *GetLiquidityHistoryParamsInterval `form:"interval,omitempty" json:"interval,omitempty"`
-
-	// Count Number of intervals to return. Should be between [1..400]
-	Count *int `form:"count,omitempty" json:"count,omitempty"`
-
-	// To End time of the query as unix timestamp. If only count is given, defaults to now
-	To *int64 `form:"to,omitempty" json:"to,omitempty"`
-
-	// From Start time of the query as unix timestamp
-	From *int64 `form:"from,omitempty" json:"from,omitempty"`
-}
-
-// GetLiquidityHistoryParamsInterval defines parameters for GetLiquidityHistory.
-type GetLiquidityHistoryParamsInterval string
-
 // GetQbtcPriceHistoryParams defines parameters for GetQbtcPriceHistory.
 type GetQbtcPriceHistoryParams struct {
 	// Interval Interval of calculations
@@ -2133,78 +631,6 @@ type GetQbtcPriceHistoryParams struct {
 
 // GetQbtcPriceHistoryParamsInterval defines parameters for GetQbtcPriceHistory.
 type GetQbtcPriceHistoryParamsInterval string
-
-// GetReserveHistoryParams defines parameters for GetReserveHistory.
-type GetReserveHistoryParams struct {
-	// Interval Interval of calculations
-	Interval *GetReserveHistoryParamsInterval `form:"interval,omitempty" json:"interval,omitempty"`
-
-	// Count Number of intervals to return. Should be between [1..400].
-	Count *int `form:"count,omitempty" json:"count,omitempty"`
-
-	// To End time of the query as unix timestamp. If only count is given, defaults to now.
-	To *int64 `form:"to,omitempty" json:"to,omitempty"`
-
-	// From Start time of the query as unix timestamp
-	From *int64 `form:"from,omitempty" json:"from,omitempty"`
-}
-
-// GetReserveHistoryParamsInterval defines parameters for GetReserveHistory.
-type GetReserveHistoryParamsInterval string
-
-// GetSwapHistoryParams defines parameters for GetSwapHistory.
-type GetSwapHistoryParams struct {
-	// Pool Return history given pool. Returns sum of all pools if missing.
-	Pool *string `form:"pool,omitempty" json:"pool,omitempty"`
-
-	// Interval Interval of calculations
-	Interval *GetSwapHistoryParamsInterval `form:"interval,omitempty" json:"interval,omitempty"`
-
-	// Count Number of intervals to return. Should be between [1..400].
-	Count *int `form:"count,omitempty" json:"count,omitempty"`
-
-	// To End time of the query as unix timestamp. If only count is given, defaults to now.
-	To *int64 `form:"to,omitempty" json:"to,omitempty"`
-
-	// From Start time of the query as unix timestamp
-	From *int64 `form:"from,omitempty" json:"from,omitempty"`
-}
-
-// GetSwapHistoryParamsInterval defines parameters for GetSwapHistory.
-type GetSwapHistoryParamsInterval string
-
-// GetTVLHistoryParams defines parameters for GetTVLHistory.
-type GetTVLHistoryParams struct {
-	// Interval Interval of calculations
-	Interval *GetTVLHistoryParamsInterval `form:"interval,omitempty" json:"interval,omitempty"`
-
-	// Count Number of intervals to return. Should be between [1..400].
-	Count *int `form:"count,omitempty" json:"count,omitempty"`
-
-	// To End time of the query as unix timestamp. If only count is given, defaults to now.
-	To *int64 `form:"to,omitempty" json:"to,omitempty"`
-
-	// From Start time of the query as unix timestamp
-	From *int64 `form:"from,omitempty" json:"from,omitempty"`
-}
-
-// GetTVLHistoryParamsInterval defines parameters for GetTVLHistory.
-type GetTVLHistoryParamsInterval string
-
-// GetHoldersParams defines parameters for GetHolders.
-type GetHoldersParams struct {
-	// Asset Asset to get the top holders for.
-	Asset *string `form:"asset,omitempty" json:"asset,omitempty"`
-
-	// Limit Number of top holders to return, default is 100, maximum is 1000.
-	Limit *int64 `form:"limit,omitempty" json:"limit,omitempty"`
-}
-
-// GetMembersAdressesParams defines parameters for GetMembersAdresses.
-type GetMembersAdressesParams struct {
-	// Pool Return only members present in the pool.
-	Pool *string `form:"pool,omitempty" json:"pool,omitempty"`
-}
 
 // GetPoolParams defines parameters for GetPool.
 type GetPoolParams struct {
@@ -2242,286 +668,103 @@ type GetPoolsParamsStatus string
 // GetPoolsParamsPeriod defines parameters for GetPools.
 type GetPoolsParamsPeriod string
 
-// GetTcyDistributionParams defines parameters for GetTcyDistribution.
-type GetTcyDistributionParams struct {
-	// Period Specifies the base interval from which APR will be calculated.
-	// Default is 30d.
-	Period *GetTcyDistributionParamsPeriod `form:"period,omitempty" json:"period,omitempty"`
-}
-
-// GetTcyDistributionParamsPeriod defines parameters for GetTcyDistribution.
-type GetTcyDistributionParamsPeriod string
-
-// GetVotesParams defines parameters for GetVotes.
-type GetVotesParams struct {
-	// Period Specifies the base interval from which votes will be shown.
-	// Default is 90d.
-	Period *GetVotesParamsPeriod `form:"period,omitempty" json:"period,omitempty"`
-}
-
-// GetVotesParamsPeriod defines parameters for GetVotes.
-type GetVotesParamsPeriod string
-
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"+u23/xsAAP//D0gOUUqRAQA=",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
