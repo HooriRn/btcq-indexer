@@ -64,108 +64,6 @@ func luviFromLPUnits(depths timeseries.PoolDepths, lpUnits int64) float64 {
 	return luvi(depths.AssetDepth, depths.QbtcDepth, lpUnits+synthUnits)
 }
 
-// func jsonSwapHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-// 	urlParams := r.URL.Query()
-//
-// 	buckets, merr := db.BucketsFromQuery(r.Context(), &urlParams)
-// 	if merr != nil {
-// 		merr.ReportHTTP(w)
-// 		return
-// 	}
-//
-// 	var pool *string
-// 	poolParam := util.ConsumeUrlParam(&urlParams, "pool")
-// 	if poolParam != "" {
-// 		pool = &poolParam
-// 	}
-//
-// 	merr = util.CheckUrlEmpty(urlParams)
-// 	if merr != nil {
-// 		merr.ReportHTTP(w)
-// 		return
-// 	}
-//
-// 	mergedPoolSwaps, err := stat.GetPoolSwaps(r.Context(), pool, buckets)
-// 	if err != nil {
-// 		btcqerr.InternalErr(err.Error()).ReportHTTP(w)
-// 		return
-// 	}
-// 	var result oapigen.SwapHistoryResponse = createVolumeIntervals(mergedPoolSwaps)
-// 	if buckets.OneInterval() {
-// 		result.Intervals = oapigen.SwapHistoryIntervals{}
-// 	}
-// 	respJSON(w, result)
-// }
-
-// func toSwapHistoryItem(bucket stat.SwapBucket) oapigen.SwapHistoryItem {
-// 	return oapigen.SwapHistoryItem{
-// 		StartTime:              util.IntStr(bucket.StartTime.ToI()),
-// 		EndTime:                util.IntStr(bucket.EndTime.ToI()),
-// 		ToAssetVolume:          util.IntStr(bucket.QbtcToAssetVolume),
-//		ToQbtcVolume:           util.IntStr(bucket.AssetToQbtcVolume),
-//		ToTradeVolume:          util.IntStr(bucket.QbtcToTradeVolume),
-//		FromTradeVolume:        util.IntStr(bucket.TradeToQbtcVolume),
-//		ToSecuredVolume:        util.IntStr(bucket.SecuredToQbtcVolume),
-//		FromSecuredVolume:      util.IntStr(bucket.QbtcToSecuredVolume),
-//		SynthMintVolume:        util.IntStr(bucket.QbtcToSynthVolume),
-//		SynthRedeemVolume:      util.IntStr(bucket.SynthToQbtcVolume),
-//		TotalVolume:            util.IntStr(bucket.TotalVolume),
-//		ToAssetVolumeUSD:       util.IntStr(bucket.QbtcToAssetVolumeUSD),
-//		ToQbtcVolumeUSD:        util.IntStr(bucket.AssetToQbtcVolumeUSD),
-//		ToTradeVolumeUSD:       util.IntStr(bucket.QbtcToTradeVolumeUSD),
-//		FromTradeVolumeUSD:     util.IntStr(bucket.TradeToQbtcVolumeUSD),
-//		ToSecuredVolumeUSD:     util.IntStr(bucket.QbtcToSecuredVolumeUSD),
-//		FromSecuredVolumeUSD:   util.IntStr(bucket.SecuredToQbtcVolumeUSD),
-//		SynthMintVolumeUSD:     util.IntStr(bucket.QbtcToSynthVolumeUSD),
-//		SynthRedeemVolumeUSD:   util.IntStr(bucket.SynthToQbtcVolumeUSD),
-//		TotalVolumeUSD:         util.IntStr(bucket.TotalVolumeUSD),
-//		ToAssetCount:           util.IntStr(bucket.QbtcToAssetCount),
-//		ToQbtcCount:            util.IntStr(bucket.AssetToQbtcCount),
-//		ToTradeCount:           util.IntStr(bucket.QbtcToTradeCount),
-//		FromTradeCount:         util.IntStr(bucket.TradeToQbtcCount),
-//		ToSecuredCount:         util.IntStr(bucket.SecuredToQbtcCount),
-//		FromSecuredCount:       util.IntStr(bucket.QbtcToSecuredCount),
-//		SynthMintCount:         util.IntStr(bucket.QbtcToSynthCount),
-//		SynthRedeemCount:       util.IntStr(bucket.SynthToQbtcCount),
-//		TotalCount:             util.IntStr(bucket.TotalCount),
-//		ToAssetFees:            util.IntStr(bucket.QbtcToAssetFees),
-//		ToQbtcFees:             util.IntStr(bucket.AssetToQbtcFees),
-//		ToTradeFees:            util.IntStr(bucket.QbtcToTradeFees),
-//		FromTradeFees:          util.IntStr(bucket.TradeToQbtcFees),
-//		ToSecuredFees:          util.IntStr(bucket.QbtcToSecuredFees),
-//		FromSecuredFees:        util.IntStr(bucket.SecuredToQbtcFees),
-//		SynthMintFees:          util.IntStr(bucket.QbtcToSynthFees),
-//		SynthRedeemFees:        util.IntStr(bucket.SynthToQbtcFees),
-//		TotalFees:              util.IntStr(bucket.TotalFees),
-//		ToAssetAverageSlip:     ratioStr(bucket.QbtcToAssetSlip, bucket.QbtcToAssetCount),
-//		ToQbtcAverageSlip:      ratioStr(bucket.AssetToQbtcSlip, bucket.AssetToQbtcCount),
-//		ToTradeAverageSlip:     ratioStr(bucket.QbtcToTradeSlip, bucket.QbtcToTradeCount),
-//		FromTradeAverageSlip:   ratioStr(bucket.TradeToQbtcSlip, bucket.TradeToQbtcCount),
-//		ToSecuredAverageSlip:   ratioStr(bucket.SecuredToQbtcSlip, bucket.QbtcToSecuredCount),
-//		FromSecuredAverageSlip: ratioStr(bucket.SecuredToQbtcSlip, bucket.SecuredToQbtcCount),
-//		SynthMintAverageSlip:   ratioStr(bucket.QbtcToSynthSlip, bucket.QbtcToSynthCount),
-//		SynthRedeemAverageSlip: ratioStr(bucket.SynthToQbtcSlip, bucket.SynthToQbtcCount),
-//		AverageSlip:            ratioStr(bucket.TotalSlip, bucket.TotalCount),
-//		QbtcPriceUSD:           floatStr(bucket.QbtcPriceUSD),
-//	}
-// }
-
-// func createVolumeIntervals(buckets []stat.SwapBucket) (result oapigen.SwapHistoryResponse) {
-// 	metaBucket := stat.SwapBucket{}
-//
-// 	for _, bucket := range buckets {
-// 		metaBucket.AddBucket(bucket)
-//
-// 		result.Intervals = append(result.Intervals, toSwapHistoryItem(bucket))
-// 	}
-//
-// 	result.Meta = toSwapHistoryItem(metaBucket)
-// 	result.Meta.StartTime = result.Intervals[0].StartTime
-// 	result.Meta.EndTime = result.Intervals[len(result.Intervals)-1].EndTime
-// 	result.Meta.QbtcPriceUSD = result.Intervals[len(result.Intervals)-1].QbtcPriceUSD
-// 	return
-// }
-
 // Filters out Suspended pools.
 // If there is a status url parameter then returns pools with that status only.
 func poolsWithRequestedStatus(
@@ -617,33 +515,6 @@ func jsonPool(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	respJSON(w, poolResponse)
 }
 
-// returns string array
-func jsonMembers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	var pool *string
-	poolParam := util.ConsumeUrlParam(&urlParams, "pool")
-	if poolParam != "" {
-		pool = &poolParam
-		if !timeseries.PoolExists(*pool) {
-			btcqerr.BadRequestF("Unknown pool: %s", *pool).ReportHTTP(w)
-			return
-		}
-	}
-	merr := util.CheckUrlEmpty(urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	addrs, err := timeseries.GetMemberIds(r.Context(), pool)
-	if err != nil {
-		respError(w, err)
-		return
-	}
-	respJSON(w, addrs)
-}
-
 // TODO(muninn): remove cache once it's <0.5s
 func calculateJsonStats(ctx context.Context, w io.Writer) error {
 	state := timeseries.Latest.GetState()
@@ -848,23 +719,6 @@ func jsonQbtcPriceHistory(w http.ResponseWriter, r *http.Request, _ httprouter.P
 	}
 
 	respJSON(w, ret)
-}
-
-func jsonRUJIMerge(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	period, err := parsePeriodParam(&urlParams, "all")
-	if err != nil {
-		btcqerr.BadRequest(err.Error()).ReportHTTP(w)
-		return
-	}
-
-	switches, err := timeseries.GetSwitchStats(r.Context(), period)
-	if err != nil {
-		return
-	}
-
-	respJSON(w, switches)
 }
 
 
