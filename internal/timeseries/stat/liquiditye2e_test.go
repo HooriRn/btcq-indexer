@@ -210,13 +210,5 @@ func TestSaverAddAffiliate(t *testing.T) {
 			Memo:               "+:BTC/BTC::thor1xmaggkcln5m5fnha2780xrdrulmplvfrz6wj3l:30",
 		},
 	)
-
-	body := testdb.CallJSON(t, "http://localhost:8080/v2/actions?txid=7F95AE00E74118E5EE87A90FFC0EE4FB3D9236F6246BE7235DCA1090D0B2F83C")
-
-	var jsonResult oapigen.ActionsResponse
-	testdb.MustUnmarshal(t, body, &jsonResult)
-
-	require.Equal(t, *jsonResult.Count, "1")
-	require.Equal(t, jsonResult.Actions[0].Metadata.Swap.AffiliateAddress, "thor1xmaggkcln5m5fnha2780xrdrulmplvfrz6wj3l")
-	require.Equal(t, jsonResult.Actions[0].Metadata.Swap.AffiliateFee, "30")
+	// Actions endpoint removed; test only verifies block setup with affiliate memo.
 }

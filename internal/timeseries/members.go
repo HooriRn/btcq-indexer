@@ -6,7 +6,6 @@ import (
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/fetch/record"
 	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 	"github.com/lib/pq"
 )
 
@@ -63,8 +62,26 @@ type MemberPool struct {
 	AssetWithdrawn int64
 }
 
-func (memberPool MemberPool) toOapigen() oapigen.MemberPool {
-	return oapigen.MemberPool{
+// MemberPoolResponse is the API response shape for a member's pool.
+type MemberPoolResponse struct {
+	Pool           string `json:"pool"`
+	QbtcAddress    string `json:"qbtcAddress"`
+	AssetAddress   string `json:"assetAddress"`
+	LiquidityUnits string `json:"liquidityUnits"`
+	QbtcDeposit    string `json:"qbtcDeposit"`
+	AssetDeposit   string `json:"assetDeposit"`
+	QbtcAdded      string `json:"qbtcAdded"`
+	AssetAdded     string `json:"assetAdded"`
+	QbtcWithdrawn  string `json:"qbtcWithdrawn"`
+	AssetWithdrawn string `json:"assetWithdrawn"`
+	QbtcPending    string `json:"qbtcPending"`
+	AssetPending   string `json:"assetPending"`
+	DateFirstAdded string `json:"dateFirstAdded"`
+	DateLastAdded  string `json:"dateLastAdded"`
+}
+
+func (memberPool MemberPool) toResponse() MemberPoolResponse {
+	return MemberPoolResponse{
 		Pool:           memberPool.Pool,
 		QbtcAddress:    memberPool.QbtcAddress,
 		AssetAddress:   memberPool.AssetAddress,
@@ -85,12 +102,12 @@ func (memberPool MemberPool) toOapigen() oapigen.MemberPool {
 // Pools data associated with a single member
 type MemberPools []MemberPool
 
-func (memberPools MemberPools) ToOapigen() []oapigen.MemberPool {
-	ret := make([]oapigen.MemberPool, len(memberPools))
+// ToResponse returns the API response shape for member pools (replacing removed oapigen.MemberPool).
+func (memberPools MemberPools) ToResponse() []MemberPoolResponse {
+	ret := make([]MemberPoolResponse, len(memberPools))
 	for i, memberPool := range memberPools {
-		ret[i] = memberPool.toOapigen()
+		ret[i] = memberPool.toResponse()
 	}
-
 	return ret
 }
 

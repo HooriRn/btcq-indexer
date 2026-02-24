@@ -5,9 +5,6 @@ import (
 	"strconv"
 
 	"github.com/btcq/btcq-indexer/internal/db"
-	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/internal/util/btcqerr"
-	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
 // TODO (HooriRn): Delete imp protection from the code and table
@@ -82,76 +79,6 @@ func liquidityChangesFromTable(
 	}
 
 	return
-}
-
-func GetLiquidityHistory(ctx context.Context, buckets db.Buckets, pool string) (
-	ret oapigen.LiquidityHistoryResponse, err error) {
-	window := buckets.Window()
-
-	deposits, err := liquidityChangesFromTable(ctx, buckets, pool,
-		"stake_events", "_asset_in_qbtc_e8", "qbtc_e8", "")
-	if err != nil {
-		return
-	}
-
-	withdraws, err := liquidityChangesFromTable(ctx, buckets, pool,
-		"withdraw_events", "_emit_asset_in_qbtc_e8", "emit_qbtc_e8", "imp_loss_protection_e8")
-	if err != nil {
-		return
-	}
-
-	usdPrices, err := USDPriceHistory(ctx, buckets)
-	if err != nil {
-		return
-	}
-
-	if len(usdPrices) != buckets.Count() {
-		err = btcqerr.InternalErr("Misalligned buckets")
-		return
-	}
-
-	ret = oapigen.LiquidityHistoryResponse{
-		Meta: buildLiquidityItem(
-			window.From, window.Until, withdraws.total, deposits.total,
-			usdPrices[len(usdPrices)-1].QbtcPriceUSD),
-		Intervals: make([]oapigen.LiquidityHistoryItem, 0, buckets.Count()),
-	}
-
-	for i := 0; i < buckets.Count(); i++ {
-		timestamp, endTime := buckets.Bucket(i)
-		if usdPrices[i].Window.From != timestamp {
-			err = btcqerr.InternalErr("Misalligned buckets")
-		}
-
-		withdrawals := withdraws.buckets[timestamp]
-		deposits := deposits.buckets[timestamp]
-
-		liquidityChangesItem := buildLiquidityItem(
-			timestamp, endTime, withdrawals, deposits, usdPrices[i].QbtcPriceUSD)
-		ret.Intervals = append(ret.Intervals, liquidityChangesItem)
-	}
-
-	return ret, nil
-}
-
-func buildLiquidityItem(
-	startTime, endTime db.Second,
-	withdrawals, deposits liquidityBucket,
-	qbtcPriceUSD float64) oapigen.LiquidityHistoryItem {
-	return oapigen.LiquidityHistoryItem{
-		StartTime:               util.IntStr(startTime.ToI()),
-		EndTime:                 util.IntStr(endTime.ToI()),
-		AddAssetLiquidityVolume: util.IntStr(deposits.assetVolume),
-		AddQbtcLiquidityVolume:  util.IntStr(deposits.qbtcVolume),
-		AddLiquidityVolume:      util.IntStr(deposits.volume),
-		AddLiquidityCount:       util.IntStr(deposits.count),
-		WithdrawAssetVolume:     util.IntStr(withdrawals.assetVolume),
-		WithdrawQbtcVolume:      util.IntStr(withdrawals.qbtcVolume),
-		WithdrawVolume:          util.IntStr(withdrawals.volume),
-		WithdrawCount:           util.IntStr(withdrawals.count),
-		Net:                     util.IntStr(deposits.volume - withdrawals.volume),
-		QbtcPriceUSD:            floatStr(qbtcPriceUSD),
-	}
 }
 
 func floatStr(f float64) string {

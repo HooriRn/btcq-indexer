@@ -4,8 +4,6 @@ import (
 	"context"
 
 	"github.com/btcq/btcq-indexer/internal/db"
-	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
 func getStakedTCY(ctx context.Context, address string) (int64, error) {
@@ -66,86 +64,3 @@ func getTCYPriceBucket(ctx context.Context, w db.Buckets) (float64, error) {
 	return avgPrice, nil
 }
 
-func GetTCYDistribution(ctx context.Context, address string, period db.Buckets) (oapigen.TCYDistribution, error) {
-	addressFilter := ""
-	qargs := []interface{}{}
-	if address != "" {
-		addressFilter = "rune_address = $1"
-		qargs = []interface{}{address}
-	}
-
-	q := `
-		SELECT
-			SUM(t.qbtc_amt),
-			t.qbtc_address,
-			t.block_timestamp,
-			AVG(r.qbtc_price_e8 * 1e8)::BIGINT as qbtc_price_e8
-		FROM tcy_distribution_events t
-		JOIN qbtc_price r
-			ON t.block_timestamp = r.block_timestamp
-		` + db.Where(addressFilter) + `
-		GROUP BY t.rune_address, t.block_timestamp
-	`
-
-	rows, err := db.Query(ctx, q, qargs...)
-	if err != nil {
-		return oapigen.TCYDistribution{}, err
-	}
-	defer rows.Close()
-
-	var distributionItems []oapigen.TCYDistributionItem
-	var total int64
-	var lastMonthEarnings int64 = 0
-	for rows.Next() {
-		var qbtcAmt int64
-		var blockTimestamp int64
-		var qbtcPrice int64
-		err := rows.Scan(&qbtcAmt, &address, &blockTimestamp, &qbtcPrice)
-		if err != nil {
-			return oapigen.TCYDistribution{}, err
-		}
-		total += qbtcAmt
-		distributionItems = append(distributionItems, oapigen.TCYDistributionItem{
-			Amount: util.IntStr(qbtcAmt),
-			Date:   util.IntStr(blockTimestamp / 1e9),
-			Price:  util.IntStr(qbtcPrice),
-		})
-		if period.Start().ToNano().ToI() <= blockTimestamp {
-			lastMonthEarnings += qbtcAmt
-		}
-	}
-
-	staked, err := getStakedTCY(ctx, address)
-	if err != nil {
-		return oapigen.TCYDistribution{}, err
-	}
-
-	tcyQbtcPrice, err := getTCYPriceBucket(ctx, period)
-	if err != nil {
-		return oapigen.TCYDistribution{}, err
-	}
-
-	// If the first distribution is before the start of the period, we need to adjust the bucket
-	// to ensure we calculate APR correctly.
-	if len(distributionItems) > 0 {
-		firstTime := util.MustParseInt64(distributionItems[0].Date)
-		if firstTime > period.Start().ToI() {
-			period = db.Buckets{Timestamps: db.Seconds{db.Second(firstTime), period.End()}}
-		}
-	}
-
-	periodsPerYear := db.GetPPYFromBuckets(period)
-	var apr float64
-	if staked > 0 {
-		apr = float64(lastMonthEarnings) / (float64(staked) * tcyQbtcPrice) * periodsPerYear
-	}
-
-	ret := oapigen.TCYDistribution{
-		Total:         util.IntStr(total),
-		Address:       address,
-		Distributions: distributionItems,
-		Apr:           util.FloatStr(apr),
-	}
-
-	return ret, nil
-}

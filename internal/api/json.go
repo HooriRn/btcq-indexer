@@ -10,9 +10,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/btcq/btcq-indexer/config"
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/decimal"
 	"github.com/btcq/btcq-indexer/internal/fetch/record"
@@ -167,159 +165,6 @@ func luviFromLPUnits(depths timeseries.PoolDepths, lpUnits int64) float64 {
 // 	result.Meta.QbtcPriceUSD = result.Intervals[len(result.Intervals)-1].QbtcPriceUSD
 // 	return
 // }
-
-// TODO(huginn): remove when bonds are fixed
-var ShowBonds bool = false
-
-func jsonTVLHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	buckets, merr := db.BucketsFromQuery(r.Context(), &urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-	merr = util.CheckUrlEmpty(urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	// TODO(huginn): optimize, just this call is 1.8 sec
-	// defer timer.Console("tvlDepthSingle")()
-	depths, err := stat.TVLDepthHistory(r.Context(), buckets)
-	if err != nil {
-		btcqerr.InternalErrE(err).ReportHTTP(w)
-		return
-	}
-
-	bonds, err := stat.BondsHistory(r.Context(), buckets)
-	if err != nil {
-		btcqerr.InternalErrE(err).ReportHTTP(w)
-		return
-	}
-	if len(depths) != len(bonds) || depths[0].Window != bonds[0].Window {
-		btcqerr.InternalErr("Buckets misalligned").ReportHTTP(w)
-		return
-	}
-
-	var result oapigen.TVLHistoryResponse = toTVLHistoryResponse(depths, bonds)
-	respJSON(w, result)
-}
-
-func toTVLHistoryResponse(depths []stat.TVLDepthBucket, bonds []stat.BondBucket) (
-	result oapigen.TVLHistoryResponse) {
-
-	showBonds := func(value string) *string {
-		if !ShowBonds {
-			return nil
-		}
-		return &value
-	}
-
-	result.Intervals = make(oapigen.TVLHistoryIntervals, 0, len(depths))
-	for i, bucket := range depths {
-		pools := 2 * bucket.TotalPoolDepth
-		bonds := bonds[i].Bonds
-		poolsDepth := toOapiPoolsDepth(bucket.PoolsMapQbtcDepth)
-		result.Intervals = append(result.Intervals, oapigen.TVLHistoryItem{
-			StartTime:        util.IntStr(bucket.Window.From.ToI()),
-			EndTime:          util.IntStr(bucket.Window.Until.ToI()),
-			TotalValuePooled: util.IntStr(pools),
-			TotalValueBonded: showBonds(util.IntStr(bonds)),
-			TotalValueLocked: showBonds(util.IntStr(pools + bonds)),
-			QbtcPriceUSD:     floatStr(bucket.QbtcPriceUSD),
-			PoolsDepth:       poolsDepth,
-		})
-	}
-	result.Meta = result.Intervals[len(depths)-1]
-	result.Meta.StartTime = result.Intervals[0].StartTime
-	return
-}
-
-func toOapiPoolsDepth(poolsMapDepth map[string]int64) []oapigen.DepthHistoryItemPool {
-	ret := make([]oapigen.DepthHistoryItemPool, 0)
-	for poolName, poolDepth := range poolsMapDepth {
-		ret = append(ret, oapigen.DepthHistoryItemPool{
-			Pool:       poolName,
-			TotalDepth: util.IntStr(2 * poolDepth),
-		})
-	}
-	return ret
-}
-
-func jsonNetwork(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	merr := util.CheckUrlEmpty(r.URL.Query())
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	network, err := timeseries.GetNetworkData(r.Context())
-	if err != nil {
-		respError(w, err)
-		return
-	}
-
-	respJSON(w, network)
-}
-
-// TODO(HooriRn): this struct is not needed since the graphql depracation, replace with the corresponding oapi version. (delete-graphql)
-type Node struct {
-	Secp256K1 string `json:"secp256k1"`
-	Ed25519   string `json:"ed25519"`
-}
-
-func jsonNodes(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	secpAddrs, edAddrs, err := timeseries.NodesSecpAndEd(r.Context(), time.Now())
-	if err != nil {
-		respError(w, err)
-		return
-	}
-
-	m := make(map[string]struct {
-		Secp string
-		Ed   string
-	}, len(secpAddrs))
-	for key, addr := range secpAddrs {
-		e := m[addr]
-		e.Secp = key
-		m[addr] = e
-	}
-	for key, addr := range edAddrs {
-		e := m[addr]
-		e.Ed = key
-		m[addr] = e
-	}
-
-	array := make([]oapigen.Node, 0, len(m))
-	for key, e := range m {
-		array = append(array, oapigen.Node{
-			Secp256k1:   e.Secp,
-			Ed25519:     e.Ed,
-			NodeAddress: key,
-		})
-	}
-	respJSON(w, array)
-}
-
-func jsonKnownPools(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	urlParams := r.URL.Query()
-	merr := util.CheckUrlEmpty(urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	lastTime := timeseries.Latest.GetState().Timestamp
-	pools, err := timeseries.GetPoolsStatuses(r.Context(), lastTime)
-	if err != nil {
-		respError(w, err)
-		return
-	}
-
-	respJSON(w, oapigen.KnownPools(pools))
-}
 
 // Filters out Suspended pools.
 // If there is a status url parameter then returns pools with that status only.
@@ -796,69 +641,7 @@ func jsonMembers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		respError(w, err)
 		return
 	}
-	result := oapigen.MembersResponse(addrs)
-	respJSON(w, result)
-}
-
-func jsonMemberDetails(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	showPoolsType := timeseries.RegularPools
-
-	if merr := util.CheckUrlEmpty(urlParams); merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	addr := strings.Join(withLowered(ps[0].Value), ",")
-
-	addrs := strings.Split(addr, ",")
-	pools, err := timeseries.GetMemberPools(r.Context(), addrs, showPoolsType)
-	if err != nil {
-		respError(w, err)
-		return
-	}
-
-	if len(pools) == 0 {
-		http.Error(w, "Not Found", http.StatusNotFound)
-		return
-	}
-
-	respJSON(w, oapigen.MemberDetailsResponse{
-		Pools: pools.ToOapigen(),
-	})
-}
-
-func jsonChurns(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	churns, err := timeseries.GetChurnsData(r.Context())
-	if err != nil {
-		return
-	}
-	respJSON(w, churns)
-}
-
-func jsonVotes(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	period, err := parsePeriodParam(&urlParams, "90d")
-	if err != nil {
-		btcqerr.BadRequest(err.Error()).ReportHTTP(w)
-		return
-	}
-
-	votes, err := timeseries.GetVotesStats(r.Context(), period)
-	if err != nil {
-		return
-	}
-
-	votesResponse := oapigen.VotesResponse{}
-	for value, vi := range votes {
-		votesResponse = append(votesResponse, oapigen.VoteValue{
-			Value: value,
-			Votes: vi,
-		})
-	}
-	respJSON(w, votesResponse)
+	respJSON(w, addrs)
 }
 
 // TODO(muninn): remove cache once it's <0.5s
@@ -929,59 +712,6 @@ func cachedJsonStats() httprouter.Handle {
 	return cachedHandler.ServeHTTP
 }
 
-func jsonActions(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	urlParams := r.URL.Query()
-	params := timeseries.ActionsParams{
-		Limit:         util.ConsumeUrlParam(&urlParams, "limit"),
-		NextPageToken: util.ConsumeUrlParam(&urlParams, "nextPageToken"),
-		PrevPageToken: util.ConsumeUrlParam(&urlParams, "prevPageToken"),
-		Timestamp:     util.ConsumeUrlParam(&urlParams, "timestamp"),
-		Height:        util.ConsumeUrlParam(&urlParams, "height"),
-		FromTimestamp: util.ConsumeUrlParam(&urlParams, "fromTimestamp"),
-		FromHeight:    util.ConsumeUrlParam(&urlParams, "fromHeight"),
-		Offset:        util.ConsumeUrlParam(&urlParams, "offset"),
-		ActionType:    util.ConsumeUrlParam(&urlParams, "type"),
-		Address:       util.ConsumeUrlParam(&urlParams, "address"),
-		TXId:          util.ConsumeUrlParam(&urlParams, "txid"),
-		Asset:         util.ConsumeUrlParam(&urlParams, "asset"),
-		TxType:        util.ConsumeUrlParam(&urlParams, "txType"),
-		Affiliate:     util.ConsumeUrlParam(&urlParams, "affiliate"),
-	}
-
-	merr := util.CheckUrlEmpty(urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	var actions oapigen.ActionsResponse
-	var err error
-	filteredAddresses := config.Global.FilteredAddresses
-	for _, addr := range withLowered(params.Address) {
-		params.Address = addr
-		if name, ok := filteredAddresses[addr]; ok {
-			errMsg := "The requested address is filtered, It might be one of module addresses."
-			if len(name) > 0 {
-				errMsg += "\n\nLabel: %s"
-				respError(w, btcqerr.BadRequestF(errMsg, name))
-			} else {
-				respError(w, btcqerr.BadRequestF(errMsg, name))
-			}
-			return
-		}
-		actions, err = timeseries.GetActions(r.Context(), time.Time{}, params)
-		if err != nil {
-			respError(w, err)
-			return
-		}
-		if len(actions.Actions) != 0 {
-			break
-		}
-	}
-
-	respJSON(w, actions)
-}
-
 func jsonBalance(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	urlParams := r.URL.Query()
 
@@ -995,41 +725,6 @@ func jsonBalance(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	address := ps[0].Value
 	result, merr := timeseries.GetBalances(r.Context(), address, height, timestamp)
-
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	respJSON(w, result)
-}
-
-func jsonHolders(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	asset := util.ConsumeUrlParam(&urlParams, "asset")
-	limitStr := util.ConsumeUrlParam(&urlParams, "limit")
-
-	// Default values
-	if asset == "" {
-		asset = "QBTC.QBTC"
-	}
-	var limit int64 = 100
-	if limitStr != "" {
-		var err error
-		limit, err = strconv.ParseInt(limitStr, 10, 64)
-		if err != nil {
-			btcqerr.BadRequest("Invalid limit parameter").ReportHTTP(w)
-			return
-		}
-	}
-
-	if merr := util.CheckUrlEmpty(urlParams); merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	result, merr := timeseries.GetTopHolders(r.Context(), asset, limit)
 
 	if merr != nil {
 		merr.ReportHTTP(w)
@@ -1131,49 +826,6 @@ func parsePeriodParam(urlParams *url.Values, def string) (db.Buckets, error) {
 	return buckets, nil
 }
 
-func jsonSwaps(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	period, err := parsePeriodParam(&urlParams, "24h")
-	if err != nil {
-		btcqerr.BadRequest(err.Error()).ReportHTTP(w)
-		return
-	}
-
-	result, err := timeseries.GetTopSwaps(r.Context(), period)
-
-	if err != nil {
-		respError(w, err)
-		return
-	}
-
-	respJSON(w, result)
-}
-
-func jsonReserveHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	buckets, merr := db.BucketsFromQuery(r.Context(), &urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	merr = util.CheckUrlEmpty(urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	ret, err := stat.GetReserveHistory(r.Context(), buckets)
-	if err != nil {
-		btcqerr.InternalErrE(err).ReportHTTP(w)
-		return
-	}
-
-	respJSON(w, ret)
-}
-
 func jsonQbtcPriceHistory(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	urlParams := r.URL.Query()
 
@@ -1215,80 +867,4 @@ func jsonRUJIMerge(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 	respJSON(w, switches)
 }
 
-func jsonTCYDistribution(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	urlParams := r.URL.Query()
-	address := ps[0].Value
 
-	period, err := parsePeriodParam(&urlParams, "30d")
-	if err != nil {
-		btcqerr.BadRequest(err.Error()).ReportHTTP(w)
-		return
-	}
-
-	merr := util.CheckUrlEmpty(urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	ret, err := stat.GetTCYDistribution(r.Context(), address, period)
-	if err != nil {
-		btcqerr.InternalErrE(err).ReportHTTP(w)
-		return
-	}
-
-	respJSON(w, ret)
-}
-
-func jsonAffiliateStats(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	buckets, merr := db.BucketsFromQuery(r.Context(), &urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	thorname := util.ConsumeUrlParam(&urlParams, "thorname")
-
-	merr = util.CheckUrlEmpty(urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	result, err := timeseries.GetAffiliateStats(r.Context(), buckets, thorname)
-
-	if err != nil {
-		btcqerr.InternalErrE(err).ReportHTTP(w)
-		return
-	}
-
-	respJSON(w, result)
-}
-
-func jsonAffiliateEarning(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	urlParams := r.URL.Query()
-
-	buckets, merr := db.BucketsFromQuery(r.Context(), &urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	thorname := util.ConsumeUrlParam(&urlParams, "thorname")
-
-	merr = util.CheckUrlEmpty(urlParams)
-	if merr != nil {
-		merr.ReportHTTP(w)
-		return
-	}
-
-	result, err := timeseries.GetAffiliateEarning(r.Context(), buckets, thorname)
-	if err != nil {
-		btcqerr.InternalErrE(err).ReportHTTP(w)
-		return
-	}
-
-	respJSON(w, result)
-}

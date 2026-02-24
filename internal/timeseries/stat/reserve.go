@@ -6,63 +6,11 @@ import (
 
 	"github.com/btcq/btcq-indexer/internal/db"
 	"github.com/btcq/btcq-indexer/internal/fetch/notinchain"
-	"github.com/btcq/btcq-indexer/internal/util"
-	"github.com/btcq/btcq-indexer/openapi/generated/oapigen"
 )
 
 type ValueBucket struct {
 	Window db.Window
 	Value  int64
-}
-
-func GetReserveHistory(ctx context.Context, buckets db.Buckets) (oapigen.ReserveHistoryResponse, error) {
-	fees, err := bucketedFeeStat(ctx, buckets)
-	if err != nil {
-		return oapigen.ReserveHistoryResponse{}, err
-	}
-
-	gases, err := bucketedGasStat(ctx, buckets)
-	if err != nil {
-		return oapigen.ReserveHistoryResponse{}, err
-	}
-
-	networkFees, err := bucketedNetworkFeeStat(ctx, buckets)
-	if err != nil {
-		return oapigen.ReserveHistoryResponse{}, err
-	}
-
-	intervals := oapigen.ReserveIntervals{}
-	var inflow int64
-	var outflow int64
-	var netFee int64
-	for i, fee := range fees {
-		interval := oapigen.ReserveItem{
-			StartTime:        util.IntStr(fee.Window.From.ToI()),
-			EndTime:          util.IntStr(fee.Window.Until.ToI()),
-			GasFeeOutbound:   util.IntStr(fee.Value),
-			GasReimbursement: util.IntStr(gases[i].Value),
-			NetworkFee:       util.IntStr(networkFees[i].Value),
-		}
-		intervals = append(intervals, interval)
-
-		// accumulate meta
-		inflow += fee.Value
-		outflow += gases[i].Value
-		netFee += networkFees[i].Value
-	}
-
-	ret := oapigen.ReserveHistoryResponse{
-		Meta: oapigen.ReserveMeta{
-			StartTime:        util.IntStr(buckets.Start().ToI()),
-			EndTime:          util.IntStr(buckets.End().ToI()),
-			NetworkFee:       util.IntStr(netFee),
-			GasFeeOutbound:   util.IntStr(inflow),
-			GasReimbursement: util.IntStr(outflow),
-		},
-		Intervals: intervals,
-	}
-
-	return ret, nil
 }
 
 func bucketedFeeStat(ctx context.Context, buckets db.Buckets) (ret []ValueBucket, err error) {
